@@ -1,0 +1,1959 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+<link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,400;0,500;0,600;0,700;0,800;1,800&display=swap" rel="stylesheet" />
+<script src="./image-slot.js"></script>
+<style>
+  body { margin: 0; background: #ffffff; font-family: 'Barlow', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+  a { color: #F05A28; text-decoration: none; }
+  a:hover { color: #ff7a4d; }
+  .gvt-dark-slot { color: #a9c4e4; }
+  input, select, textarea, button { font-family: inherit; font-size: inherit; }
+  input::placeholder, textarea::placeholder { color: #93a3b5; }
+  a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, [tabindex]:focus-visible {
+    outline: 2px solid #F05A28; outline-offset: 2px; border-radius: 3px;
+  }
+  @keyframes gvtFadeA { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+  @keyframes gvtFadeB { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+  @keyframes gvtAcc { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: none; } }
+  @keyframes gvtDrop { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
+  @keyframes gvtRing { 0% { transform: scale(.85); opacity: .85; } 70% { transform: scale(1.35); opacity: 0; } 100% { transform: scale(1.35); opacity: 0; } }
+  @keyframes gvtPop { 0% { transform: scale(.5); opacity: 0; } 60% { transform: scale(1.08); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
+  @keyframes gvtSpin { to { transform: rotate(360deg); } }
+  @keyframes gvtDrift { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
+  @keyframes gvtBreak { 0%,100% { opacity: .25; } 50% { opacity: 1; } }
+</style>
+</helmet>
+
+<div style="font-family:'Barlow',system-ui,sans-serif;color:#0B2C55;background:#fff;overflow-x:hidden">
+
+  <sc-if value="{{ isDesktopNav }}" hint-placeholder-val="{{ true }}">
+  <div style="background:#071E3A;color:#cddaea;font-size:12.5px;padding:9px 0">
+    <div style="max-width:1200px;margin:0 auto;padding:0 28px;display:flex;align-items:center;justify-content:space-between;gap:10px 16px;flex-wrap:wrap">
+      <div style="display:flex;align-items:center;gap:7px">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#F05A28" stroke-width="2.4"><path d="M12 22s7-6.2 7-12A7 7 0 0 0 5 10c0 5.8 7 12 7 12z"></path><circle cx="12" cy="10" r="2.4"></circle></svg>
+        <span>Serving Businesses Across South Africa</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px 22px;flex-wrap:wrap">
+        <a href="tel:0840356925" style="display:flex;align-items:center;gap:7px;color:#cddaea" style-hover="color:#F05A28">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#F05A28" stroke-width="2.4"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"></path></svg>
+          <span>084 035 6925</span>
+        </a>
+        <a href="mailto:thabash.mampa@gmail.com" style="display:flex;align-items:center;gap:7px;color:#cddaea" style-hover="color:#F05A28">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#F05A28" stroke-width="2.4"><rect x="2.5" y="4.5" width="19" height="15" rx="2"></rect><path d="m3 6 9 6.5L21 6"></path></svg>
+          <span>thabash.mampa@gmail.com</span>
+        </a>
+        <a href="#/request-a-quote" style="background:#F05A28;color:#fff;padding:6px 14px;border-radius:4px;font-weight:600;font-size:12px" style-hover="background:#d9491a">Request IT Support</a>
+      </div>
+    </div>
+  </div>
+  </sc-if>
+
+  <header style="background:#fff;border-bottom:1px solid #e6ebf1;position:sticky;top:0;z-index:60;box-shadow:0 1px 10px rgba(11,44,85,.06)">
+    <div style="max-width:1200px;margin:0 auto;padding:12px 28px;display:flex;align-items:center;justify-content:space-between;gap:16px">
+      <a href="#/home" aria-label="Gauvis Technology Holdings — home" style="flex:none;display:block"><img src="./gvt-logo.png" alt="Gauvis Tech" style="height:46px;width:auto;display:block" /></a>
+
+      <sc-if value="{{ isDesktopNav }}" hint-placeholder-val="{{ true }}">
+        <nav aria-label="Main" style="display:flex;align-items:center;gap:24px;font-size:14px;font-weight:500">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+            <a href="#/home" style="color:#41536b" style-hover="color:#F05A28">Home</a>
+            <sc-if value="{{ navHome }}"><div style="width:100%;height:2px;background:#F05A28;border-radius:2px"></div></sc-if>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+            <a href="#/about" style="color:#41536b" style-hover="color:#F05A28">About</a>
+            <sc-if value="{{ navAbout }}"><div style="width:100%;height:2px;background:#F05A28;border-radius:2px"></div></sc-if>
+          </div>
+          <div onMouseEnter="{{ openMega }}" onMouseLeave="{{ closeMega }}" style="position:relative;display:flex;flex-direction:column;align-items:center;gap:4px">
+            <a href="#/services" aria-haspopup="true" style="color:#41536b;display:inline-flex;align-items:center;gap:6px" style-hover="color:#F05A28">Services
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m5 9 7 7 7-7"></path></svg>
+            </a>
+            <sc-if value="{{ navServices }}"><div style="width:100%;height:2px;background:#F05A28;border-radius:2px"></div></sc-if>
+            <sc-if value="{{ mega }}">
+              <div style="position:absolute;top:100%;left:50%;transform:translateX(-50%);padding-top:14px;z-index:70">
+                <div style="width:min(92vw,720px);background:#fff;border:1px solid #e6ebf1;border-radius:8px;box-shadow:0 18px 50px rgba(11,44,85,.18);padding:18px;animation:gvtDrop .18s ease">
+                  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:6px">
+                    <sc-for list="{{ services }}" as="s" hint-placeholder-count="0">
+                      <a href="{{ s.href }}" style="display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:6px;color:#0B2C55" style-hover="background:#F2F5F9">
+                        {{ s.iconEl28 }}
+                        <span style="font-size:13.5px;font-weight:600;line-height:1.3">{{ s.name }}</span>
+                      </a>
+                    </sc-for>
+                  </div>
+                  <div style="border-top:1px solid #eef1f6;margin-top:14px;padding-top:13px;display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap">
+                    <span style="font-size:12.5px;color:#5a6b80">Not sure which service you need?</span>
+                    <a href="#/solutions" style="font-size:13px;font-weight:600;color:#F05A28">Browse solutions by business need &#8594;</a>
+                  </div>
+                </div>
+              </div>
+            </sc-if>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+            <a href="#/solutions" style="color:#41536b" style-hover="color:#F05A28">Solutions</a>
+            <sc-if value="{{ navSolutions }}"><div style="width:100%;height:2px;background:#F05A28;border-radius:2px"></div></sc-if>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+            <a href="#/case-studies" style="color:#41536b;white-space:nowrap" style-hover="color:#F05A28">Case Studies</a>
+            <sc-if value="{{ navCases }}"><div style="width:100%;height:2px;background:#F05A28;border-radius:2px"></div></sc-if>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+            <a href="#/faq" style="color:#41536b" style-hover="color:#F05A28">FAQ</a>
+            <sc-if value="{{ navFaq }}"><div style="width:100%;height:2px;background:#F05A28;border-radius:2px"></div></sc-if>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+            <a href="#/contact" style="color:#41536b" style-hover="color:#F05A28">Contact</a>
+            <sc-if value="{{ navContact }}"><div style="width:100%;height:2px;background:#F05A28;border-radius:2px"></div></sc-if>
+          </div>
+        </nav>
+        <a href="#/request-a-quote" style="background:#F05A28;color:#fff;padding:10px 20px;border-radius:5px;font-weight:600;font-size:14px;white-space:nowrap;flex:none" style-hover="background:#d9491a">Request a Quote</a>
+      </sc-if>
+
+      <sc-if value="{{ isMobileNav }}">
+        <button type="button" onClick="{{ toggleMnav }}" aria-label="Open menu" aria-expanded="{{ mnav }}" style="flex:none;width:46px;height:44px;border:1px solid #dde4ed;background:#fff;border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;cursor:pointer" style-hover="border-color:#F05A28">
+          <span style="display:block;width:20px;height:2px;background:#0B2C55;border-radius:2px"></span>
+          <span style="display:block;width:20px;height:2px;background:#0B2C55;border-radius:2px"></span>
+          <span style="display:block;width:20px;height:2px;background:#0B2C55;border-radius:2px"></span>
+        </button>
+      </sc-if>
+    </div>
+
+    <sc-if value="{{ mnavOpen }}">
+      <div style="border-top:1px solid #e6ebf1;background:#fff;max-height:74vh;overflow-y:auto;animation:gvtDrop .2s ease">
+        <nav aria-label="Mobile" style="max-width:1200px;margin:0 auto;padding:14px 20px 22px;display:flex;flex-direction:column;gap:2px">
+          <a href="#/home" onClick="{{ closeMnav }}" style="padding:13px 8px;font-size:16px;font-weight:600;color:#0B2C55;border-bottom:1px solid #eef1f6">Home</a>
+          <a href="#/about" onClick="{{ closeMnav }}" style="padding:13px 8px;font-size:16px;font-weight:600;color:#0B2C55;border-bottom:1px solid #eef1f6">About</a>
+          <a href="#/services" onClick="{{ closeMnav }}" style="padding:13px 8px;font-size:16px;font-weight:600;color:#0B2C55;border-bottom:1px solid #eef1f6">Services</a>
+          <div style="padding:10px 8px 4px;display:flex;flex-direction:column;gap:2px">
+            <sc-for list="{{ services }}" as="s" hint-placeholder-count="0">
+              <a href="{{ s.href }}" onClick="{{ closeMnav }}" style="display:flex;align-items:center;gap:11px;padding:11px 10px;border-radius:6px;background:#F6F8FB;color:#41536b;font-size:14px;font-weight:500">
+                {{ s.iconEl24 }}
+                <span>{{ s.name }}</span>
+              </a>
+            </sc-for>
+          </div>
+          <a href="#/solutions" onClick="{{ closeMnav }}" style="padding:13px 8px;font-size:16px;font-weight:600;color:#0B2C55;border-top:1px solid #eef1f6;border-bottom:1px solid #eef1f6;margin-top:8px">Solutions</a>
+          <a href="#/case-studies" onClick="{{ closeMnav }}" style="padding:13px 8px;font-size:16px;font-weight:600;color:#0B2C55;border-bottom:1px solid #eef1f6">Case Studies</a>
+          <a href="#/faq" onClick="{{ closeMnav }}" style="padding:13px 8px;font-size:16px;font-weight:600;color:#0B2C55;border-bottom:1px solid #eef1f6">FAQ</a>
+          <a href="#/contact" onClick="{{ closeMnav }}" style="padding:13px 8px;font-size:16px;font-weight:600;color:#0B2C55;border-bottom:1px solid #eef1f6">Contact</a>
+          <a href="#/request-a-quote" onClick="{{ closeMnav }}" style="margin-top:16px;background:#F05A28;color:#fff;padding:15px 22px;border-radius:6px;font-weight:700;font-size:15px;text-align:center">Request a Quote</a>
+        </nav>
+      </div>
+    </sc-if>
+  </header>
+
+  <main style="animation:{{ fadeAnim }}">
+
+    <sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
+    <div>
+      <div style="background:#0A2A52">
+        <div style="max-width:1200px;margin:0 auto;padding:72px 28px 78px;display:flex;flex-wrap:wrap;gap:48px;align-items:center">
+          <div style="flex:1 1 430px;min-width:0">
+            <div style="color:#dbe6f3;font-size:12.5px;font-weight:600;letter-spacing:2.6px;text-transform:uppercase;margin-bottom:20px">Gauvis Technology Holdings</div>
+            <h1 style="margin:0;font-size:54px;line-height:1.06;font-weight:700;color:#fff;letter-spacing:-1.2px;text-wrap:balance">Powering Your<br /><span style="color:#F05A28">Digital Future.</span></h1>
+            <p style="margin:24px 0 0;font-size:15.5px;line-height:1.72;color:#c7d6e8;max-width:470px;text-wrap:pretty">Expert IT solutions for businesses across South Africa. From infrastructure and networks to software and support, we keep you connected, secure and productive.</p>
+            <div style="display:flex;gap:14px;margin-top:34px;flex-wrap:wrap">
+              <a href="#/request-a-quote" style="background:#F05A28;color:#fff;padding:13px 26px;border-radius:5px;font-weight:600;font-size:14.5px" style-hover="background:#d9491a">Request a Quote</a>
+              <a href="#/services" style="border:1.5px solid rgba(255,255,255,.65);color:#fff;padding:13px 26px;border-radius:5px;font-weight:600;font-size:14.5px" style-hover="background:rgba(255,255,255,.12)">Explore Services</a>
+            </div>
+          </div>
+          <div style="flex:1 1 430px;min-width:0;display:flex;gap:16px;height:400px">
+            <div class="gvt-dark-slot" style="flex:1.5 1 0;min-width:0;position:relative;border-radius:6px;overflow:hidden;border:1px solid rgba(255,255,255,.1)">
+              <image-slot id="gvt-hero-bg" shape="rect" fit="cover" src="./img/hero-technician.png" placeholder="Technician at work"></image-slot>
+            </div>
+            <div style="flex:1 1 0;min-width:0;display:flex;flex-direction:column;gap:16px">
+              <div class="gvt-dark-slot" style="flex:1;position:relative;border-radius:6px;overflow:hidden;border:1px solid rgba(255,255,255,.1)">
+                <image-slot id="gvt-hero-b" shape="rect" fit="cover" src="./img/hero-cabling.png" placeholder="Network cabling"></image-slot>
+              </div>
+              <div class="gvt-dark-slot" style="flex:1;position:relative;border-radius:6px;overflow:hidden;border:1px solid rgba(255,255,255,.1)">
+                <image-slot id="gvt-hero-c" shape="rect" fit="cover" src="./img/hero-city-desk.png" placeholder="Team at work"></image-slot>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="background:#0B315E;border-top:1px solid rgba(255,255,255,.08)">
+        <div style="max-width:1200px;margin:0 auto;padding:0 28px">
+          <div style="overflow:hidden">
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));margin-left:-1px">
+              <sc-for list="{{ strip }}" as="t" hint-placeholder-count="0">
+                <a href="{{ t.href }}" style="padding:26px 14px;display:flex;flex-direction:column;align-items:center;gap:12px;border-left:1px solid rgba(255,255,255,.09);color:#e6eefa" style-hover="background:rgba(255,255,255,.05)">
+                  {{ t.iconEl }}
+                  <span style="font-size:13px;font-weight:500;text-align:center">{{ t.name }}</span>
+                </a>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <section style="background:#fff;position:relative;overflow:hidden">
+        <div style="max-width:1200px;margin:0 auto;padding:0 28px;display:flex;flex-wrap:wrap;align-items:center;gap:40px">
+          <div style="flex:1 1 420px;min-width:0;padding:74px 0">
+            <div style="color:#F05A28;font-size:12px;font-weight:700;letter-spacing:2.4px;text-transform:uppercase;margin-bottom:16px">About Gauvis</div>
+            <h2 style="margin:0;font-size:34px;line-height:1.22;font-weight:700;color:#0B2C55;letter-spacing:-.6px">Your Technology Partner.<br />Not Just Your IT Supplier.</h2>
+            <div style="width:54px;height:3px;background:#F05A28;margin:22px 0 22px"></div>
+            <p style="margin:0;font-size:15px;line-height:1.78;color:#5a6b80;max-width:460px;text-wrap:pretty">Gauvis Technology Holdings provides practical technology solutions across hardware, software, networks and end-user support. We help businesses work smarter, stay secure and grow with confidence.</p>
+            <a href="#/about" style="display:inline-flex;align-items:center;gap:9px;background:#F05A28;color:#fff;padding:12px 22px;border-radius:5px;font-weight:600;font-size:14px;margin-top:30px" style-hover="background:#d9491a">Learn About Gauvis <span style="font-size:15px">&#8594;</span></a>
+          </div>
+          <div style="flex:1 1 420px;min-width:0;position:relative;height:380px">
+            <div style="position:absolute;inset:0;left:34px;clip-path:polygon(16% 0,100% 0,100% 100%,0 100%);overflow:hidden">
+              <image-slot id="gvt-about" shape="rect" fit="cover" src="./img/hero-server-aisle.png" placeholder="Server racks / network photo"></image-slot>
+            </div>
+            <div style="position:absolute;right:0;top:0;width:84px;height:100%;background:#F05A28;clip-path:polygon(62% 0,100% 0,38% 100%,0 100%);pointer-events:none"></div>
+          </div>
+        </div>
+      </section>
+
+      <section style="background:#0A2A52;padding:70px 0 78px">
+        <div style="max-width:1200px;margin:0 auto;padding:0 28px">
+          <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:30px;flex-wrap:wrap">
+            <div>
+              <div style="color:#F05A28;font-size:12px;font-weight:700;letter-spacing:2.4px;text-transform:uppercase;margin-bottom:14px">Our Services</div>
+              <h2 style="margin:0;font-size:32px;line-height:1.24;font-weight:700;color:#fff;letter-spacing:-.5px">Technology Solutions for<br />Every Business Need.</h2>
+              <p style="margin:18px 0 0;font-size:14.5px;line-height:1.7;color:#b9cae0;max-width:520px">We provide end-to-end IT solutions, from hardware supply to ongoing support and maintenance.</p>
+            </div>
+            <a href="#/services" style="display:inline-flex;align-items:center;gap:8px;color:#fff;font-size:13.5px;font-weight:600;border-bottom:1px solid rgba(255,255,255,.35);padding-bottom:5px" style-hover="color:#F05A28">View All Services <span>&#8594;</span></a>
+          </div>
+
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(clamp(260px,30%,420px),1fr));gap:24px;margin-top:40px">
+            <sc-for list="{{ homeServices }}" as="svc" hint-placeholder-count="6">
+              <a href="{{ svc.href }}" style="display:block;background:#0E3663;border:1px solid rgba(255,255,255,.09);border-radius:6px;overflow:hidden;color:#fff" style-hover="border-color:rgba(240,90,40,.65)">
+                <div class="gvt-dark-slot" style="height:200px;position:relative">
+                  <image-slot id="{{ svc.id }}" shape="rect" fit="cover" src="{{ svc.img }}" placeholder="{{ svc.ph }}"></image-slot>
+                </div>
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:14px;padding:18px 20px 20px">
+                  <div style="min-width:0">
+                    <div style="color:#fff;font-size:16px;font-weight:700;letter-spacing:-.2px">{{ svc.name }}</div>
+                    <div style="color:#a9c4e4;font-size:13px;margin-top:4px">{{ svc.sub }}</div>
+                  </div>
+                  <span style="color:#F05A28;font-size:17px;line-height:1;flex:none">&#8594;</span>
+                </div>
+              </a>
+            </sc-for>
+          </div>
+        </div>
+      </section>
+
+      <section style="background:#F2F5F9;padding:62px 0 30px">
+        <div style="max-width:1200px;margin:0 auto;padding:0 28px;display:flex;flex-wrap:wrap;gap:32px 44px;align-items:center">
+          <h3 style="flex:0 1 240px;margin:0;font-size:23px;line-height:1.34;font-weight:700;color:#0B2C55;letter-spacing:-.3px">Technology ecosystems<br />we work with</h3>
+          <div style="flex:1 1 420px;min-width:0;background:#0B2C55;border-radius:8px;padding:26px 30px;display:flex;flex-direction:column;gap:18px;align-items:center">
+            <img src="./img/logos-row1.png" alt="Dell, HP, Lenovo, Microsoft 365, SAP and Oracle" style="display:block;width:100%;max-width:745px;height:auto" />
+            <div style="width:100%;height:1px;background:rgba(255,255,255,.14)"></div>
+            <img src="./img/logos-row2.png" alt="Cisco, ServiceNow, VPN, Wi-Fi, Remote Desktop" style="display:block;width:100%;max-width:745px;height:auto" />
+          </div>
+        </div>
+      </section>
+
+      <section style="background:#F2F5F9;padding:26px 0 66px">
+        <div style="max-width:1200px;margin:0 auto;padding:0 28px">
+          <h3 style="margin:0;font-size:23px;font-weight:700;color:#0B2C55;letter-spacing:-.3px">Our Process</h3>
+          <p style="margin:10px 0 34px;font-size:14.5px;color:#5a6b80">From planning to support, we&#8217;re with you at every step.</p>
+          <div style="overflow:hidden">
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));row-gap:36px;margin-left:-1px">
+              <sc-for list="{{ homeProcess }}" as="p" hint-placeholder-count="4">
+                <div style="padding:0 30px;border-left:1px solid #d7dfe9">
+                  <div style="width:38px;height:38px;border-radius:8px;background:rgba(240,90,40,.12);display:flex;align-items:center;justify-content:center;color:#F05A28;font-size:15px;font-weight:700">{{ p.n }}</div>
+                  <div style="width:22px;height:2px;background:#F05A28;margin:16px 0 10px"></div>
+                  <div style="font-size:16px;font-weight:700;color:#0B2C55">{{ p.t }}</div>
+                  <p style="margin:7px 0 0;font-size:13.5px;line-height:1.65;color:#5a6b80">{{ p.d }}</p>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section style="background:#0A2A52">
+        <div style="max-width:1200px;margin:0 auto;padding:64px 28px 68px;display:flex;flex-wrap:wrap;gap:48px;align-items:center">
+          <div style="flex:1 1 420px;min-width:0">
+            <h2 style="margin:0;font-size:32px;line-height:1.24;font-weight:700;color:#fff;letter-spacing:-.4px">Let&#8217;s Build a More Reliable<br /><span style="color:#F05A28">IT Environment.</span></h2>
+            <div style="width:54px;height:3px;background:#F05A28;margin:22px 0"></div>
+            <p style="margin:0;font-size:15px;line-height:1.75;color:#cfdcec;max-width:480px;text-wrap:pretty">Whether you need new hardware, network infrastructure, software deployment or ongoing IT support, our team can help. We come to you for all your IT needs.</p>
+            <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:30px">
+              <a href="#/request-a-quote" style="background:#F05A28;color:#fff;padding:12px 24px;border-radius:5px;font-weight:600;font-size:14.5px" style-hover="background:#d9491a">Request a Quote</a>
+              <a href="tel:0840356925" style="display:inline-flex;align-items:center;gap:9px;background:#fff;color:#0B2C55;padding:12px 24px;border-radius:5px;font-weight:600;font-size:14.5px" style-hover="background:#e9eff7">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#F05A28" stroke-width="2.4"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"></path></svg>
+                Call 084 035 6925
+              </a>
+            </div>
+          </div>
+          <div style="flex:1 1 420px;min-width:0;display:flex;gap:16px;height:330px">
+            <div class="gvt-dark-slot" style="flex:1.5 1 0;min-width:0;position:relative;border-radius:6px;overflow:hidden;border:1px solid rgba(255,255,255,.1)">
+              <image-slot id="gvt-cta-a" shape="rect" fit="cover" src="./img/svc-pc-support.png" placeholder="Technician on site"></image-slot>
+            </div>
+            <div style="flex:1 1 0;min-width:0;display:flex;flex-direction:column;gap:16px">
+              <div class="gvt-dark-slot" style="flex:1;position:relative;border-radius:6px;overflow:hidden;border:1px solid rgba(255,255,255,.1)">
+                <image-slot id="gvt-cta-b" shape="rect" fit="cover" src="./img/hero-cctv-dome.png" placeholder="CCTV camera"></image-slot>
+              </div>
+              <div class="gvt-dark-slot" style="flex:1;position:relative;border-radius:6px;overflow:hidden;border:1px solid rgba(255,255,255,.1)">
+                <image-slot id="gvt-cta-c" shape="rect" fit="cover" src="./img/svc-southafrica.png" placeholder="City skyline"></image-slot>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+    </sc-if>
+
+    <sc-if value="{{ isAbout }}">
+    <div>
+      <div style="background:#0A2A52">
+        <div style="max-width:1200px;margin:0 auto;padding:70px 28px 76px;display:flex;flex-wrap:wrap;gap:48px;align-items:center">
+          <div style="flex:1 1 430px;min-width:0">
+            <div style="color:#F05A28;font-size:12px;font-weight:700;letter-spacing:2.4px;text-transform:uppercase;margin-bottom:18px">About Gauvis</div>
+            <h1 style="margin:0;font-size:46px;line-height:1.1;font-weight:700;color:#fff;letter-spacing:-1px;text-wrap:balance">Technology Built Around Your Business.</h1>
+            <p style="margin:24px 0 0;font-size:15.5px;line-height:1.74;color:#c7d6e8;max-width:480px;text-wrap:pretty">Gauvis Technology Holdings provides practical technology solutions that help businesses operate efficiently, securely and confidently.</p>
+            <div style="display:flex;gap:14px;margin-top:32px;flex-wrap:wrap">
+              <a href="#/request-a-quote" style="background:#F05A28;color:#fff;padding:13px 26px;border-radius:5px;font-weight:600;font-size:14.5px" style-hover="background:#d9491a">Request a Quote</a>
+              <a href="#/services" style="border:1.5px solid rgba(255,255,255,.65);color:#fff;padding:13px 26px;border-radius:5px;font-weight:600;font-size:14.5px" style-hover="background:rgba(255,255,255,.12)">Explore Our Services</a>
+            </div>
+          </div>
+          <div class="gvt-dark-slot" style="flex:1 1 400px;min-width:0;height:360px;position:relative;border-radius:8px;overflow:hidden;border:1px solid rgba(255,255,255,.1)">
+            <image-slot id="gvt-about-hero" shape="rect" fit="cover" src="./img/hero-city-desk.png" placeholder="Business team at work"></image-slot>
+          </div>
+        </div>
+      </div>
+
+      <section style="background:#fff">
+        <div style="max-width:1200px;margin:0 auto;padding:0 28px;display:flex;flex-wrap:wrap;align-items:center;gap:44px">
+          <div style="flex:1 1 420px;min-width:0;padding:72px 0">
+            <div style="color:#F05A28;font-size:12px;font-weight:700;letter-spacing:2.4px;text-transform:uppercase;margin-bottom:16px">Who We Are</div>
+            <h2 style="margin:0;font-size:32px;line-height:1.24;font-weight:700;color:#0B2C55;letter-spacing:-.5px">Your Technology Partner.<br />Not Just Your IT Supplier.</h2>
+            <div style="width:54px;height:3px;background:#F05A28;margin:22px 0"></div>
+            <p style="margin:0;font-size:15px;line-height:1.78;color:#5a6b80;max-width:500px;text-wrap:pretty">Gauvis Technology Holdings is a growing South African IT solutions provider focused on helping businesses with their technology infrastructure, software, hardware and support requirements.</p>
+            <p style="margin:16px 0 0;font-size:15px;line-height:1.78;color:#5a6b80;max-width:500px;text-wrap:pretty">We were founded in 2026 and work from Soweto with businesses across South Africa. We would rather tell you plainly what we can do than overstate a history we do not have yet.</p>
+            <div style="display:flex;gap:34px;flex-wrap:wrap;margin-top:30px">
+              <div>
+                <div style="font-size:12px;font-weight:700;letter-spacing:1.6px;text-transform:uppercase;color:#5a6b80">Founded</div>
+                <div style="font-size:20px;font-weight:700;color:#0B2C55;margin-top:5px">2026</div>
+              </div>
+              <div>
+                <div style="font-size:12px;font-weight:700;letter-spacing:1.6px;text-transform:uppercase;color:#5a6b80">Based in</div>
+                <div style="font-size:20px;font-weight:700;color:#0B2C55;margin-top:5px">Soweto, South Africa</div>
+              </div>
+            </div>
+          </div>
+          <div style="flex:1 1 380px;min-width:0;position:relative;height:360px">
+            <div style="position:absolute;inset:0;left:30px;clip-path:polygon(16% 0,100% 0,100% 100%,0 100%);overflow:hidden">
+              <image-slot id="gvt-about-who" shape="rect" fit="cover" src="./img/hero-technician.png" placeholder="Technician at work"></image-slot>
+            </div>
+            <div style="position:absolute;right:0;top:0;width:84px;height:100%;background:#F05A28;clip-path:polygon(62% 0,100% 0,38% 100%,0 100%);pointer-events:none"></div>
+          </div>
+        </div>
+      </section>
+
+      <section style="background:#0A2A52">
+        <div style="max-width:1200px;margin:0 auto;padding:0 28px;display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr))">
+          <div style="padding:64px 44px 64px 0">
+            <div style="color:#F05A28;font-size:12px;font-weight:700;letter-spacing:2.4px;text-transform:uppercase;margin-bottom:16px">Our Vision</div>
+            <h2 style="margin:0;font-size:30px;line-height:1.26;font-weight:700;color:#fff;letter-spacing:-.4px">Where We&#8217;re Going.</h2>
+            <p style="margin:20px 0 0;font-size:17px;line-height:1.7;color:#e3ecf7;max-width:460px;text-wrap:pretty">To be the leading IT support and solutions partner for businesses nationwide.</p>
+          </div>
+          <div style="padding:64px 0 64px 44px;border-left:1px solid rgba(255,255,255,.12)">
+            <div style="color:#F05A28;font-size:12px;font-weight:700;letter-spacing:2.4px;text-transform:uppercase;margin-bottom:16px">Our Mission</div>
+            <h2 style="margin:0;font-size:30px;line-height:1.26;font-weight:700;color:#fff;letter-spacing:-.4px">What Drives Us.</h2>
+            <p style="margin:20px 0 0;font-size:17px;line-height:1.7;color:#e3ecf7;max-width:460px;text-wrap:pretty">To provide innovative, customer-centric IT services that enhance productivity, security and growth.</p>
+          </div>
+        </div>
+      </section>
+
+      <section style="background:#F2F5F9;padding:66px 0 70px">
+        <div style="max-width:1200px;margin:0 auto;padding:0 28px">
+          <div style="color:#F05A28;font-size:12px;font-weight:700;letter-spacing:2.4px;text-transform:uppercase;margin-bottom:14px">Our Approach</div>
+          <h2 style="margin:0 0 36px;font-size:29px;line-height:1.26;font-weight:700;color:#0B2C55;letter-spacing:-.4px">Four principles, on every engagement.</h2>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px">
+            <sc-for list="{{ approach }}" as="a" hint-placeholder-count="4">
+              <div style="background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:26px 24px 28px" style-hover="border-color:#F05A28">
+                <div style="font-size:13px;font-weight:700;color:#F05A28;letter-spacing:1.4px">{{ a.n }}</div>
+                <div style="font-size:19px;font-weight:700;color:#0B2C55;margin-top:14px">{{ a.t }}</div>
+                <p style="margin:9px 0 0;font-size:14px;line-height:1.7;color:#5a6b80">{{ a.d }}</p>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </section>
+
+      <section style="background:#fff;padding:66px 0 70px">
+        <div style="max-width:1200px;margin:0 auto;padding:0 28px">
+          <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap;margin-bottom:34px">
+            <div>
+              <div style="color:#F05A28;font-size:12px;font-weight:700;letter-spacing:2.4px;text-transform:uppercase;margin-bottom:14px">Core Capabilities</div>
+              <h2 style="margin:0;font-size:29px;line-height:1.26;font-weight:700;color:#0B2C55;letter-spacing:-.4px">What we are set up to do.</h2>
+            </div>
+            <a href="#/services" style="font-size:13.5px;font-weight:600;color:#F05A28">See all nine services &#8594;</a>
+          </div>
+          <div style="display:flex;flex-direction:column;border-top:1px solid #e2e8f0">
+            <sc-for list="{{ coreCaps }}" as="c" hint-placeholder-count="0">
+              <a href="{{ c.href }}" style="display:flex;align-items:center;gap:22px;padding:22px 10px;border-bottom:1px solid #e2e8f0;color:#0B2C55" style-hover="background:#F6F8FB">
+                <span style="font-size:12.5px;font-weight:700;color:#F05A28;letter-spacing:1.2px;flex:none;width:30px">{{ c.n }}</span>
+                {{ c.iconEl }}
+                <span style="flex:1 1 200px;min-width:0">
+                  <span style="display:block;font-size:18px;font-weight:700;letter-spacing:-.2px">{{ c.name }}</span>
+                  <span style="display:block;font-size:14px;color:#5a6b80;margin-top:4px">{{ c.short }}</span>
+                </span>
+                <span style="color:#F05A28;font-size:18px;flex:none">&#8594;</span>
+              </a>
+            </sc-for>
+          </div>
+        </div>
+      </section>
+
+      <section style="background:#F2F5F9;padding:58px 0 62px">
+        <div style="max-width:1200px;margin:0 auto;padding:0 28px;display:flex;flex-wrap:wrap;gap:32px 44px;align-items:center">
+          <div style="flex:0 1 260px">
+            <h3 style="margin:0;font-size:23px;line-height:1.34;font-weight:700;color:#0B2C55;letter-spacing:-.3px">Technology ecosystems we work with</h3>
+            <p style="margin:12px 0 0;font-size:13.5px;line-height:1.7;color:#5a6b80">Platforms and technologies we commonly work with. These are not partnerships or certifications.</p>
+          </div>
+          <div style="flex:1 1 420px;min-width:0;background:#0B2C55;border-radius:8px;padding:26px 30px;display:flex;flex-direction:column;gap:18px;align-items:center">
+            <img src="./img/logos-row1.png" alt="Dell, HP, Lenovo, Microsoft 365, SAP and Oracle" style="display:block;width:100%;max-width:745px;height:auto" />
+            <div style="width:100%;height:1px;background:rgba(255,255,255,.14)"></div>
+            <img src="./img/logos-row2.png" alt="Cisco, ServiceNow, VPN, Wi-Fi, Remote Desktop" style="display:block;width:100%;max-width:745px;height:auto" />
+          </div>
+        </div>
+      </section>
+
+      <section style="background:#0A2A52">
+        <div style="max-width:1200px;margin:0 auto;padding:60px 28px 64px;display:flex;flex-wrap:wrap;gap:40px;align-items:center;justify-content:space-between">
+          <div style="flex:1 1 420px;min-width:0">
+            <h2 style="margin:0;font-size:31px;line-height:1.24;font-weight:700;color:#fff;letter-spacing:-.4px">Let&#8217;s Build a Better<br /><span style="color:#F05A28">Technology Environment.</span></h2>
+          </div>
+          <div style="display:flex;gap:12px;flex-wrap:wrap">
+            <a href="#/request-a-quote" style="background:#F05A28;color:#fff;padding:13px 26px;border-radius:5px;font-weight:600;font-size:14.5px" style-hover="background:#d9491a">Request a Quote</a>
+            <a href="#/contact" style="border:1.5px solid rgba(255,255,255,.65);color:#fff;padding:13px 26px;border-radius:5px;font-weight:600;font-size:14.5px" style-hover="background:rgba(255,255,255,.12)">Contact Gauvis</a>
+          </div>
+        </div>
+      </section>
+    </div>
+    </sc-if>
+
+    <sc-if value="{{ isServices }}">
+    <div>
+      <div style="background:#0A2A52">
+        <div style="max-width:1200px;margin:0 auto;padding:66px 28px 70px">
+          <div style="color:#F05A28;font-size:12px;font-weight:700;letter-spacing:2.4px;text-transform:uppercase;margin-bottom:18px">Our Services</div>
+          <h1 style="margin:0;font-size:46px;line-height:1.1;font-weight:700;color:#fff;letter-spacing:-1px;text-wrap:balance">Technology Solutions<br />For Every Business Need.</h1>
+          <p style="margin:24px 0 0;font-size:15.5px;line-height:1.74;color:#c7d6e8;max-width:620px;text-wrap:pretty">From hardware and software to networking, security and ongoing support, Gauvis Technology provides practical solutions designed around your business.</p>
+        </div>
+      </div>
+
+      <section style="background:#fff;padding:56px 0 70px">
+        <div style="max-width:1200px;margin:0 auto;padding:0 28px;display:flex;flex-direction:column;gap:22px">
+          <sc-for list="{{ servicesIndexed }}" as="s" hint-placeholder-count="0">
+            <div style="display:flex;flex-wrap:wrap;gap:0;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;background:#fff" style-hover="border-color:#F05A28">
+              <div class="gvt-dark-slot" style="flex:1 1 340px;min-width:0;min-height:230px;position:relative;background:#0E3663">
+                <image-slot id="{{ s.slotId }}" shape="rect" fit="cover" src="{{ s.img }}" placeholder="{{ s.name }}"></image-slot>
+              </div>
+              <div style="flex:1.25 1 380px;min-width:0;padding:32px 34px 34px;display:flex;flex-direction:column;justify-content:center">
+                <div style="display:flex;align-items:center;gap:14px">
+                  {{ s.iconEl }}
+                  <span style="font-size:12.5px;font-weight:700;color:#F05A28;letter-spacing:1.6px">{{ s.n }}</span>
+                </div>
+                <h2 style="margin:16px 0 0;font-size:25px;line-height:1.22;font-weight:700;color:#0B2C55;letter-spacing:-.4px">{{ s.name }}</h2>
+                <p style="margin:11px 0 0;font-size:14.5px;line-height:1.72;color:#5a6b80;max-width:460px;text-wrap:pretty">{{ s.short }}</p>
+                <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:22px">
+                  <a href="{{ s.href }}" style="display:inline-flex;align-items:center;gap:8px;background:#F05A28;color:#fff;padding:11px 22px;border-radius:5px;font-weight:600;font-size:14px" style-hover="background:#d9491a">Learn More <span>&#8594;</span></a>
+                  <a href="#/request-a-quote" style="display:inline-flex;align-items:center;border:1.5px solid #d7dfe9;color:#0B2C55;padding:11px 22px;border-radius:5px;font-weight:600;font-size:14px" style-hover="border-color:#F05A28">{{ s.cta }}</a>
+                </div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </section>
+
+      <section style="background:#0A2A52">
+        <div style="max-width:1200px;margin:0 auto;padding:56px 28px 60px;display:flex;flex-wrap:wrap;gap:34px;align-items:center;justify-content:space-between">
+          <div style="flex:1 1 420px;min-width:0">
+            <h2 style="margin:0;font-size:29px;line-height:1.26;font-weight:700;color:#fff;letter-spacing:-.4px">Not sure where to start?</h2>
+            <p style="margin:14px 0 0;font-size:15px;line-height:1.74;color:#c7d6e8;max-width:520px">Tell us what is going wrong and we will point you at the right service — or tell you if you do not need one.</p>
+          </div>
+          <div style="display:flex;gap:12px;flex-wrap:wrap">
+            <a href="#/solutions" style="border:1.5px solid rgba(255,255,255,.65);color:#fff;padding:13px 26px;border-radius:5px;font-weight:600;font-size:14.5px" style-hover="background:rgba(255,255,255,.12)">Browse by business need</a>
+            <a href="#/contact" style="background:#F05A28;color:#fff;padding:13px 26px;border-radius:5px;font-weight:600;font-size:14.5px" style-hover="background:#d9491a">Talk to Gauvis</a>
+          </div>
+        </div>
+      </section>
+    </div>
+    </sc-if>
+
+    <sc-if value="{{ isSolutions }}">
+    <div>
+      <div style="background:#0A2A52">
+        <div style="max-width:1200px;margin:0 auto;padding:66px 28px 70px;display:flex;flex-wrap:wrap;gap:44px;align-items:center">
+          <div style="flex:1 1 440px;min-width:0">
+            <div style="color:#F05A28;font-size:12px;font-weight:700;letter-spacing:2.4px;text-transform:uppercase;margin-bottom:18px">Solutions</div>
+            <h1 style="margin:0;font-size:44px;line-height:1.1;font-weight:700;color:#fff;letter-spacing:-1px;text-wrap:balance">Technology Solutions<br />Built Around Your Business.</h1>
+            <p style="margin:24px 0 0;font-size:15.5px;line-height:1.74;color:#c7d6e8;max-width:500px;text-wrap:pretty">Most businesses do not arrive with a shopping list — they arrive with a problem. Find the situation that sounds like yours.</p>
+          </div>
+          <div class="gvt-dark-slot" style="flex:1 1 360px;min-width:0;height:300px;position:relative;border-radius:8px;overflow:hidden;border:1px solid rgba(255,255,255,.1)">
+            <image-slot id="gvt-sol-hero" shape="rect" fit="cover" src="./img/svc-southafrica.png" placeholder="South African business district"></image-slot>
+          </div>
+        </div>
+      </div>
+
+      <section style="background:#fff;padding:60px 0 68px">
+        <div style="max-width:1200px;margin:0 auto;padding:0 28px;display:flex;flex-direction:column;gap:18px">
+          <sc-for list="{{ solutions }}" as="s" hint-placeholder-count="0">
+            <div style="border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;background:#fff" style-hover="border-color:#F05A28">
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr))">
+                <div style="padding:30px 32px;background:#F6F8FB;border-right:1px solid #e8edf3">
+                  <div style="font-size:11.5px;font-weight:700;color:#5a6b80;letter-spacing:1.8px;text-transform:uppercase">The situation</div>
+                  <h2 style="margin:14px 0 0;font-size:21px;line-height:1.3;font-weight:700;color:#0B2C55;letter-spacing:-.3px">{{ s.title }}</h2>
+                  <p style="margin:11px 0 0;font-size:14.5px;line-height:1.72;color:#5a6b80;text-wrap:pretty">{{ s.problem }}</p>
+                </div>
+                <div style="padding:30px 32px;display:flex;flex-direction:column">
+                  <div style="display:flex;align-items:center;gap:10px">
+                    <span style="color:#F05A28;font-size:18px;line-height:1">&#8594;</span>
+                    <span style="font-size:11.5px;font-weight:700;color:#F05A28;letter-spacing:1.8px;text-transform:uppercase">What we do about it</span>
+                  </div>
+                  <p style="margin:14px 0 0;font-size:14.5px;line-height:1.72;color:#41536b;text-wrap:pretty">{{ s.answer }}</p>
+                  <div style="display:flex;gap:9px;flex-wrap:wrap;margin-top:20px">
+                    <sc-for list="{{ s.links }}" as="l" hint-placeholder-count="0">
+                      <a href="{{ l.href }}" style="display:inline-flex;align-items:center;gap:8px;border:1px solid #d7dfe9;border-radius:100px;padding:8px 15px;font-size:13px;font-weight:600;color:#0B2C55" style-hover="border-color:#F05A28;background:#FFF4F0">
+                        {{ l.iconEl }}
+                        {{ l.name }}
+                      </a>
+                    </sc-for>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </section>
+
+      <section style="background:#0A2A52">
+        <div style="max-width:1200px;margin:0 auto;padding:58px 28px 62px;display:flex;flex-wrap:wrap;gap:34px;align-items:center;justify-content:space-between">
+          <h2 style="flex:1 1 420px;margin:0;font-size:30px;line-height:1.26;font-weight:700;color:#fff;letter-spacing:-.4px">None of these quite fit?<br /><span style="color:#F05A28">Tell us what is happening.</span></h2>
+          <div style="display:flex;gap:12px;flex-wrap:wrap">
+            <a href="#/contact" style="background:#F05A28;color:#fff;padding:13px 26px;border-radius:5px;font-weight:600;font-size:14.5px" style-hover="background:#d9491a">Talk to Gauvis</a>
+            <a href="tel:0840356925" style="border:1.5px solid rgba(255,255,255,.65);color:#fff;padding:13px 26px;border-radius:5px;font-weight:600;font-size:14.5px" style-hover="background:rgba(255,255,255,.12)">Call 084 035 6925</a>
+          </div>
+        </div>
+      </section>
+    </div>
+    </sc-if>
+
+    <sc-if value="{{ isCases }}">
+    <div>
+      <div style="background:#0A2A52">
+        <div style="max-width:1200px;margin:0 auto;padding:66px 28px 70px">
+          <div style="color:#F05A28;font-size:12px;font-weight:700;letter-spacing:2.4px;text-transform:uppercase;margin-bottom:18px">Case Studies</div>
+          <h1 style="margin:0;font-size:44px;line-height:1.1;font-weight:700;color:#fff;letter-spacing:-1px;text-wrap:balance">How We Approach<br />Real Engagements.</h1>
+          <p style="margin:24px 0 0;font-size:15.5px;line-height:1.74;color:#c7d6e8;max-width:600px;text-wrap:pretty">The profiles below are illustrative. They show how we structure an engagement rather than describing named clients.</p>
+          <div style="display:inline-flex;align-items:center;gap:10px;margin-top:26px;border:1px solid rgba(240,90,40,.5);background:rgba(240,90,40,.12);border-radius:5px;padding:10px 16px">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#F05A28" stroke-width="2.2" style="flex:none"><circle cx="12" cy="12" r="9.5"></circle><path d="M12 11v5.5M12 7.6v.1"></path></svg>
+            <span style="font-size:12.5px;font-weight:600;color:#fff;letter-spacing:.4px">Illustrative project profiles &#183; not named clients</span>
+          </div>
+        </div>
+      </div>
+
+      <section style="background:#fff;padding:58px 0 68px">
+        <div style="max-width:1200px;margin:0 auto;padding:0 28px;display:flex;flex-direction:column;gap:26px">
+          <sc-for list="{{ cases }}" as="c" hint-placeholder-count="3">
+            <div style="border:1px solid #e2e8f0;border-radius:10px;overflow:hidden">
+              <div style="display:flex;flex-wrap:wrap">
+                <div class="gvt-dark-slot" style="flex:1 1 320px;min-width:0;min-height:250px;position:relative;background:#0E3663">
+                  <image-slot id="{{ c.slotId }}" shape="rect" fit="cover" src="{{ c.img }}" placeholder="{{ c.title }}"></image-slot>
+                  <div style="position:absolute;left:18px;top:18px;background:rgba(7,30,58,.88);border:1px solid rgba(255,255,255,.28);color:#fff;font-size:10.5px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;padding:6px 11px;border-radius:4px">Illustrative project profile</div>
+                </div>
+                <div style="flex:1.4 1 400px;min-width:0;padding:30px 34px 32px">
+                  <div style="font-size:12.5px;font-weight:700;color:#F05A28;letter-spacing:1.8px">{{ c.n }}</div>
+                  <h2 style="margin:12px 0 0;font-size:24px;line-height:1.24;font-weight:700;color:#0B2C55;letter-spacing:-.4px">{{ c.title }}</h2>
+                  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:20px;margin-top:22px">
+                    <div>
+                      <div style="font-size:11.5px;font-weight:700;color:#5a6b80;letter-spacing:1.5px;text-transform:uppercase">Challenge</div>
+                      <p style="margin:8px 0 0;font-size:14px;line-height:1.68;color:#5a6b80">{{ c.challenge }}</p>
+                    </div>
+                    <div>
+                      <div style="font-size:11.5px;font-weight:700;color:#5a6b80;letter-spacing:1.5px;text-transform:uppercase">Solution</div>
+                      <p style="margin:8px 0 0;font-size:14px;line-height:1.68;color:#5a6b80">{{ c.solution }}</p>
+                    </div>
+                    <div>
+                      <div style="font-size:11.5px;font-weight:700;color:#F05A28;letter-spacing:1.5px;text-transform:uppercase">Outcome</div>
+                      <p style="margin:8px 0 0;font-size:14px;line-height:1.68;color:#0B2C55;font-weight:600">{{ c.outcome }}</p>
+                    </div>
+                  </div>
+                  <a href="{{ c.href }}" style="display:inline-flex;align-items:center;gap:8px;font-size:13.5px;font-weight:600;color:#F05A28;margin-top:24px">{{ c.linkLabel }} <span>&#8594;</span></a>
+                </div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </section>
+
+      <section style="background:#0A2A52">
+        <div style="max-width:1200px;margin:0 auto;padding:58px 28px 62px;display:flex;flex-wrap:wrap;gap:34px;align-items:center;justify-content:space-between">
+          <h2 style="flex:1 1 420px;margin:0;font-size:30px;line-height:1.26;font-weight:700;color:#fff;letter-spacing:-.4px">Have a project like one of these?</h2>
+          <div style="display:flex;gap:12px;flex-wrap:wrap">
+            <a href="#/request-a-quote" style="background:#F05A28;color:#fff;padding:13px 26px;border-radius:5px;font-weight:600;font-size:14.5px" style-hover="background:#d9491a">Request a Quote</a>
+            <a href="#/contact" style="border:1.5px solid rgba(255,255,255,.65);color:#fff;padding:13px 26px;border-radius:5px;font-weight:600;font-size:14.5px" style-hover="background:rgba(255,255,255,.12)">Contact Gauvis</a>
+          </div>
+        </div>
+      </section>
+    </div>
+    </sc-if>
+
+    <sc-if value="{{ isFaq }}">
+    <div>
+      <div style="background:#0A2A52">
+        <div style="max-width:1200px;margin:0 auto;padding:66px 28px 70px">
+          <div style="color:#F05A28;font-size:12px;font-weight:700;letter-spacing:2.4px;text-transform:uppercase;margin-bottom:18px">FAQ</div>
+          <h1 style="margin:0;font-size:44px;line-height:1.1;font-weight:700;color:#fff;letter-spacing:-1px;text-wrap:balance">Questions?<br />Let&#8217;s Clear Things Up.</h1>
+          <p style="margin:24px 0 0;font-size:15.5px;line-height:1.74;color:#c7d6e8;max-width:560px;text-wrap:pretty">The things businesses ask us most often. If your question is not here, it is a short call away.</p>
+        </div>
+      </div>
+
+      <section style="background:#fff;padding:56px 0 66px">
+        <div style="max-width:900px;margin:0 auto;padding:0 28px;display:flex;flex-direction:column;gap:40px">
+          <sc-for list="{{ faqGroups }}" as="g" hint-placeholder-count="7">
+            <div>
+              <div style="display:flex;align-items:center;gap:14px;margin-bottom:18px">
+                <h2 style="margin:0;font-size:13px;font-weight:700;color:#F05A28;letter-spacing:2.2px;text-transform:uppercase">{{ g.title }}</h2>
+                <div style="flex:1;height:1px;background:#e2e8f0"></div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:10px">
+                <sc-for list="{{ g.items }}" as="it" hint-placeholder-count="3">
+                  <div style="border:1px solid #e2e8f0;border-radius:8px;overflow:hidden;background:#fff">
+                    <button type="button" onClick="{{ it.toggle }}" aria-expanded="{{ it.open }}" style="width:100%;display:flex;align-items:center;justify-content:space-between;gap:18px;padding:18px 20px;background:{{ it.headBg }};border:0;cursor:pointer;text-align:left;min-height:56px">
+                      <span style="font-size:15.5px;font-weight:600;color:#0B2C55;line-height:1.45">{{ it.q }}</span>
+                      <span style="flex:none;width:26px;height:26px;border-radius:50%;background:{{ it.iconBg }};color:{{ it.iconFg }};display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:700;line-height:1">{{ it.sign }}</span>
+                    </button>
+                    <sc-if value="{{ it.open }}">
+                      <div style="padding:0 20px 20px;animation:gvtAcc .2s ease">
+                        <p style="margin:0;font-size:14.5px;line-height:1.75;color:#5a6b80;max-width:640px;text-wrap:pretty">{{ it.a }}</p>
+                      </div>
+                    </sc-if>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </section>
+
+      <section style="background:#F2F5F9;padding:52px 0 58px">
+        <div style="max-width:1200px;margin:0 auto;padding:0 28px;display:flex;flex-wrap:wrap;gap:30px;align-items:center;justify-content:space-between">
+          <div style="flex:1 1 420px;min-width:0">
+            <h2 style="margin:0;font-size:27px;line-height:1.26;font-weight:700;color:#0B2C55;letter-spacing:-.4px">Still have a question?</h2>
+            <p style="margin:12px 0 0;font-size:15px;line-height:1.74;color:#5a6b80;max-width:500px">Send it through and we will answer plainly — including when the answer is that you do not need us.</p>
+          </div>
+          <div style="display:flex;gap:12px;flex-wrap:wrap">
+            <a href="#/contact" style="background:#F05A28;color:#fff;padding:13px 26px;border-radius:5px;font-weight:600;font-size:14.5px" style-hover="background:#d9491a">Contact Gauvis</a>
+            <a href="tel:0840356925" style="border:1.5px solid #d7dfe9;color:#0B2C55;padding:13px 26px;border-radius:5px;font-weight:600;font-size:14.5px" style-hover="border-color:#F05A28">Call 084 035 6925</a>
+          </div>
+        </div>
+      </section>
+    </div>
+    </sc-if>
+
+    <sc-if value="{{ isService }}">
+    <div>
+      <div style="background:#0A2A52">
+        <div style="max-width:1200px;margin:0 auto;padding:18px 28px 0">
+          <nav aria-label="Breadcrumb" style="display:flex;align-items:center;gap:9px;font-size:12.5px;color:#9fb6d2;flex-wrap:wrap">
+            <a href="#/home" style="color:#9fb6d2" style-hover="color:#F05A28">Home</a>
+            <span>/</span>
+            <a href="#/services" style="color:#9fb6d2" style-hover="color:#F05A28">Services</a>
+            <span>/</span>
+            <span style="color:#fff;font-weight:600">{{ svc.name }}</span>
+          </nav>
+        </div>
+        <div style="max-width:1200px;margin:0 auto;padding:34px 28px 66px;display:flex;flex-wrap:wrap;gap:46px;align-items:center">
+          <div style="flex:1 1 430px;min-width:0">
+            <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px">
+              {{ svc.iconEl }}
+              <span style="color:#F05A28;font-size:12px;font-weight:700;letter-spacing:2.4px;text-transform:uppercase">{{ svc.name }}</span>
+            </div>
+            <h1 style="margin:0;font-size:44px;line-height:1.1;font-weight:700;color:#fff;letter-spacing:-1px;text-wrap:balance">{{ svc.h1a }}<br /><span style="color:#F05A28">{{ svc.h1b }}</span></h1>
+            <p style="margin:24px 0 0;font-size:15.5px;line-height:1.74;color:#c7d6e8;max-width:490px;text-wrap:pretty">{{ svc.sub }}</p>
+            <div style="display:flex;gap:14px;margin-top:32px;flex-wrap:wrap">
+              <a href="#/request-a-quote" style="background:#F05A28;color:#fff;padding:13px 26px;border-radius:5px;font-weight:600;font-size:14.5px" style-hover="background:#d9491a">{{ svc.cta }}</a>
+              <a href="#/contact" style="border:1.5px solid rgba(255,255,255,.65);color:#fff;padding:13px 26px;border-radius:5px;font-weight:600;font-size:14.5px" style-hover="background:rgba(255,255,255,.12)">Ask a Question</a>
+            </div>
+          </div>
+          <div class="gvt-dark-slot" style="flex:1 1 380px;min-width:0;height:340px;position:relative;border-radius:8px;overflow:hidden;border:1px solid rgba(255,255,255,.1)">
+            <image-slot id="{{ svc.heroSlot }}" shape="rect" fit="cover" src="{{ svc.img }}" placeholder="{{ svc.name }}"></image-slot>
+          </div>
+        </div>
+      </div>
+
+      <section style="background:#fff;padding:62px 0 20px">
+        <div style="max-width:1200px;margin:0 auto;padding:0 28px">
+          <p style="margin:0;font-size:22px;line-height:1.6;color:#0B2C55;font-weight:600;max-width:760px;letter-spacing:-.3px;text-wrap:pretty">{{ svc.lead }}</p>
+          <div style="width:54px;height:3px;background:#F05A28;margin:26px 0 0"></div>
+        </div>
+      </section>
+
+      <section style="background:#fff;padding:44px 0 60px">
+        <div style="max-width:1200px;margin:0 auto;padding:0 28px;display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:44px">
+          <div>
+            <h2 style="margin:0 0 20px;font-size:13px;font-weight:700;color:#F05A28;letter-spacing:2.2px;text-transform:uppercase">What We Provide</h2>
+            <div style="display:flex;flex-wrap:wrap;gap:10px">
+              <sc-for list="{{ svc.provide }}" as="p" hint-placeholder-count="6">
+                <span style="display:inline-flex;align-items:center;gap:9px;border:1px solid #dde4ed;border-radius:100px;padding:9px 16px;font-size:14px;font-weight:600;color:#0B2C55;background:#fff">
+                  <span style="width:6px;height:6px;border-radius:50%;background:#F05A28;flex:none"></span>
+                  {{ p.t }}
+                </span>
+              </sc-for>
+            </div>
+          </div>
+          <div>
+            <h2 style="margin:0 0 20px;font-size:13px;font-weight:700;color:#F05A28;letter-spacing:2.2px;text-transform:uppercase">Service Capabilities</h2>
+            <div style="display:flex;flex-direction:column;gap:2px">
+              <sc-for list="{{ svc.caps }}" as="c" hint-placeholder-count="6">
+                <div style="display:flex;align-items:center;gap:12px;padding:11px 2px;border-bottom:1px solid #eef1f6">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#F05A28" stroke-width="3" style="flex:none"><path d="m4 12.5 5.2 5.2L20 7"></path></svg>
+                  <span style="font-size:14.5px;color:#41536b">{{ c.t }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section style="background:#F2F5F9;padding:60px 0 66px">
+        <div style="max-width:1200px;margin:0 auto;padding:0 28px">
+          <h2 style="margin:0 0 8px;font-size:13px;font-weight:700;color:#F05A28;letter-spacing:2.2px;text-transform:uppercase">Business Benefits</h2>
+          <p style="margin:0 0 30px;font-size:27px;font-weight:700;color:#0B2C55;letter-spacing:-.4px">What this changes day to day.</p>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:20px">
+            <sc-for list="{{ svc.benefits }}" as="b" hint-placeholder-count="3">
+              <div style="background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:26px 24px 28px" style-hover="border-color:#F05A28">
+                <div style="font-size:18px;font-weight:700;color:#0B2C55;letter-spacing:-.2px">{{ b.t }}</div>
+                <p style="margin:10px 0 0;font-size:14px;line-height:1.7;color:#5a6b80">{{ b.d }}</p>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </section>
+
+      <section style="background:#0A2A52;padding:62px 0 68px">
+        <div style="max-width:1200px;margin:0 auto;padding:0 28px">
+          <h2 style="margin:0 0 8px;font-size:13px;font-weight:700;color:#F05A28;letter-spacing:2.2px;text-transform:uppercase">How We Work</h2>
+          <p style="margin:0 0 34px;font-size:27px;font-weight:700;color:#fff;letter-spacing:-.4px">From first conversation to ongoing support.</p>
+          <div style="overflow:hidden">
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));row-gap:34px;margin-left:-1px">
+              <sc-for list="{{ svc.process }}" as="p" hint-placeholder-count="5">
+                <div style="padding:0 26px;border-left:1px solid rgba(255,255,255,.16)">
+                  <div style="width:38px;height:38px;border-radius:8px;background:rgba(240,90,40,.18);display:flex;align-items:center;justify-content:center;color:#F05A28;font-size:15px;font-weight:700">{{ p.n }}</div>
+                  <div style="width:22px;height:2px;background:#F05A28;margin:16px 0 10px"></div>
+                  <div style="font-size:16px;font-weight:700;color:#fff">{{ p.t }}</div>
+                  <p style="margin:7px 0 0;font-size:13.5px;line-height:1.68;color:#b9cae0">{{ p.d }}</p>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section style="background:#fff;padding:58px 0 20px">
+        <div style="max-width:1200px;margin:0 auto;padding:0 28px;display:flex;flex-wrap:wrap;gap:32px 44px;align-items:center">
+          <div style="flex:0 1 260px">
+            <h2 style="margin:0;font-size:22px;line-height:1.34;font-weight:700;color:#0B2C55;letter-spacing:-.3px">Relevant technology</h2>
+            <p style="margin:12px 0 0;font-size:13.5px;line-height:1.7;color:#5a6b80">Platforms we commonly work with. Not partnerships or certifications.</p>
+          </div>
+          <div style="flex:1 1 420px;min-width:0;background:#0B2C55;border-radius:8px;padding:24px 28px;display:flex;flex-direction:column;gap:16px;align-items:center">
+            <img src="./img/logos-row1.png" alt="Dell, HP, Lenovo, Microsoft 365, SAP and Oracle" style="display:block;width:100%;max-width:745px;height:auto" />
+            <div style="width:100%;height:1px;background:rgba(255,255,255,.14)"></div>
+            <img src="./img/logos-row2.png" alt="Cisco, ServiceNow, VPN, Wi-Fi, Remote Desktop" style="display:block;width:100%;max-width:745px;height:auto" />
+          </div>
+        </div>
+      </section>
+
+      <section style="background:#fff;padding:56px 0 62px">
+        <div style="max-width:900px;margin:0 auto;padding:0 28px">
+          <h2 style="margin:0 0 8px;font-size:13px;font-weight:700;color:#F05A28;letter-spacing:2.2px;text-transform:uppercase">Common Questions</h2>
+          <p style="margin:0 0 24px;font-size:27px;font-weight:700;color:#0B2C55;letter-spacing:-.4px">About {{ svc.name }}.</p>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <sc-for list="{{ svc.faq }}" as="it" hint-placeholder-count="3">
+              <div style="border:1px solid #e2e8f0;border-radius:8px;overflow:hidden;background:#fff">
+                <button type="button" onClick="{{ it.toggle }}" aria-expanded="{{ it.open }}" style="width:100%;display:flex;align-items:center;justify-content:space-between;gap:18px;padding:18px 20px;background:{{ it.headBg }};border:0;cursor:pointer;text-align:left;min-height:56px">
+                  <span style="font-size:15.5px;font-weight:600;color:#0B2C55;line-height:1.45">{{ it.q }}</span>
+                  <span style="flex:none;width:26px;height:26px;border-radius:50%;background:{{ it.iconBg }};color:{{ it.iconFg }};display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:700;line-height:1">{{ it.sign }}</span>
+                </button>
+                <sc-if value="{{ it.open }}">
+                  <div style="padding:0 20px 20px;animation:gvtAcc .2s ease">
+                    <p style="margin:0;font-size:14.5px;line-height:1.75;color:#5a6b80;max-width:640px;text-wrap:pretty">{{ it.a }}</p>
+                  </div>
+                </sc-if>
+              </div>
+            </sc-for>
+          </div>
+          <a href="#/faq" style="display:inline-flex;align-items:center;gap:8px;font-size:13.5px;font-weight:600;color:#F05A28;margin-top:22px">See all frequently asked questions <span>&#8594;</span></a>
+        </div>
+      </section>
+
+      <section style="background:#0A2A52">
+        <div style="max-width:1200px;margin:0 auto;padding:58px 28px 62px;display:flex;flex-wrap:wrap;gap:34px;align-items:center;justify-content:space-between">
+          <div style="flex:1 1 400px;min-width:0">
+            <h2 style="margin:0;font-size:29px;line-height:1.26;font-weight:700;color:#fff;letter-spacing:-.4px">Ready to talk about {{ svc.name }}?</h2>
+            <p style="margin:13px 0 0;font-size:14.5px;line-height:1.72;color:#c7d6e8;max-width:480px">Tell us what you need and we will come back with something proportionate.</p>
+          </div>
+          <div style="display:flex;gap:12px;flex-wrap:wrap">
+            <a href="#/request-a-quote" style="background:#F05A28;color:#fff;padding:13px 26px;border-radius:5px;font-weight:600;font-size:14.5px" style-hover="background:#d9491a">{{ svc.cta }}</a>
+            <a href="tel:0840356925" style="display:inline-flex;align-items:center;gap:9px;background:#fff;color:#0B2C55;padding:13px 24px;border-radius:5px;font-weight:600;font-size:14.5px" style-hover="background:#e9eff7">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#F05A28" stroke-width="2.4"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"></path></svg>
+              Call 084 035 6925
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <section style="background:#F2F5F9;padding:56px 0 62px">
+        <div style="max-width:1200px;margin:0 auto;padding:0 28px">
+          <h2 style="margin:0 0 6px;font-size:23px;font-weight:700;color:#0B2C55;letter-spacing:-.3px">Looking for something else?</h2>
+          <p style="margin:0 0 28px;font-size:14.5px;color:#5a6b80">Three services businesses often pair with this one.</p>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:20px">
+            <sc-for list="{{ svc.relatedList }}" as="r" hint-placeholder-count="0">
+              <a href="{{ r.href }}" style="display:block;background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:24px 22px 26px;color:#0B2C55" style-hover="border-color:#F05A28">
+                {{ r.iconEl }}
+                <div style="font-size:18px;font-weight:700;margin-top:16px;letter-spacing:-.2px">{{ r.name }}</div>
+                <p style="margin:9px 0 0;font-size:13.5px;line-height:1.68;color:#5a6b80">{{ r.short }}</p>
+                <span style="display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:600;color:#F05A28;margin-top:16px">Learn more <span>&#8594;</span></span>
+              </a>
+            </sc-for>
+          </div>
+        </div>
+      </section>
+    </div>
+    </sc-if>
+
+    <sc-if value="{{ isContact }}">
+    <div>
+      <div style="background:#0A2A52">
+        <div style="max-width:1200px;margin:0 auto;padding:62px 28px 66px">
+          <div style="color:#F05A28;font-size:12px;font-weight:700;letter-spacing:2.4px;text-transform:uppercase;margin-bottom:18px">Contact</div>
+          <h1 style="margin:0;font-size:44px;line-height:1.1;font-weight:700;color:#fff;letter-spacing:-1px;text-wrap:balance">Let&#8217;s Start a Conversation.</h1>
+          <p style="margin:22px 0 0;font-size:15.5px;line-height:1.74;color:#c7d6e8;max-width:560px;text-wrap:pretty">Tell us what your business needs and we&#8217;ll help you identify the right next step.</p>
+        </div>
+      </div>
+
+      <section style="background:#fff;padding:52px 0 66px">
+        <div style="max-width:1200px;margin:0 auto;padding:0 28px;display:grid;grid-template-columns:repeat(auto-fit,minmax(310px,1fr));gap:44px;align-items:start">
+
+          <div>
+            <h2 style="margin:0;font-size:23px;font-weight:700;color:#0B2C55;letter-spacing:-.3px">Gauvis Technology Holdings</h2>
+            <div style="width:44px;height:3px;background:#F05A28;margin:16px 0 22px"></div>
+            <div style="display:flex;flex-direction:column;gap:16px;font-size:14.5px;color:#41536b">
+              <div style="display:flex;align-items:flex-start;gap:12px">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#F05A28" stroke-width="2.2" style="margin-top:2px;flex:none"><path d="M12 22s7-6.2 7-12A7 7 0 0 0 5 10c0 5.8 7 12 7 12z"></path><circle cx="12" cy="10" r="2.4"></circle></svg>
+                <div>
+                  <div style="font-weight:600;color:#0B2C55">Soweto, South Africa</div>
+                  <div style="font-size:13.5px;color:#5a6b80;margin-top:3px">Serving businesses nationwide</div>
+                </div>
+              </div>
+              <div style="display:flex;align-items:flex-start;gap:12px">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#F05A28" stroke-width="2.2" style="margin-top:2px;flex:none"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"></path></svg>
+                <div>
+                  <div style="font-weight:600;color:#0B2C55">084 035 6925</div>
+                  <div style="font-size:13.5px;color:#5a6b80;margin-top:3px">Thabang</div>
+                </div>
+              </div>
+              <div style="display:flex;align-items:flex-start;gap:12px">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#F05A28" stroke-width="2.2" style="margin-top:2px;flex:none"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"></path></svg>
+                <div>
+                  <div style="font-weight:600;color:#0B2C55">064 367 0274</div>
+                  <div style="font-size:13.5px;color:#5a6b80;margin-top:3px">Pontsho</div>
+                </div>
+              </div>
+              <div style="display:flex;align-items:flex-start;gap:12px">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#F05A28" stroke-width="2.2" style="margin-top:2px;flex:none"><rect x="2.5" y="4.5" width="19" height="15" rx="2"></rect><path d="m3 6 9 6.5L21 6"></path></svg>
+                <div>
+                  <div style="font-weight:600;color:#0B2C55;word-break:break-word">thabash.mampa@gmail.com</div>
+                </div>
+              </div>
+            </div>
+
+            <div style="display:flex;flex-direction:column;gap:10px;margin-top:26px">
+              <a href="tel:0840356925" style="display:flex;align-items:center;justify-content:center;gap:10px;min-height:48px;background:#F05A28;color:#fff;border-radius:6px;font-weight:600;font-size:14.5px" style-hover="background:#d9491a">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"></path></svg>
+                Call Thabash
+              </a>
+              <a href="tel:0643670274" style="display:flex;align-items:center;justify-content:center;gap:10px;min-height:48px;border:1.5px solid #d7dfe9;color:#0B2C55;border-radius:6px;font-weight:600;font-size:14.5px" style-hover="border-color:#F05A28">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#F05A28" stroke-width="2.4"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"></path></svg>
+                Call Pontsho
+              </a>
+              <a href="mailto:thabash.mampa@gmail.com" style="display:flex;align-items:center;justify-content:center;gap:10px;min-height:48px;border:1.5px solid #d7dfe9;color:#0B2C55;border-radius:6px;font-weight:600;font-size:14.5px" style-hover="border-color:#F05A28">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#F05A28" stroke-width="2.4"><rect x="2.5" y="4.5" width="19" height="15" rx="2"></rect><path d="m3 6 9 6.5L21 6"></path></svg>
+                Email Gauvis
+              </a>
+            </div>
+
+            <div style="margin-top:26px;border:1px solid #e2e8f0;border-radius:8px;padding:20px 22px;background:#F6F8FB">
+              <div style="font-size:14.5px;font-weight:700;color:#0B2C55">Need a formal quote instead?</div>
+              <p style="margin:8px 0 0;font-size:13.5px;line-height:1.68;color:#5a6b80">The quote form collects the detail we need to price a piece of work properly.</p>
+              <a href="#/request-a-quote" style="display:inline-flex;align-items:center;gap:8px;font-size:13.5px;font-weight:600;color:#F05A28;margin-top:14px">Request a Quote <span>&#8594;</span></a>
+            </div>
+          </div>
+
+          <div style="border:1px solid #e2e8f0;border-radius:10px;padding:30px 30px 34px;background:#fff;box-shadow:0 2px 20px rgba(11,44,85,.05)">
+            <h2 style="margin:0;font-size:21px;font-weight:700;color:#0B2C55;letter-spacing:-.3px">Send us a message</h2>
+            <p style="margin:9px 0 24px;font-size:13.5px;line-height:1.68;color:#5a6b80">Fields marked with an asterisk are required.</p>
+            <form onSubmit="{{ submitContact }}" noValidate="{{ true }}" style="display:flex;flex-direction:column;gap:16px">
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px">
+                <div style="display:flex;flex-direction:column;gap:7px">
+                  <label for="c-name" style="font-size:13px;font-weight:600;color:#0B2C55">Full Name *</label>
+                  <input id="c-name" type="text" value="{{ c.name }}" onChange="{{ onC.name }}" aria-invalid="{{ cErrName }}" placeholder="Your name" style="min-height:46px;padding:0 14px;border:1.5px solid {{ cErr.nameBorder }};border-radius:6px;color:#0B2C55;background:#fff;outline:none" />
+                  <sc-if value="{{ cErrName }}"><span role="alert" style="font-size:12.5px;color:#C8341A;font-weight:600">{{ cErr.name }}</span></sc-if>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:7px">
+                  <label for="c-company" style="font-size:13px;font-weight:600;color:#0B2C55">Company Name</label>
+                  <input id="c-company" type="text" value="{{ c.company }}" onChange="{{ onC.company }}" placeholder="Your business" style="min-height:46px;padding:0 14px;border:1.5px solid #dde4ed;border-radius:6px;color:#0B2C55;background:#fff;outline:none" />
+                </div>
+              </div>
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px">
+                <div style="display:flex;flex-direction:column;gap:7px">
+                  <label for="c-email" style="font-size:13px;font-weight:600;color:#0B2C55">Email *</label>
+                  <input id="c-email" type="email" value="{{ c.email }}" onChange="{{ onC.email }}" aria-invalid="{{ cErrEmail }}" placeholder="you@company.co.za" style="min-height:46px;padding:0 14px;border:1.5px solid {{ cErr.emailBorder }};border-radius:6px;color:#0B2C55;background:#fff;outline:none" />
+                  <sc-if value="{{ cErrEmail }}"><span role="alert" style="font-size:12.5px;color:#C8341A;font-weight:600">{{ cErr.email }}</span></sc-if>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:7px">
+                  <label for="c-phone" style="font-size:13px;font-weight:600;color:#0B2C55">Phone</label>
+                  <input id="c-phone" type="tel" value="{{ c.phone }}" onChange="{{ onC.phone }}" aria-invalid="{{ cErrPhone }}" placeholder="084 000 0000" style="min-height:46px;padding:0 14px;border:1.5px solid {{ cErr.phoneBorder }};border-radius:6px;color:#0B2C55;background:#fff;outline:none" />
+                  <sc-if value="{{ cErrPhone }}"><span role="alert" style="font-size:12.5px;color:#C8341A;font-weight:600">{{ cErr.phone }}</span></sc-if>
+                </div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:7px">
+                <label for="c-service" style="font-size:13px;font-weight:600;color:#0B2C55">Service Required *</label>
+                <select id="c-service" value="{{ c.service }}" onChange="{{ onC.service }}" aria-invalid="{{ cErrService }}" style="min-height:46px;padding:0 12px;border:1.5px solid {{ cErr.serviceBorder }};border-radius:6px;color:#0B2C55;background:#fff;outline:none">
+                  <option value="">Select a service…</option>
+                  <sc-for list="{{ serviceOptions }}" as="o" hint-placeholder-count="9">
+                    <option value="{{ o.v }}">{{ o.v }}</option>
+                  </sc-for>
+                </select>
+                <sc-if value="{{ cErrService }}"><span role="alert" style="font-size:12.5px;color:#C8341A;font-weight:600">{{ cErr.service }}</span></sc-if>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:7px">
+                <label for="c-message" style="font-size:13px;font-weight:600;color:#0B2C55">Message *</label>
+                <textarea id="c-message" rows="5" value="{{ c.message }}" onChange="{{ onC.message }}" aria-invalid="{{ cErrMessage }}" placeholder="Tell us what you need help with" style="padding:13px 14px;border:1.5px solid {{ cErr.messageBorder }};border-radius:6px;color:#0B2C55;background:#fff;outline:none;resize:vertical;line-height:1.6"></textarea>
+                <sc-if value="{{ cErrMessage }}"><span role="alert" style="font-size:12.5px;color:#C8341A;font-weight:600">{{ cErr.message }}</span></sc-if>
+              </div>
+              <button type="submit" disabled="{{ cSending }}" style="min-height:50px;background:{{ cBtnBg }};color:#fff;border:0;border-radius:6px;font-weight:700;font-size:15px;letter-spacing:.6px;cursor:{{ cBtnCursor }};display:flex;align-items:center;justify-content:center;gap:11px">
+                <sc-if value="{{ cSending }}">
+                  <span style="width:16px;height:16px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:gvtSpin .7s linear infinite;display:block"></span>
+                </sc-if>
+                {{ cBtnLabel }}
+              </button>
+              <p style="margin:0;font-size:12.5px;line-height:1.6;color:#5a6b80">This is a prototype — submitting shows the confirmation flow rather than sending mail.</p>
+            </form>
+          </div>
+        </div>
+      </section>
+    </div>
+    </sc-if>
+
+    <sc-if value="{{ isThanks }}">
+    <div style="background:#0A2A52;position:relative;overflow:hidden">
+      <div style="position:absolute;left:8%;top:16%;width:8px;height:8px;border-radius:50%;background:rgba(240,90,40,.5);animation:gvtDrift 5s ease-in-out infinite"></div>
+      <div style="position:absolute;right:12%;top:26%;width:6px;height:6px;border-radius:50%;background:rgba(120,180,255,.45);animation:gvtDrift 6.5s ease-in-out infinite"></div>
+      <div style="position:absolute;left:18%;bottom:20%;width:5px;height:5px;border-radius:50%;background:rgba(240,90,40,.4);animation:gvtDrift 7.5s ease-in-out infinite"></div>
+      <div style="position:absolute;right:22%;bottom:26%;width:7px;height:7px;border-radius:50%;background:rgba(120,180,255,.35);animation:gvtDrift 5.8s ease-in-out infinite"></div>
+
+      <div style="position:relative;max-width:760px;margin:0 auto;padding:76px 28px 84px;text-align:center">
+        <div style="position:relative;width:112px;height:112px;margin:0 auto">
+          <div style="position:absolute;inset:0;border-radius:50%;border:2px solid rgba(240,90,40,.55);animation:gvtRing 2.6s ease-out infinite"></div>
+          <div style="position:absolute;inset:0;border-radius:50%;border:2px solid rgba(240,90,40,.35);animation:gvtRing 2.6s ease-out .8s infinite"></div>
+          <div style="position:absolute;inset:14px;border-radius:50%;background:#F05A28;display:flex;align-items:center;justify-content:center;animation:gvtPop .5s cubic-bezier(.2,1.2,.3,1) both;box-shadow:0 10px 34px rgba(240,90,40,.4)">
+            <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m4 12.5 5.2 5.2L20 7"></path></svg>
+          </div>
+        </div>
+
+        <div style="display:inline-flex;align-items:center;gap:9px;margin-top:32px;border:1px solid rgba(255,255,255,.22);border-radius:100px;padding:7px 16px">
+          <span style="width:7px;height:7px;border-radius:50%;background:#4ade80;display:block"></span>
+          <span style="font-size:11.5px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;color:#cfe0f5">Your enquiry has been submitted</span>
+        </div>
+
+        <h1 style="margin:22px 0 0;font-size:46px;line-height:1.08;font-weight:700;color:#fff;letter-spacing:-1.2px">Thank You.</h1>
+        <p style="margin:16px 0 0;font-size:19px;font-weight:600;color:#F05A28">Your message has been received.</p>
+        <p style="margin:20px auto 0;font-size:15px;line-height:1.78;color:#c7d6e8;max-width:540px;text-wrap:pretty">Thank you for getting in touch with Gauvis Technology Holdings. We&#8217;ve received your enquiry and will review the information you&#8217;ve provided. A member of the Gauvis team can follow up with you regarding your request.</p>
+
+        <div style="display:inline-flex;flex-wrap:wrap;justify-content:center;gap:0;margin-top:32px;border:1px solid rgba(255,255,255,.16);border-radius:8px;overflow:hidden;background:rgba(255,255,255,.05)">
+          <div style="padding:16px 26px;text-align:left;border-right:1px solid rgba(255,255,255,.16)">
+            <div style="font-size:10.5px;font-weight:700;letter-spacing:1.6px;text-transform:uppercase;color:#8fa9c8">Service</div>
+            <div style="font-size:14.5px;font-weight:600;color:#fff;margin-top:5px">{{ doneService }}</div>
+          </div>
+          <div style="padding:16px 26px;text-align:left">
+            <div style="font-size:10.5px;font-weight:700;letter-spacing:1.6px;text-transform:uppercase;color:#8fa9c8">Contact</div>
+            <div style="font-size:14.5px;font-weight:600;color:#fff;margin-top:5px;word-break:break-word">{{ doneEmail }}</div>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:36px">
+          <a href="#/home" style="background:#F05A28;color:#fff;padding:13px 26px;border-radius:5px;font-weight:600;font-size:14.5px" style-hover="background:#d9491a">Back to Home</a>
+          <a href="#/services" style="border:1.5px solid rgba(255,255,255,.65);color:#fff;padding:13px 26px;border-radius:5px;font-weight:600;font-size:14.5px" style-hover="background:rgba(255,255,255,.12)">Explore Our Services</a>
+          <a href="tel:0840356925" style="display:inline-flex;align-items:center;gap:9px;background:#fff;color:#0B2C55;padding:13px 24px;border-radius:5px;font-weight:600;font-size:14.5px" style-hover="background:#e9eff7">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#F05A28" stroke-width="2.4"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"></path></svg>
+            Call Gauvis
+          </a>
+        </div>
+      </div>
+    </div>
+    </sc-if>
+
+    <sc-if value="{{ isQuote }}">
+    <div>
+      <div style="background:#0A2A52">
+        <div style="max-width:1200px;margin:0 auto;padding:58px 28px 62px">
+          <div style="color:#F05A28;font-size:12px;font-weight:700;letter-spacing:2.4px;text-transform:uppercase;margin-bottom:18px">Request a Quote</div>
+          <h1 style="margin:0;font-size:42px;line-height:1.1;font-weight:700;color:#fff;letter-spacing:-1px;text-wrap:balance">Let&#8217;s Talk About<br />Your Technology Needs.</h1>
+          <p style="margin:22px 0 0;font-size:15.5px;line-height:1.74;color:#c7d6e8;max-width:540px;text-wrap:pretty">Tell us what you need and we&#8217;ll help you determine the right solution.</p>
+        </div>
+      </div>
+
+      <section style="background:#F2F5F9;padding:0">
+        <div style="max-width:900px;margin:0 auto;padding:0 28px">
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:0;background:#fff;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;margin-top:-32px;position:relative;z-index:2;box-shadow:0 8px 30px rgba(11,44,85,.1)">
+            <sc-for list="{{ steps }}" as="s" hint-placeholder-count="4">
+              <div style="padding:18px 18px;display:flex;align-items:center;gap:12px;border-left:1px solid #eef1f6;background:{{ s.bg }}">
+                <span style="flex:none;width:30px;height:30px;border-radius:50%;background:{{ s.dotBg }};color:{{ s.dotFg }};display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700">{{ s.mark }}</span>
+                <span style="min-width:0">
+                  <span style="display:block;font-size:10.5px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:#5a6b80">Step {{ s.n }}</span>
+                  <span style="display:block;font-size:13.5px;font-weight:700;color:{{ s.labelFg }};margin-top:2px">{{ s.label }}</span>
+                </span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </section>
+
+      <section style="background:#F2F5F9;padding:34px 0 70px">
+        <div style="max-width:900px;margin:0 auto;padding:0 28px">
+          <div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:32px 32px 36px">
+
+            <sc-if value="{{ step1 }}">
+              <div style="animation:gvtAcc .22s ease">
+                <h2 style="margin:0;font-size:22px;font-weight:700;color:#0B2C55;letter-spacing:-.3px">Your Details</h2>
+                <p style="margin:9px 0 26px;font-size:13.5px;line-height:1.68;color:#5a6b80">So we know who we are talking to.</p>
+                <div style="display:flex;flex-direction:column;gap:16px">
+                  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px">
+                    <div style="display:flex;flex-direction:column;gap:7px">
+                      <label for="q-name" style="font-size:13px;font-weight:600;color:#0B2C55">Full Name *</label>
+                      <input id="q-name" type="text" value="{{ q.name }}" onChange="{{ onQ.name }}" aria-invalid="{{ qErrName }}" placeholder="Your name" style="min-height:46px;padding:0 14px;border:1.5px solid {{ qErr.nameBorder }};border-radius:6px;color:#0B2C55;background:#fff;outline:none" />
+                      <sc-if value="{{ qErrName }}"><span role="alert" style="font-size:12.5px;color:#C8341A;font-weight:600">{{ qErr.name }}</span></sc-if>
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:7px">
+                      <label for="q-company" style="font-size:13px;font-weight:600;color:#0B2C55">Company Name</label>
+                      <input id="q-company" type="text" value="{{ q.company }}" onChange="{{ onQ.company }}" placeholder="Your business" style="min-height:46px;padding:0 14px;border:1.5px solid #dde4ed;border-radius:6px;color:#0B2C55;background:#fff;outline:none" />
+                    </div>
+                  </div>
+                  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px">
+                    <div style="display:flex;flex-direction:column;gap:7px">
+                      <label for="q-email" style="font-size:13px;font-weight:600;color:#0B2C55">Email *</label>
+                      <input id="q-email" type="email" value="{{ q.email }}" onChange="{{ onQ.email }}" aria-invalid="{{ qErrEmail }}" placeholder="you@company.co.za" style="min-height:46px;padding:0 14px;border:1.5px solid {{ qErr.emailBorder }};border-radius:6px;color:#0B2C55;background:#fff;outline:none" />
+                      <sc-if value="{{ qErrEmail }}"><span role="alert" style="font-size:12.5px;color:#C8341A;font-weight:600">{{ qErr.email }}</span></sc-if>
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:7px">
+                      <label for="q-phone" style="font-size:13px;font-weight:600;color:#0B2C55">Phone *</label>
+                      <input id="q-phone" type="tel" value="{{ q.phone }}" onChange="{{ onQ.phone }}" aria-invalid="{{ qErrPhone }}" placeholder="084 000 0000" style="min-height:46px;padding:0 14px;border:1.5px solid {{ qErr.phoneBorder }};border-radius:6px;color:#0B2C55;background:#fff;outline:none" />
+                      <sc-if value="{{ qErrPhone }}"><span role="alert" style="font-size:12.5px;color:#C8341A;font-weight:600">{{ qErr.phone }}</span></sc-if>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ step2 }}">
+              <div style="animation:gvtAcc .22s ease">
+                <h2 style="margin:0;font-size:22px;font-weight:700;color:#0B2C55;letter-spacing:-.3px">Your Requirement</h2>
+                <p style="margin:9px 0 26px;font-size:13.5px;line-height:1.68;color:#5a6b80">Pick the closest match — we will refine it with you.</p>
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px">
+                  <sc-for list="{{ serviceChoices }}" as="o" hint-placeholder-count="9">
+                    <button type="button" onClick="{{ o.pick }}" aria-pressed="{{ o.on }}" style="display:flex;align-items:center;gap:12px;text-align:left;min-height:58px;padding:12px 16px;border:1.5px solid {{ o.border }};background:{{ o.bg }};border-radius:8px;cursor:pointer;color:#0B2C55">
+                      <span style="flex:none;width:18px;height:18px;border-radius:50%;border:2px solid {{ o.dot }};display:flex;align-items:center;justify-content:center">
+                        <sc-if value="{{ o.on }}"><span style="width:8px;height:8px;border-radius:50%;background:#F05A28;display:block"></span></sc-if>
+                      </span>
+                      <span style="font-size:14.5px;font-weight:600">{{ o.v }}</span>
+                    </button>
+                  </sc-for>
+                </div>
+                <sc-if value="{{ qErrService }}"><p role="alert" style="margin:14px 0 0;font-size:12.5px;color:#C8341A;font-weight:600">{{ qErr.service }}</p></sc-if>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ step3 }}">
+              <div style="animation:gvtAcc .22s ease">
+                <h2 style="margin:0;font-size:22px;font-weight:700;color:#0B2C55;letter-spacing:-.3px">Project Information</h2>
+                <p style="margin:9px 0 26px;font-size:13.5px;line-height:1.68;color:#5a6b80">Rough answers are fine — this is to size the work, not to commit you.</p>
+                <div style="display:flex;flex-direction:column;gap:16px">
+                  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px">
+                    <div style="display:flex;flex-direction:column;gap:7px">
+                      <label for="q-users" style="font-size:13px;font-weight:600;color:#0B2C55">Number of Users</label>
+                      <input id="q-users" type="text" value="{{ q.users }}" onChange="{{ onQ.users }}" placeholder="e.g. 12" style="min-height:46px;padding:0 14px;border:1.5px solid #dde4ed;border-radius:6px;color:#0B2C55;background:#fff;outline:none" />
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:7px">
+                      <label for="q-location" style="font-size:13px;font-weight:600;color:#0B2C55">Location *</label>
+                      <input id="q-location" type="text" value="{{ q.location }}" onChange="{{ onQ.location }}" aria-invalid="{{ qErrLocation }}" placeholder="Town or city" style="min-height:46px;padding:0 14px;border:1.5px solid {{ qErr.locationBorder }};border-radius:6px;color:#0B2C55;background:#fff;outline:none" />
+                      <sc-if value="{{ qErrLocation }}"><span role="alert" style="font-size:12.5px;color:#C8341A;font-weight:600">{{ qErr.location }}</span></sc-if>
+                    </div>
+                  </div>
+                  <div style="display:flex;flex-direction:column;gap:7px">
+                    <label for="q-desc" style="font-size:13px;font-weight:600;color:#0B2C55">Project Description *</label>
+                    <textarea id="q-desc" rows="5" value="{{ q.desc }}" onChange="{{ onQ.desc }}" aria-invalid="{{ qErrDesc }}" placeholder="What needs to happen, and what is going wrong now?" style="padding:13px 14px;border:1.5px solid {{ qErr.descBorder }};border-radius:6px;color:#0B2C55;background:#fff;outline:none;resize:vertical;line-height:1.6"></textarea>
+                    <sc-if value="{{ qErrDesc }}"><span role="alert" style="font-size:12.5px;color:#C8341A;font-weight:600">{{ qErr.desc }}</span></sc-if>
+                  </div>
+                  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px">
+                    <div style="display:flex;flex-direction:column;gap:7px">
+                      <label for="q-budget" style="font-size:13px;font-weight:600;color:#0B2C55">Budget Range</label>
+                      <select id="q-budget" value="{{ q.budget }}" onChange="{{ onQ.budget }}" style="min-height:46px;padding:0 12px;border:1.5px solid #dde4ed;border-radius:6px;color:#0B2C55;background:#fff;outline:none">
+                        <option value="">Prefer not to say</option>
+                        <sc-for list="{{ budgets }}" as="b" hint-placeholder-count="4">
+                          <option value="{{ b.v }}">{{ b.v }}</option>
+                        </sc-for>
+                      </select>
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:7px">
+                      <label for="q-pref" style="font-size:13px;font-weight:600;color:#0B2C55">Preferred Contact Method</label>
+                      <select id="q-pref" value="{{ q.pref }}" onChange="{{ onQ.pref }}" style="min-height:46px;padding:0 12px;border:1.5px solid #dde4ed;border-radius:6px;color:#0B2C55;background:#fff;outline:none">
+                        <option value="Email">Email</option>
+                        <option value="Phone call">Phone call</option>
+                        <option value="WhatsApp">WhatsApp</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ step4 }}">
+              <div style="animation:gvtAcc .22s ease">
+                <h2 style="margin:0;font-size:22px;font-weight:700;color:#0B2C55;letter-spacing:-.3px">Review</h2>
+                <p style="margin:9px 0 24px;font-size:13.5px;line-height:1.68;color:#5a6b80">Check this over before you send it.</p>
+                <div style="border:1px solid #e2e8f0;border-radius:8px;overflow:hidden">
+                  <sc-for list="{{ summary }}" as="row" hint-placeholder-count="10">
+                    <div style="display:flex;flex-wrap:wrap;gap:6px 20px;padding:13px 18px;border-bottom:1px solid #eef1f6;background:{{ row.bg }}">
+                      <span style="flex:0 0 190px;font-size:12.5px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:#5a6b80">{{ row.k }}</span>
+                      <span style="flex:1 1 200px;min-width:0;font-size:14.5px;color:#0B2C55;font-weight:600;word-break:break-word">{{ row.v }}</span>
+                    </div>
+                  </sc-for>
+                </div>
+                <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:18px">
+                  <button type="button" onClick="{{ editStep1 }}" style="border:1px solid #d7dfe9;background:#fff;color:#0B2C55;border-radius:5px;padding:9px 16px;font-size:13px;font-weight:600;cursor:pointer;min-height:40px" style-hover="border-color:#F05A28">Edit details</button>
+                  <button type="button" onClick="{{ editStep2 }}" style="border:1px solid #d7dfe9;background:#fff;color:#0B2C55;border-radius:5px;padding:9px 16px;font-size:13px;font-weight:600;cursor:pointer;min-height:40px" style-hover="border-color:#F05A28">Edit service</button>
+                  <button type="button" onClick="{{ editStep3 }}" style="border:1px solid #d7dfe9;background:#fff;color:#0B2C55;border-radius:5px;padding:9px 16px;font-size:13px;font-weight:600;cursor:pointer;min-height:40px" style-hover="border-color:#F05A28">Edit project info</button>
+                </div>
+              </div>
+            </sc-if>
+
+            <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:30px;padding-top:24px;border-top:1px solid #eef1f6">
+              <sc-if value="{{ stepNot1 }}">
+                <button type="button" onClick="{{ prevStep }}" style="border:1.5px solid #d7dfe9;background:#fff;color:#0B2C55;border-radius:6px;padding:0 22px;min-height:48px;font-size:14.5px;font-weight:600;cursor:pointer" style-hover="border-color:#F05A28">Back</button>
+              </sc-if>
+              <sc-if value="{{ showNext }}">
+                <button type="button" onClick="{{ nextStep }}" style="background:#F05A28;color:#fff;border:0;border-radius:6px;padding:0 28px;min-height:48px;font-size:14.5px;font-weight:700;cursor:pointer" style-hover="background:#d9491a">Continue</button>
+              </sc-if>
+              <sc-if value="{{ step4 }}">
+                <button type="button" onClick="{{ submitQuote }}" disabled="{{ qSending }}" style="background:{{ qBtnBg }};color:#fff;border:0;border-radius:6px;padding:0 30px;min-height:50px;font-size:15px;font-weight:700;letter-spacing:.6px;cursor:{{ qBtnCursor }};display:flex;align-items:center;justify-content:center;gap:11px">
+                  <sc-if value="{{ qSending }}">
+                    <span style="width:16px;height:16px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:gvtSpin .7s linear infinite;display:block"></span>
+                  </sc-if>
+                  {{ qBtnLabel }}
+                </button>
+              </sc-if>
+              <span style="font-size:12.5px;color:#5a6b80;margin-left:auto">Step {{ step }} of 4</span>
+            </div>
+          </div>
+
+          <p style="margin:18px 2px 0;font-size:12.5px;line-height:1.6;color:#5a6b80">This is a prototype — submitting shows the confirmation flow rather than sending your request.</p>
+        </div>
+      </section>
+    </div>
+    </sc-if>
+
+    <sc-if value="{{ isQuoteThanks }}">
+    <div style="background:#0A2A52;position:relative;overflow:hidden">
+      <div style="position:absolute;left:10%;top:14%;width:7px;height:7px;border-radius:50%;background:rgba(240,90,40,.5);animation:gvtDrift 5.4s ease-in-out infinite"></div>
+      <div style="position:absolute;right:14%;top:22%;width:6px;height:6px;border-radius:50%;background:rgba(120,180,255,.4);animation:gvtDrift 6.8s ease-in-out infinite"></div>
+      <div style="position:absolute;left:20%;bottom:16%;width:5px;height:5px;border-radius:50%;background:rgba(240,90,40,.4);animation:gvtDrift 7.2s ease-in-out infinite"></div>
+
+      <div style="position:relative;max-width:860px;margin:0 auto;padding:72px 28px 80px">
+        <div style="text-align:center">
+          <div style="position:relative;width:104px;height:104px;margin:0 auto">
+            <div style="position:absolute;inset:0;border-radius:50%;border:2px solid rgba(240,90,40,.55);animation:gvtRing 2.6s ease-out infinite"></div>
+            <div style="position:absolute;inset:0;border-radius:50%;border:2px solid rgba(240,90,40,.3);animation:gvtRing 2.6s ease-out .8s infinite"></div>
+            <div style="position:absolute;inset:13px;border-radius:50%;background:#F05A28;display:flex;align-items:center;justify-content:center;animation:gvtPop .5s cubic-bezier(.2,1.2,.3,1) both;box-shadow:0 10px 34px rgba(240,90,40,.4)">
+              <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m4 12.5 5.2 5.2L20 7"></path></svg>
+            </div>
+          </div>
+          <h1 style="margin:30px 0 0;font-size:44px;line-height:1.08;font-weight:700;color:#fff;letter-spacing:-1.2px">Request Received.</h1>
+          <p style="margin:18px auto 0;font-size:15px;line-height:1.78;color:#c7d6e8;max-width:560px;text-wrap:pretty">Thank you for contacting Gauvis Technology Holdings. We&#8217;ve received your technology requirements and your request has been submitted successfully.</p>
+        </div>
+
+        <div style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.16);border-radius:10px;padding:26px 28px;margin-top:36px">
+          <div style="display:inline-flex;align-items:center;gap:9px;border:1px solid rgba(255,255,255,.22);border-radius:100px;padding:6px 14px;margin-bottom:20px">
+            <span style="width:7px;height:7px;border-radius:50%;background:#4ade80;display:block"></span>
+            <span style="font-size:11px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;color:#cfe0f5">Request received</span>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px">
+            <div>
+              <div style="font-size:10.5px;font-weight:700;letter-spacing:1.6px;text-transform:uppercase;color:#8fa9c8">Service</div>
+              <div style="font-size:16px;font-weight:700;color:#fff;margin-top:6px">{{ doneService }}</div>
+            </div>
+            <div>
+              <div style="font-size:10.5px;font-weight:700;letter-spacing:1.6px;text-transform:uppercase;color:#8fa9c8">Contact</div>
+              <div style="font-size:16px;font-weight:700;color:#fff;margin-top:6px;word-break:break-word">{{ doneEmail }}</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top:38px">
+          <h2 style="margin:0 0 20px;font-size:13px;font-weight:700;color:#F05A28;letter-spacing:2.2px;text-transform:uppercase">What Happens Next</h2>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:18px">
+            <sc-for list="{{ whatNext }}" as="w" hint-placeholder-count="3">
+              <div style="border:1px solid rgba(255,255,255,.16);border-radius:8px;padding:22px 22px 24px;background:rgba(255,255,255,.04)">
+                <div style="width:34px;height:34px;border-radius:8px;background:rgba(240,90,40,.2);display:flex;align-items:center;justify-content:center;color:#F05A28;font-size:14px;font-weight:700">{{ w.n }}</div>
+                <p style="margin:16px 0 0;font-size:14.5px;line-height:1.7;color:#e3ecf7">{{ w.t }}</p>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:38px">
+          <a href="#/home" style="background:#F05A28;color:#fff;padding:13px 26px;border-radius:5px;font-weight:600;font-size:14.5px" style-hover="background:#d9491a">Back to Home</a>
+          <a href="#/services" style="border:1.5px solid rgba(255,255,255,.65);color:#fff;padding:13px 26px;border-radius:5px;font-weight:600;font-size:14.5px" style-hover="background:rgba(255,255,255,.12)">View Services</a>
+          <a href="tel:0840356925" style="display:inline-flex;align-items:center;gap:9px;background:#fff;color:#0B2C55;padding:13px 24px;border-radius:5px;font-weight:600;font-size:14.5px" style-hover="background:#e9eff7">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#F05A28" stroke-width="2.4"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"></path></svg>
+            Call Gauvis
+          </a>
+        </div>
+      </div>
+    </div>
+    </sc-if>
+
+    <sc-if value="{{ isLegal }}">
+    <div>
+      <div style="background:#0A2A52">
+        <div style="max-width:1200px;margin:0 auto;padding:54px 28px 58px">
+          <div style="color:#F05A28;font-size:12px;font-weight:700;letter-spacing:2.4px;text-transform:uppercase;margin-bottom:16px">Legal</div>
+          <h1 style="margin:0;font-size:38px;line-height:1.14;font-weight:700;color:#fff;letter-spacing:-.9px">{{ legalTitle }}</h1>
+          <p style="margin:18px 0 0;font-size:14.5px;line-height:1.72;color:#c7d6e8;max-width:560px">{{ legalIntro }}</p>
+        </div>
+      </div>
+      <section style="background:#fff;padding:54px 0 66px">
+        <div style="max-width:820px;margin:0 auto;padding:0 28px;display:flex;flex-direction:column;gap:32px">
+          <sc-for list="{{ legalSections }}" as="sec" hint-placeholder-count="11">
+            <div>
+              <h2 style="margin:0;font-size:19px;font-weight:700;color:#0B2C55;letter-spacing:-.2px">{{ sec.t }}</h2>
+              <div style="width:34px;height:2px;background:#F05A28;margin:12px 0 14px"></div>
+              <p style="margin:0;font-size:14.5px;line-height:1.8;color:#5a6b80;text-wrap:pretty">{{ sec.d }}</p>
+            </div>
+          </sc-for>
+          <div style="border:1px solid #e2e8f0;border-radius:8px;background:#F6F8FB;padding:24px 26px">
+            <div style="font-size:15px;font-weight:700;color:#0B2C55">Questions about this page?</div>
+            <p style="margin:9px 0 0;font-size:14px;line-height:1.7;color:#5a6b80">Contact Gauvis Technology Holdings, Soweto, South Africa — 084 035 6925 or thabash.mampa@gmail.com.</p>
+            <a href="#/contact" style="display:inline-flex;align-items:center;gap:8px;font-size:13.5px;font-weight:600;color:#F05A28;margin-top:14px">Contact Gauvis <span>&#8594;</span></a>
+          </div>
+        </div>
+      </section>
+    </div>
+    </sc-if>
+
+    <sc-if value="{{ is404 }}">
+    <div style="background:#0A2A52;position:relative;overflow:hidden">
+      <div style="max-width:760px;margin:0 auto;padding:86px 28px 94px;text-align:center;position:relative">
+        <div style="display:flex;align-items:center;justify-content:center;gap:0;margin-bottom:34px">
+          <span style="width:13px;height:13px;border-radius:50%;background:#F05A28;display:block;flex:none"></span>
+          <span style="width:64px;height:2px;background:rgba(255,255,255,.35);display:block"></span>
+          <span style="width:9px;height:9px;border-radius:50%;border:2px solid rgba(255,255,255,.4);display:block;flex:none"></span>
+          <span style="width:26px;height:2px;background:rgba(255,255,255,.3);display:block"></span>
+          <span style="width:34px;height:2px;background:repeating-linear-gradient(90deg,#F05A28 0 5px,transparent 5px 11px);display:block;animation:gvtBreak 1.7s ease-in-out infinite"></span>
+          <span style="width:26px;height:2px;background:rgba(255,255,255,.12);display:block"></span>
+          <span style="width:9px;height:9px;border-radius:50%;border:2px solid rgba(255,255,255,.18);display:block;flex:none"></span>
+          <span style="width:64px;height:2px;background:rgba(255,255,255,.12);display:block"></span>
+          <span style="width:13px;height:13px;border-radius:50%;background:rgba(255,255,255,.18);display:block;flex:none"></span>
+        </div>
+        <div style="font-size:88px;line-height:1;font-weight:800;color:#fff;letter-spacing:-3px">404</div>
+        <h1 style="margin:18px 0 0;font-size:32px;line-height:1.18;font-weight:700;color:#F05A28;letter-spacing:-.6px">Connection Interrupted.</h1>
+        <p style="margin:18px auto 0;font-size:15px;line-height:1.76;color:#c7d6e8;max-width:460px;text-wrap:pretty">The page you&#8217;re looking for could not be found. It may have moved, or the address may be slightly off.</p>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:34px">
+          <a href="#/home" style="background:#F05A28;color:#fff;padding:13px 26px;border-radius:5px;font-weight:600;font-size:14.5px" style-hover="background:#d9491a">Back Home</a>
+          <a href="#/services" style="border:1.5px solid rgba(255,255,255,.65);color:#fff;padding:13px 26px;border-radius:5px;font-weight:600;font-size:14.5px" style-hover="background:rgba(255,255,255,.12)">Explore Services</a>
+          <a href="#/contact" style="display:inline-flex;align-items:center;background:#fff;color:#0B2C55;padding:13px 24px;border-radius:5px;font-weight:600;font-size:14.5px" style-hover="background:#e9eff7">Contact Gauvis</a>
+        </div>
+      </div>
+    </div>
+    </sc-if>
+
+    <div data-pages-end="1"></div>
+  </main>
+
+  <footer style="background:#071E3A;padding:54px 0 0">
+    <div style="max-width:1200px;margin:0 auto;padding:0 28px;display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:40px">
+      <div>
+        <a href="#/home" style="display:block"><img src="./gvt-logo.png" alt="Gauvis Tech" style="height:46px;width:auto;display:block;margin-bottom:18px;filter:brightness(1.22)" /></a>
+        <p style="margin:0;font-size:13px;line-height:1.75;color:#93a8c2;max-width:250px">Gauvis Technology Holdings is an IT solutions provider specialising in hardware, software, network infrastructure and support services.</p>
+        <p style="margin:14px 0 0;font-size:12.5px;line-height:1.7;color:#7f96b2">Founded 2026 &#183; Soweto, South Africa</p>
+      </div>
+
+      <div>
+        <div style="color:#fff;font-size:14.5px;font-weight:700;margin-bottom:18px">Quick Links</div>
+        <div style="display:flex;flex-direction:column;gap:10px;font-size:13px">
+          <a href="#/home" style="color:#93a8c2" style-hover="color:#F05A28">Home</a>
+          <a href="#/about" style="color:#93a8c2" style-hover="color:#F05A28">About</a>
+          <a href="#/services" style="color:#93a8c2" style-hover="color:#F05A28">Services</a>
+          <a href="#/solutions" style="color:#93a8c2" style-hover="color:#F05A28">Solutions</a>
+          <a href="#/case-studies" style="color:#93a8c2" style-hover="color:#F05A28">Case Studies</a>
+          <a href="#/faq" style="color:#93a8c2" style-hover="color:#F05A28">FAQ</a>
+          <a href="#/contact" style="color:#93a8c2" style-hover="color:#F05A28">Contact</a>
+          <a href="#/request-a-quote" style="color:#93a8c2" style-hover="color:#F05A28">Request a Quote</a>
+        </div>
+      </div>
+
+      <div>
+        <div style="color:#fff;font-size:14.5px;font-weight:700;margin-bottom:18px">Services</div>
+        <div style="display:flex;flex-direction:column;gap:10px;font-size:13px">
+          <sc-for list="{{ services }}" as="s" hint-placeholder-count="9">
+            <a href="{{ s.href }}" style="color:#93a8c2" style-hover="color:#F05A28">{{ s.name }}</a>
+          </sc-for>
+        </div>
+      </div>
+
+      <div>
+        <div style="color:#fff;font-size:14.5px;font-weight:700;margin-bottom:18px">Contact</div>
+        <div style="display:flex;flex-direction:column;gap:13px;font-size:13px;color:#93a8c2">
+          <div style="display:flex;align-items:flex-start;gap:10px">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F05A28" stroke-width="2.4" style="margin-top:3px;flex:none"><path d="M12 22s7-6.2 7-12A7 7 0 0 0 5 10c0 5.8 7 12 7 12z"></path><circle cx="12" cy="10" r="2.4"></circle></svg>
+            <span>Soweto, South Africa</span>
+          </div>
+          <a href="tel:0840356925" style="display:flex;align-items:flex-start;gap:10px;color:#93a8c2" style-hover="color:#F05A28">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F05A28" stroke-width="2.4" style="margin-top:3px;flex:none"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"></path></svg>
+            <span>084 035 6925 &#183; Thabang</span>
+          </a>
+          <a href="tel:0643670274" style="display:flex;align-items:flex-start;gap:10px;color:#93a8c2" style-hover="color:#F05A28">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F05A28" stroke-width="2.4" style="margin-top:3px;flex:none"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"></path></svg>
+            <span>064 367 0274 &#183; Pontsho</span>
+          </a>
+          <a href="mailto:thabash.mampa@gmail.com" style="display:flex;align-items:flex-start;gap:10px;color:#93a8c2" style-hover="color:#F05A28">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F05A28" stroke-width="2.4" style="margin-top:3px;flex:none"><rect x="2.5" y="4.5" width="19" height="15" rx="2"></rect><path d="m3 6 9 6.5L21 6"></path></svg>
+            <span>thabash.mampa@gmail.com</span>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div style="border-top:1px solid rgba(255,255,255,.09);margin-top:44px">
+      <div style="max-width:1200px;margin:0 auto;padding:18px 28px;display:flex;align-items:center;justify-content:space-between;gap:14px 20px;flex-wrap:wrap;font-size:12px;color:#7f96b2">
+        <span>&#169; 2026 Gauvis Technology Holdings. All rights reserved.</span>
+        <div style="display:flex;gap:22px">
+          <a href="#/privacy-policy" style="color:#7f96b2" style-hover="color:#F05A28">Privacy Policy</a>
+          <a href="#/terms-and-conditions" style="color:#7f96b2" style-hover="color:#F05A28">Terms &amp; Conditions</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <sc-if value="{{ isMobileNav }}">
+    <div>
+      <div style="height:64px"></div>
+      <div style="position:fixed;left:0;right:0;bottom:0;z-index:80;background:#071E3A;border-top:1px solid rgba(255,255,255,.12);padding:10px 14px;display:flex;gap:10px;box-shadow:0 -6px 20px rgba(0,0,0,.25)">
+        <a href="tel:0840356925" style="flex:1;display:flex;align-items:center;justify-content:center;gap:8px;min-height:46px;border:1.5px solid rgba(255,255,255,.4);color:#fff;border-radius:6px;font-weight:600;font-size:14.5px">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#F05A28" stroke-width="2.4"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"></path></svg>
+          Call
+        </a>
+        <a href="#/request-a-quote" style="flex:1.4;display:flex;align-items:center;justify-content:center;min-height:46px;background:#F05A28;color:#fff;border-radius:6px;font-weight:700;font-size:14.5px">Request a Quote</a>
+      </div>
+    </div>
+  </sc-if>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{}">
+class Component extends DCLogic {
+  ROUTES = ['home','about','services','solutions','case-studies','faq','contact','request-a-quote','thank-you','quote-thank-you','privacy-policy','terms-and-conditions'];
+
+  SERVICES = [
+    {
+      slug: 'hardware-oem', name: 'Hardware OEM', icon: './img/ic-hardware.png', img: './img/svc-hardware.png',
+      short: 'Supply, installation and lifecycle support for business hardware.',
+      h1a: 'Business Hardware.', h1b: 'Ready When You Are.',
+      sub: 'Reliable hardware supply, deployment and support for the devices your business depends on.',
+      lead: 'The right hardware, configured properly and supported over its whole life, removes a surprising amount of day-to-day friction for a business.',
+      provide: [{t:'Desktops'},{t:'Laptops'},{t:'Servers'},{t:'Monitors'},{t:'Peripherals'},{t:'Business hardware'}],
+      caps: [{t:'Hardware sourcing'},{t:'Installation'},{t:'Configuration'},{t:'Warranty management'},{t:'Lifecycle management'},{t:'Asset tracking'},{t:'Upgrades'}],
+      benefits: [
+        {t:'Fewer interruptions', d:'Hardware that is specified and configured for the work it has to do.'},
+        {t:'Clear ownership', d:'Asset tracking and warranty management keep records in one place.'},
+        {t:'Planned replacement', d:'Lifecycle management helps you replace equipment before it fails.'}
+      ],
+      process: [{n:'01',t:'Assess',d:'Understand what the role and the environment actually require.'},{n:'02',t:'Source',d:'Identify suitable hardware and confirm it with you.'},{n:'03',t:'Configure',d:'Set up, image and prepare devices before they reach a desk.'},{n:'04',t:'Deploy',d:'Install on site with minimal disruption to the team.'},{n:'05',t:'Support',d:'Warranty handling, upgrades and ongoing assistance.'}],
+      faq: [{q:'Can you supply business laptops and desktops?',a:'Yes. We source business hardware including laptops, desktops, servers, monitors and peripherals based on what the role requires.'},{q:'Do you configure devices before delivery?',a:'We can configure and prepare devices before deployment so they are ready for the user when they arrive.'},{q:'Can you help with upgrades to existing equipment?',a:'Yes. Where hardware can sensibly be upgraded rather than replaced, we will tell you.'}],
+      cta: 'Request Hardware Quote', related: ['software-solutions','pc-support','it-support']
+    },
+    {
+      slug: 'software-solutions', name: 'Software Solutions', icon: './img/ic-appwindow.png', img: './img/svc-software.png',
+      short: 'Software deployment, integration, updates and user support.',
+      h1a: 'Software That Works', h1b: 'With Your Business.',
+      sub: 'Deployment, integration and support for the applications your team relies on every day.',
+      lead: 'Software only pays for itself when it is deployed properly, kept current, and the people using it know what it can do.',
+      provide: [{t:'Microsoft 365'},{t:'ERP'},{t:'CRM'},{t:'Enterprise applications'},{t:'Custom software'},{t:'Line-of-business tools'}],
+      caps: [{t:'Software deployment'},{t:'Patch management'},{t:'Updates'},{t:'User training'},{t:'System integration'},{t:'Licensing assistance'}],
+      benefits: [
+        {t:'Consistent environments', d:'The same build and the same versions across the team.'},
+        {t:'Fewer support tickets', d:'Patching and updates handled before they become problems.'},
+        {t:'Confident users', d:'Training that covers the parts of the tool people actually use.'}
+      ],
+      process: [{n:'01',t:'Understand',d:'Establish what the business needs the software to do.'},{n:'02',t:'Configure',d:'Set the application up around those requirements.'},{n:'03',t:'Deploy',d:'Roll it out to users in a controlled way.'},{n:'04',t:'Train',d:'Walk the team through it so adoption actually happens.'},{n:'05',t:'Support',d:'Updates, patching and ongoing assistance.'}],
+      faq: [{q:'Do you work with existing software we already own?',a:'Yes. In most cases we work with the applications a business already has before suggesting anything new.'},{q:'Can you help with system integration?',a:'We can assist with integrating business applications so information moves between them more sensibly.'},{q:'Do you provide user training?',a:'Yes. Training is part of deployment rather than an afterthought.'}],
+      cta: 'Discuss a Software Requirement', related: ['microsoft-365','website-development','it-support']
+    },
+    {
+      slug: 'network-services', name: 'Network Services', icon: './img/ic-networking.png', img: './img/svc-network.png',
+      short: 'LAN, WAN, Wi-Fi, VPN, firewall and network infrastructure.',
+      h1a: 'Infrastructure Built', h1b: 'To Keep You Connected.',
+      sub: 'Network design, deployment and support for businesses that cannot afford to drop off.',
+      lead: 'Most businesses only notice the network when it stops working. The aim is a network you do not have to think about.',
+      provide: [{t:'LAN'},{t:'WAN'},{t:'Wi-Fi'},{t:'Firewall'},{t:'VPN'},{t:'Switching and routing'}],
+      caps: [{t:'Network optimisation'},{t:'Infrastructure deployment'},{t:'Performance monitoring'},{t:'Structured cabling support'},{t:'Router and switch configuration'},{t:'Remote access setup'}],
+      benefits: [
+        {t:'Predictable performance', d:'Infrastructure sized for the number of users and devices on it.'},
+        {t:'Coverage where it is needed', d:'Wi-Fi planned around the building rather than guessed at.'},
+        {t:'Remote access', d:'VPN and remote access configured for people working off site.'}
+      ],
+      process: [{n:'01',t:'Assess',d:'Survey the site and measure how the current network behaves.'},{n:'02',t:'Design',d:'Plan the topology, hardware and coverage.'},{n:'03',t:'Implement',d:'Install and configure the infrastructure.'},{n:'04',t:'Test',d:'Verify throughput, coverage and failover behaviour.'},{n:'05',t:'Support',d:'Monitoring and ongoing adjustment as the business changes.'}],
+      faq: [{q:'Can you install a network for a new office?',a:'Yes. We can assess the site, design the network and handle installation and configuration.'},{q:'Do you troubleshoot Wi-Fi problems?',a:'Yes. Poor coverage, dropouts and slow performance are common and usually diagnosable.'},{q:'Do you configure VPNs and firewalls?',a:'We configure VPN access and firewall rules as part of network deployment and support.'}],
+      cta: 'Plan Your Network', related: ['cctv-security','pc-support','hardware-oem']
+    },
+    {
+      slug: 'pc-support', name: 'PC & End User Support', icon: './img/ic-itsupport.png', img: './img/svc-pc-support.png',
+      short: 'Remote and onsite troubleshooting, maintenance and user support.',
+      h1a: 'Reliable Support', h1b: 'For Every User.',
+      sub: 'Practical help for the people doing the work, remotely or on site.',
+      lead: 'When technology gets in the way, we help get business moving again.',
+      provide: [{t:'Remote troubleshooting'},{t:'Onsite troubleshooting'},{t:'Preventive maintenance'},{t:'PC upgrades'},{t:'Helpdesk'},{t:'Remote Desktop'}],
+      caps: [{t:'ITIL-based support approach'},{t:'Incident logging'},{t:'User account assistance'},{t:'Software installation'},{t:'Device health checks'},{t:'Onboarding and offboarding'}],
+      benefits: [
+        {t:'Less downtime', d:'Most issues can be resolved remotely without waiting for a site visit.'},
+        {t:'A record of what happened', d:'Structured logging means recurring problems get spotted.'},
+        {t:'Fewer repeat faults', d:'Preventive maintenance rather than only reacting to breakages.'}
+      ],
+      process: [{n:'01',t:'Log',d:'The user reports the issue and it is captured properly.'},{n:'02',t:'Diagnose',d:'We connect remotely or attend site to establish the cause.'},{n:'03',t:'Resolve',d:'Fix the problem and confirm with the user that it is working.'},{n:'04',t:'Prevent',d:'Address the underlying cause so it does not recur.'}],
+      faq: [{q:'Do you provide onsite IT support?',a:'Yes, where an issue cannot be resolved remotely we can attend site.'},{q:'Do you provide remote support?',a:'Yes. Remote support is usually the fastest way to resolve common issues.'},{q:'What kind of computer problems can you help with?',a:'Typical issues include slow machines, software faults, printing problems, email and account access, and hardware failures.'}],
+      cta: 'Request IT Support', related: ['it-support','microsoft-365','hardware-oem']
+    },
+    {
+      slug: 'microsoft-365', name: 'Microsoft 365 Support', icon: './img/ic-cloud.png', img: './img/svc-m365.png',
+      short: 'Microsoft 365 setup, management, migration and troubleshooting.',
+      h1a: 'Get More From', h1b: 'Microsoft 365.',
+      sub: 'Setup, migration, day-to-day management and user support for Microsoft 365.',
+      lead: 'Microsoft 365 support and management — configured around how your business actually works.',
+      provide: [{t:'Microsoft 365 setup'},{t:'User management'},{t:'Email configuration'},{t:'Microsoft Teams'},{t:'SharePoint'},{t:'OneDrive'}],
+      caps: [{t:'Security configuration'},{t:'Migration support'},{t:'Troubleshooting'},{t:'User training'},{t:'Licence administration'},{t:'Mailbox and group management'}],
+      benefits: [
+        {t:'A clean tenant', d:'Users, licences and groups set up in a way you can still understand a year later.'},
+        {t:'Email that behaves', d:'Domains, mailboxes and routing configured correctly from the start.'},
+        {t:'Files in the right place', d:'SharePoint and OneDrive structured so people can find things.'}
+      ],
+      process: [{n:'01',t:'Setup',d:'Tenant, domains, users and licences configured.'},{n:'02',t:'Migrate',d:'Move mail and files across with minimal disruption.'},{n:'03',t:'Manage',d:'Ongoing administration of users, groups and permissions.'},{n:'04',t:'Support',d:'Troubleshooting and user assistance as needed.'}],
+      faq: [{q:'Do you support Microsoft 365?',a:'Yes. We provide Microsoft 365 support and management. We are not a certified Microsoft partner and do not claim to be.'},{q:'Can you help configure business email?',a:'Yes, including domain setup, mailboxes, aliases and mail flow.'},{q:'Can you assist with Microsoft Teams?',a:'We can help with Teams setup, channels, permissions and general user support.'}],
+      cta: 'Get Microsoft 365 Support', related: ['software-solutions','pc-support','it-support']
+    },
+    {
+      slug: 'cctv-security', name: 'CCTV & Security', icon: './img/ic-security.png', img: './img/svc-cctv.png',
+      short: 'CCTV installation, configuration, remote viewing and maintenance.',
+      h1a: 'Security You Can See.', h1b: 'Control You Can Trust.',
+      sub: 'CCTV installation and configuration for business premises, with remote viewing.',
+      lead: 'A camera system is only useful if it is pointed at the right things and someone can actually access the footage.',
+      provide: [{t:'CCTV installation'},{t:'Camera positioning'},{t:'NVR/DVR setup'},{t:'Remote viewing'},{t:'System configuration'},{t:'Maintenance'}],
+      caps: [{t:'Site assessment'},{t:'Cabling and mounting'},{t:'Recording configuration'},{t:'Mobile and remote access'},{t:'Storage planning'},{t:'System health checks'}],
+      benefits: [
+        {t:'Coverage that makes sense', d:'Cameras positioned around entrances, stock and blind spots.'},
+        {t:'Footage you can reach', d:'Remote viewing configured so you are not tied to one screen.'},
+        {t:'Maintained systems', d:'Periodic checks so you find out about a fault before you need the footage.'}
+      ],
+      process: [{n:'01',t:'Assess',d:'Walk the site and agree what needs to be covered.'},{n:'02',t:'Install',d:'Mount cameras and run cabling.'},{n:'03',t:'Configure',d:'Set up recording, retention and remote access.'},{n:'04',t:'Maintain',d:'Ongoing checks and support.'}],
+      faq: [{q:'Do you install CCTV?',a:'Yes. We handle site assessment, installation, configuration and maintenance.'},{q:'Can CCTV systems be accessed remotely?',a:'Yes. Remote viewing can be configured so authorised people can access the system off site.'},{q:'Will CCTV stop crime at my premises?',a:'We would not claim that. CCTV records and deters, but it is one part of a wider security approach.'}],
+      cta: 'Request a CCTV Assessment', related: ['network-services','it-support','hardware-oem']
+    },
+    {
+      slug: 'printer-services', name: 'Printer Services', icon: './img/ic-printer.png', img: './img/svc-printer.png',
+      short: 'Printer setup, network configuration, troubleshooting and maintenance.',
+      h1a: 'Keep Your Business', h1b: 'Printing.',
+      sub: 'Setup, network configuration and support for business printers and scanners.',
+      lead: 'Printing is the thing nobody thinks about until the invoices will not come out.',
+      provide: [{t:'Printer setup'},{t:'Network printer configuration'},{t:'Printer troubleshooting'},{t:'Maintenance'},{t:'Scanning configuration'},{t:'Driver management'}],
+      caps: [{t:'Shared printer deployment'},{t:'Scan-to-email and scan-to-folder'},{t:'Consumable guidance'},{t:'Fault diagnosis'},{t:'Queue and spooler issues'},{t:'Multi-site printing'}],
+      benefits: [
+        {t:'Printers on the network', d:'Configured once, available to everyone who needs them.'},
+        {t:'Scanning that works', d:'Scan-to-email and scan-to-folder set up properly.'},
+        {t:'Faster fixes', d:'Common print faults diagnosed rather than rebooted repeatedly.'}
+      ],
+      process: [{n:'01',t:'Identify',d:'Establish what is failing and where.'},{n:'02',t:'Configure',d:'Set up the device, drivers and network settings.'},{n:'03',t:'Test',d:'Confirm printing and scanning from the machines that need it.'},{n:'04',t:'Maintain',d:'Ongoing support and periodic checks.'}],
+      faq: [{q:'Can you set up a network printer for the whole office?',a:'Yes. We configure shared and network printers so everyone who needs access has it.'},{q:'Can you fix scanning to email?',a:'Scan-to-email and scan-to-folder are common requests and we can configure both.'},{q:'Do you support any printer brand?',a:'We work with common business printer brands. Tell us the model and we will confirm.'}],
+      cta: 'Get Printer Support', related: ['hardware-oem','pc-support','it-support']
+    },
+    {
+      slug: 'website-development', name: 'Website Development', icon: './img/ic-webdev.png', img: './img/svc-website.png',
+      short: 'Professional responsive websites and digital solutions for businesses.',
+      h1a: 'Websites Built', h1b: 'For Real Businesses.',
+      sub: 'Professional, responsive websites designed to help businesses establish a stronger digital presence.',
+      lead: 'A business website has one job: make it obvious what you do and easy to get hold of you.',
+      provide: [{t:'Business websites'},{t:'Responsive websites'},{t:'Website redesign'},{t:'Landing pages'},{t:'CMS solutions'},{t:'Social media integration'},{t:'Website maintenance'}],
+      caps: [{t:'Design and layout'},{t:'Content structure'},{t:'Mobile-first build'},{t:'Contact and enquiry forms'},{t:'Basic search visibility'},{t:'Ongoing updates'}],
+      benefits: [
+        {t:'Works on a phone', d:'Built mobile-first, because that is where most visitors arrive.'},
+        {t:'Easy to update', d:'A CMS where it makes sense, so you are not dependent on us for text changes.'},
+        {t:'Enquiries that arrive', d:'Forms that are tested and actually reach an inbox.'}
+      ],
+      process: [{n:'01',t:'Design',d:'Agree structure, look and the message the site has to carry.'},{n:'02',t:'Build',d:'Develop the site responsively across screen sizes.'},{n:'03',t:'Launch',d:'Deploy, connect the domain and test everything.'},{n:'04',t:'Grow',d:'Maintenance, updates and improvements over time.'}],
+      faq: [{q:'Can you build a website for my business?',a:'Yes. We build responsive business websites, from single landing pages to multi-page sites.'},{q:'Do you provide website maintenance?',a:'Yes, ongoing updates and maintenance can be arranged.'},{q:'Can I update the content myself?',a:'Where a CMS is appropriate we will set one up so you can edit content directly.'}],
+      cta: 'Start a Website Project', related: ['software-solutions','microsoft-365','it-support']
+    },
+    {
+      slug: 'it-support', name: 'IT Support', icon: './img/ic-support.png', img: './img/svc-itsupport.png',
+      short: 'Ongoing technology support for businesses and their users.',
+      h1a: 'Technology Problems?', h1b: 'We\u2019ve Got You Covered.',
+      sub: 'Ongoing support across hardware, software, networks and the people using them.',
+      lead: 'We come to you for all your IT needs — remotely first, on site when it matters.',
+      provide: [{t:'Remote support'},{t:'Onsite support'},{t:'Troubleshooting'},{t:'Preventative maintenance'},{t:'Hardware support'},{t:'Software support'},{t:'End-user support'}],
+      caps: [{t:'Business technology support'},{t:'Issue triage'},{t:'Scheduled maintenance'},{t:'Account and access assistance'},{t:'Vendor liaison'},{t:'Documentation'}],
+      benefits: [
+        {t:'One number to call', d:'Hardware, software and network issues handled by the same team.'},
+        {t:'Problems that stay fixed', d:'We look for the cause rather than only clearing the symptom.'},
+        {t:'Support that scales', d:'Cover grows with the business rather than being rebuilt each time.'}
+      ],
+      process: [{n:'01',t:'Problem',d:'Something stops working and gets reported.'},{n:'02',t:'Diagnosis',d:'We establish what is actually happening.'},{n:'03',t:'Resolution',d:'The issue is fixed and confirmed with the user.'},{n:'04',t:'Prevention',d:'Steps taken so the same thing does not come back.'}],
+      faq: [{q:'What IT services does Gauvis Technology provide?',a:'Hardware, software, networking, PC and end-user support, Microsoft 365, CCTV, printer services and website development.'},{q:'Do you work with small businesses?',a:'Yes. Much of what we do is sized for small and growing businesses.'},{q:'Do you provide services outside Soweto?',a:'We are based in Soweto and work with businesses across South Africa. Ask us about your location.'}],
+      cta: 'Request IT Support', related: ['pc-support','network-services','microsoft-365']
+    }
+  ];
+
+  SERVICE_OPTIONS = ['Hardware','Software','Networking','IT Support','Microsoft 365','CCTV','Printer Services','Website Development','Other'];
+
+  state = {
+    route: 'home', param: '', w: 1280, mega: false, mnav: false, nav: 0,
+    faqOpen: '', step: 1,
+    c: { name:'', company:'', email:'', phone:'', service:'', message:'' },
+    cErr: {}, cState: 'idle',
+    q: { name:'', company:'', email:'', phone:'', service:'', users:'', location:'', desc:'', budget:'', pref:'Email' },
+    qErr: {}, qState: 'idle',
+    done: { service:'', email:'' }
+  };
+
+  componentDidMount() {
+    this._hash = () => this.applyHash(false);
+    this._resize = () => this.setState({ w: window.innerWidth });
+    window.addEventListener('hashchange', this._hash);
+    window.addEventListener('resize', this._resize);
+    this.setState({ w: window.innerWidth });
+    this.applyHash(true);
+  }
+  componentWillUnmount() {
+    window.removeEventListener('hashchange', this._hash);
+    window.removeEventListener('resize', this._resize);
+  }
+
+  applyHash(first) {
+    const raw = (window.location.hash || '').replace(/^#\/?/, '').replace(/\/+$/, '');
+    let route = 'home', param = '';
+    if (raw) {
+      const p = raw.split('/');
+      if (p[0] === 'services' && p[1]) {
+        param = p[1];
+        route = this.SERVICES.some(s => s.slug === p[1]) ? 'service' : '404';
+      } else if (this.ROUTES.indexOf(p[0]) >= 0) {
+        route = p[0];
+      } else {
+        route = '404';
+      }
+    }
+    this.setState(s => ({ route, param, mega: false, mnav: false, nav: s.nav + 1, step: route === 'request-a-quote' ? 1 : s.step }));
+    if (!first) window.scrollTo(0, 0);
+  }
+
+  emailOk(v) { return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v.trim()); }
+  phoneOk(v) { return /^[0-9+()\s-]{9,}$/.test(v.trim()); }
+
+  setC(k, v) { this.setState(s => ({ c: Object.assign({}, s.c, { [k]: v }), cErr: Object.assign({}, s.cErr, { [k]: '' }) })); }
+  setQ(k, v) { this.setState(s => ({ q: Object.assign({}, s.q, { [k]: v }), qErr: Object.assign({}, s.qErr, { [k]: '' }) })); }
+
+  validateContact() {
+    const c = this.state.c, e = {};
+    if (!c.name.trim()) e.name = 'Please enter your full name.';
+    if (!c.email.trim()) e.email = 'Please enter your email address.';
+    else if (!this.emailOk(c.email)) e.email = 'Please enter a valid email address.';
+    if (c.phone.trim() && !this.phoneOk(c.phone)) e.phone = 'Please enter a valid phone number.';
+    if (!c.service) e.service = 'Please choose the service you need.';
+    if (!c.message.trim()) e.message = 'Please tell us how we can help.';
+    return e;
+  }
+
+  submitContact(ev) {
+    if (ev && ev.preventDefault) ev.preventDefault();
+    const e = this.validateContact();
+    if (Object.keys(e).length) { this.setState({ cErr: e }); return; }
+    this.setState({ cState: 'sending' });
+    setTimeout(() => {
+      this.setState(s => ({ cState: 'idle', done: { service: s.c.service, email: s.c.email } }));
+      window.location.hash = '#/thank-you';
+    }, 850);
+  }
+
+  validateStep(n) {
+    const q = this.state.q, e = {};
+    if (n === 1) {
+      if (!q.name.trim()) e.name = 'Please enter your full name.';
+      if (!q.email.trim()) e.email = 'Please enter your email address.';
+      else if (!this.emailOk(q.email)) e.email = 'Please enter a valid email address.';
+      if (!q.phone.trim()) e.phone = 'Please enter a contact number.';
+      else if (!this.phoneOk(q.phone)) e.phone = 'Please enter a valid phone number.';
+    }
+    if (n === 2 && !q.service) e.service = 'Please select the service you need.';
+    if (n === 3) {
+      if (!q.location.trim()) e.location = 'Please tell us where you are based.';
+      if (!q.desc.trim()) e.desc = 'Please describe what you need.';
+    }
+    return e;
+  }
+
+  nextStep() {
+    const e = this.validateStep(this.state.step);
+    if (Object.keys(e).length) { this.setState({ qErr: e }); return; }
+    this.setState(s => ({ step: Math.min(4, s.step + 1), qErr: {} }));
+    window.scrollTo(0, 0);
+  }
+  prevStep() { this.setState(s => ({ step: Math.max(1, s.step - 1), qErr: {} })); window.scrollTo(0, 0); }
+  gotoStep(n) { this.setState({ step: n, qErr: {} }); window.scrollTo(0, 0); }
+
+  submitQuote(ev) {
+    if (ev && ev.preventDefault) ev.preventDefault();
+    this.setState({ qState: 'sending' });
+    setTimeout(() => {
+      this.setState(s => ({ qState: 'idle', done: { service: s.q.service, email: s.q.email } }));
+      window.location.hash = '#/quote-thank-you';
+    }, 850);
+  }
+
+  toggleFaq(key) { this.setState(s => ({ faqOpen: s.faqOpen === key ? '' : key })); }
+
+  faqGroups() {
+    return [
+      { title: 'General', items: [
+        { q: 'What IT services does Gauvis Technology provide?', a: 'Hardware supply and support, software solutions, network services, PC and end-user support, Microsoft 365 support, CCTV and security, printer services, website development and ongoing IT support.' },
+        { q: 'Where is Gauvis Technology based?', a: 'We are based in Soweto, South Africa.' },
+        { q: 'Do you work with small businesses?', a: 'Yes. A large part of what we do is sized for small and growing businesses.' },
+        { q: 'Do you provide services outside Soweto?', a: 'We work with businesses across South Africa. Tell us where you are and we will confirm what we can cover.' }
+      ]},
+      { title: 'IT Support', items: [
+        { q: 'Do you provide onsite IT support?', a: 'Yes. Where an issue cannot be resolved remotely we can attend site.' },
+        { q: 'Do you provide remote support?', a: 'Yes. Remote support is usually the quickest route to a fix for common issues.' },
+        { q: 'What type of computer problems can you help with?', a: 'Slow or failing machines, software faults, printing issues, email and account access problems, and hardware failures.' }
+      ]},
+      { title: 'Hardware', items: [
+        { q: 'Can you supply business laptops?', a: 'Yes. We source business laptops based on what the role requires.' },
+        { q: 'Can you supply desktops and servers?', a: 'Yes, along with monitors and peripherals.' },
+        { q: 'Can you help with hardware upgrades?', a: 'Yes. Where an upgrade makes more sense than a replacement, we will say so.' }
+      ]},
+      { title: 'Networking', items: [
+        { q: 'Can you install business networks?', a: 'Yes. We assess the site, design the network and handle installation and configuration.' },
+        { q: 'Do you provide Wi-Fi troubleshooting?', a: 'Yes. Coverage gaps, dropouts and slow performance are common and usually diagnosable.' },
+        { q: 'Do you configure VPNs and firewalls?', a: 'We configure VPN access and firewall rules as part of network deployment and support.' }
+      ]},
+      { title: 'Microsoft 365', items: [
+        { q: 'Do you support Microsoft 365?', a: 'Yes, we provide Microsoft 365 setup, management, migration and troubleshooting. We are not a certified Microsoft partner and do not claim to be.' },
+        { q: 'Can you help configure business email?', a: 'Yes, including domains, mailboxes, aliases and mail flow.' },
+        { q: 'Can you assist with Microsoft Teams?', a: 'Yes, including setup, channels, permissions and general user support.' }
+      ]},
+      { title: 'Security', items: [
+        { q: 'Do you install CCTV?', a: 'Yes. We handle site assessment, camera positioning, installation, configuration and maintenance.' },
+        { q: 'Can CCTV systems be accessed remotely?', a: 'Yes. Remote viewing can be configured so authorised people can access the system off site.' }
+      ]},
+      { title: 'Website Development', items: [
+        { q: 'Can you build a website for my business?', a: 'Yes, from a single landing page through to a multi-page responsive business website.' },
+        { q: 'Do you provide website maintenance?', a: 'Yes, ongoing updates and maintenance can be arranged.' }
+      ]}
+    ];
+  }
+
+  iconEl(src, h, dim) {
+    if (!src) return null;
+    const style = { height: h + 'px', width: 'auto', display: 'block', flex: 'none' };
+    if (dim) style.filter = 'brightness(.55) saturate(1.3)';
+    return React.createElement('img', { src: src, alt: '', style: style });
+  }
+
+  renderVals() {
+    const st = this.state;
+    const r = st.route;
+    const bySlug = {};
+    this.SERVICES.forEach(s => { bySlug[s.slug] = s; });
+
+    const services = this.SERVICES.map(s => Object.assign({}, s, {
+      href: '#/services/' + s.slug,
+      iconEl28: this.iconEl(s.icon, 28, false),
+      iconEl24: this.iconEl(s.icon, 24, false)
+    }));
+    const svcRaw = r === 'service' ? bySlug[st.param] : null;
+
+    const decorateFaq = (items, prefix) => (items || []).map((it, i) => {
+      const open = st.faqOpen === (prefix + i);
+      return {
+        q: it.q, a: it.a, key: prefix + i, open,
+        sign: open ? '\u2212' : '+',
+        headBg: open ? '#F6F8FB' : '#fff',
+        iconBg: open ? '#F05A28' : '#F2F5F9',
+        iconFg: open ? '#fff' : '#0B2C55',
+        toggle: () => this.toggleFaq(prefix + i)
+      };
+    });
+
+    const svc = svcRaw ? Object.assign({}, svcRaw, {
+      href: '#/services/' + svcRaw.slug,
+      heroSlot: 'gvt-svchero-' + svcRaw.slug,
+      iconEl: this.iconEl(svcRaw.icon, 44, false),
+      faq: decorateFaq(svcRaw.faq, 's-' + svcRaw.slug + '-'),
+      relatedList: svcRaw.related.map(sl => Object.assign({}, bySlug[sl], {
+        href: '#/services/' + sl,
+        iconEl: this.iconEl(bySlug[sl].icon, 38, true)
+      }))
+    }) : null;
+
+    const faqGroups = this.faqGroups().map((g, gi) => ({
+      title: g.title,
+      items: decorateFaq(g.items, 'g' + gi + '-')
+    }));
+
+    const q = st.q;
+    const summary = [
+      { k: 'Full name', v: q.name || '—' },
+      { k: 'Company', v: q.company || '—' },
+      { k: 'Email', v: q.email || '—' },
+      { k: 'Phone', v: q.phone || '—' },
+      { k: 'Service required', v: q.service || '—' },
+      { k: 'Number of users', v: q.users || '—' },
+      { k: 'Location', v: q.location || '—' },
+      { k: 'Budget range', v: q.budget || '—' },
+      { k: 'Preferred contact', v: q.pref || '—' },
+      { k: 'Description', v: q.desc || '—' }
+    ];
+
+    return {
+      services,
+      serviceOptions: this.SERVICE_OPTIONS.map(o => ({ v: o })),
+      svc,
+      faqGroups,
+      fadeAnim: (st.nav % 2 === 0 ? 'gvtFadeA' : 'gvtFadeB') + ' .32s ease',
+
+      isDesktopNav: st.w >= 1024,
+      isMobileNav: st.w < 1024,
+      mnavOpen: st.w < 1024 && st.mnav,
+      mega: st.mega,
+      mnav: st.mnav,
+      openMega: () => this.setState({ mega: true }),
+      closeMega: () => this.setState({ mega: false }),
+      toggleMnav: () => this.setState(s => ({ mnav: !s.mnav })),
+      closeMnav: () => this.setState({ mnav: false }),
+
+      navHome: r === 'home', navAbout: r === 'about',
+      navServices: r === 'services' || r === 'service',
+      navSolutions: r === 'solutions', navCases: r === 'case-studies',
+      navFaq: r === 'faq', navContact: r === 'contact',
+
+      isHome: r === 'home', isAbout: r === 'about', isServices: r === 'services',
+      isService: r === 'service', isSolutions: r === 'solutions',
+      isCases: r === 'case-studies', isFaq: r === 'faq', isContact: r === 'contact',
+      isQuote: r === 'request-a-quote', isThanks: r === 'thank-you',
+      isQuoteThanks: r === 'quote-thank-you', isPrivacy: r === 'privacy-policy',
+      isTerms: r === 'terms-and-conditions', is404: r === '404',
+
+      homeServices: [
+        { id:'gvt-s1', name:'Hardware Support', sub:'Repairs & Maintenance', img:'./img/svc-hardware.png', ph:'Desktop + repair tools', href:'#/services/hardware-oem' },
+        { id:'gvt-s2', name:'Office 365 Support', sub:'Microsoft 365 Management', img:'./img/svc-m365.png', ph:'Microsoft 365 apps', href:'#/services/microsoft-365' },
+        { id:'gvt-s3', name:'Software Solutions', sub:'Development & Testing', img:'./img/svc-software.png', ph:'Code on a laptop', href:'#/services/software-solutions' },
+        { id:'gvt-s4', name:'Printer Services', sub:'Printer Setup & Repair', img:'./img/svc-printer.png', ph:'Office printer', href:'#/services/printer-services' },
+        { id:'gvt-s5', name:'CCTV Installation', sub:'Security Systems', img:'./img/svc-cctv.png', ph:'CCTV camera', href:'#/services/cctv-security' },
+        { id:'gvt-s6', name:'Website Development', sub:'Web & Social Media', img:'./img/svc-website.png', ph:'Website on a screen', href:'#/services/website-development' }
+      ],
+      strip: [
+        { name:'Hardware', icon:'./img/ic-hardware.png', href:'#/services/hardware-oem' },
+        { name:'Software', icon:'./img/ic-software.png', href:'#/services/software-solutions' },
+        { name:'Networking', icon:'./img/ic-networking.png', href:'#/services/network-services' },
+        { name:'IT Support', icon:'./img/ic-itsupport.png', href:'#/services/pc-support' },
+        { name:'Security', icon:'./img/ic-security.png', href:'#/services/cctv-security' },
+        { name:'Web Development', icon:'./img/ic-webdev.png', href:'#/services/website-development' }
+      ].map(t => Object.assign({}, t, { iconEl: this.iconEl(t.icon, 40, false) })),
+      servicesIndexed: this.SERVICES.map((s, i) => Object.assign({}, s, {
+        href: '#/services/' + s.slug,
+        n: 'Service 0' + (i + 1),
+        slotId: 'gvt-hub-' + s.slug,
+        iconEl: this.iconEl(s.icon, 40, true)
+      })),
+      solutions: [
+        { title:'For small businesses', problem:'You need technology that works without a full IT department behind it.', answer:'Reliable technology without unnecessary complexity — the right hardware, properly set up, with support you can actually reach.', links:[bySlug['hardware-oem'],bySlug['pc-support'],bySlug['it-support']] },
+        { title:'For growing businesses', problem:'The team is expanding faster than the systems that were set up for it.', answer:'Infrastructure that can scale as your team grows, so adding people does not mean rebuilding everything each time.', links:[bySlug['network-services'],bySlug['hardware-oem'],bySlug['microsoft-365']] },
+        { title:'For businesses with IT issues', problem:'The same problems keep coming back and nobody has time to get to the bottom of them.', answer:'Practical troubleshooting and support — remote first, on site when needed, with attention to why it keeps recurring.', links:[bySlug['it-support'],bySlug['pc-support'],bySlug['printer-services']] },
+        { title:'For businesses moving to cloud', problem:'You want email and files off the server in the cupboard, without breaking how people work.', answer:'Microsoft 365 and cloud-related support, including migration, configuration and helping users through the change.', links:[bySlug['microsoft-365'],bySlug['software-solutions'],bySlug['it-support']] },
+        { title:'For businesses needing better security', problem:'Premises and infrastructure need closer attention than they currently get.', answer:'CCTV, network and infrastructure solutions — cameras where they matter, and networks configured deliberately.', links:[bySlug['cctv-security'],bySlug['network-services'],bySlug['it-support']] },
+        { title:'For businesses needing a stronger digital presence', problem:'Customers cannot find you, or what they find does not represent the business.', answer:'Website development and digital solutions — responsive sites that make it clear what you do and easy to get hold of you.', links:[bySlug['website-development'],bySlug['software-solutions'],bySlug['microsoft-365']] }
+      ].map(s => Object.assign({}, s, {
+        links: s.links.map(l => ({ name: l.name, href: '#/services/' + l.slug, iconEl: this.iconEl(l.icon, 20, true) }))
+      })),
+      cases: [
+        { n:'Project 01', title:'Business Hardware Deployment', slotId:'gvt-case-1', img:'./img/svc-hardware.png',
+          challenge:'A business needed a coordinated hardware rollout.',
+          solution:'Hardware sourcing, configuration, deployment and support.',
+          outcome:'Improved operational readiness.',
+          href:'#/services/hardware-oem', linkLabel:'About Hardware OEM' },
+        { n:'Project 02', title:'Network Infrastructure Improvement', slotId:'gvt-case-2', img:'./img/svc-network.png',
+          challenge:'Unreliable network performance.',
+          solution:'Network assessment and infrastructure improvements.',
+          outcome:'Improved network reliability.',
+          href:'#/services/network-services', linkLabel:'About Network Services' },
+        { n:'Project 03', title:'End-User IT Support', slotId:'gvt-case-3', img:'./img/svc-pc-support.png',
+          challenge:'Recurring technology issues affecting users.',
+          solution:'Structured support and preventative maintenance.',
+          outcome:'Improved user productivity.',
+          href:'#/services/pc-support', linkLabel:'About PC & End User Support' }
+      ],
+      approach: [
+        { n:'01', t:'Understand', d:'We start by learning how the business works and where technology is getting in the way.' },
+        { n:'02', t:'Plan', d:'We propose something proportionate — the right solution, not the largest one.' },
+        { n:'03', t:'Implement', d:'Deployment and configuration handled with as little disruption as possible.' },
+        { n:'04', t:'Support', d:'We stay involved afterwards, because that is when most problems surface.' }
+      ],
+      coreCaps: ['hardware-oem','software-solutions','network-services','pc-support'].map((sl, i) => {
+        const s = bySlug[sl];
+        return { n: '0' + (i + 1), name: s.name, short: s.short, iconEl: this.iconEl(s.icon, 38, true), href: '#/services/' + sl };
+      }),
+      homeProcess: [
+        { n:'01', t:'Assess', d:'Understand your needs and environment.' },
+        { n:'02', t:'Plan', d:'Design the right solution for your business.' },
+        { n:'03', t:'Implement', d:'Deploy and configure your systems.' },
+        { n:'04', t:'Support', d:'Keep your business running smoothly.' }
+      ],
+
+      c: st.c,
+      cErr: Object.assign({}, st.cErr, {
+        nameBorder: st.cErr.name ? '#C8341A' : '#dde4ed',
+        emailBorder: st.cErr.email ? '#C8341A' : '#dde4ed',
+        phoneBorder: st.cErr.phone ? '#C8341A' : '#dde4ed',
+        serviceBorder: st.cErr.service ? '#C8341A' : '#dde4ed',
+        messageBorder: st.cErr.message ? '#C8341A' : '#dde4ed'
+      }),
+      cBtnBg: st.cState === 'sending' ? '#c9633f' : '#F05A28',
+      cBtnCursor: st.cState === 'sending' ? 'default' : 'pointer',
+      cBtnLabel: st.cState === 'sending' ? 'Sending…' : 'SEND MESSAGE',
+      cSending: st.cState === 'sending', cIdle: st.cState !== 'sending',
+      onC: {
+        name: e => this.setC('name', e.target.value),
+        company: e => this.setC('company', e.target.value),
+        email: e => this.setC('email', e.target.value),
+        phone: e => this.setC('phone', e.target.value),
+        service: e => this.setC('service', e.target.value),
+        message: e => this.setC('message', e.target.value)
+      },
+      submitContact: e => this.submitContact(e),
+      cErrName: !!st.cErr.name, cErrEmail: !!st.cErr.email, cErrPhone: !!st.cErr.phone,
+      cErrService: !!st.cErr.service, cErrMessage: !!st.cErr.message,
+
+      q: st.q, step: st.step,
+      summary: summary.map((row, i) => Object.assign({}, row, { bg: i % 2 ? '#F9FBFD' : '#fff' })),
+      qErr: Object.assign({}, st.qErr, {
+        nameBorder: st.qErr.name ? '#C8341A' : '#dde4ed',
+        emailBorder: st.qErr.email ? '#C8341A' : '#dde4ed',
+        phoneBorder: st.qErr.phone ? '#C8341A' : '#dde4ed',
+        locationBorder: st.qErr.location ? '#C8341A' : '#dde4ed',
+        descBorder: st.qErr.desc ? '#C8341A' : '#dde4ed'
+      }),
+      steps: [
+        { n: 1, label: 'Your Details' }, { n: 2, label: 'Requirement' },
+        { n: 3, label: 'Project Info' }, { n: 4, label: 'Review' }
+      ].map(s => {
+        const done = st.step > s.n, cur = st.step === s.n;
+        return Object.assign({}, s, {
+          mark: done ? '\u2713' : String(s.n),
+          bg: cur ? '#FFF4F0' : '#fff',
+          dotBg: cur || done ? '#F05A28' : '#EEF2F7',
+          dotFg: cur || done ? '#fff' : '#5a6b80',
+          labelFg: cur ? '#F05A28' : '#0B2C55'
+        });
+      }),
+      serviceChoices: this.SERVICE_OPTIONS.map(v => {
+        const on = st.q.service === v;
+        return {
+          v, on,
+          border: on ? '#F05A28' : '#dde4ed',
+          bg: on ? '#FFF4F0' : '#fff',
+          dot: on ? '#F05A28' : '#c3ceda',
+          pick: () => this.setQ('service', v)
+        };
+      }),
+      budgets: [{ v: 'Under R10 000' }, { v: 'R10 000 – R50 000' }, { v: 'R50 000 – R150 000' }, { v: 'Over R150 000' }, { v: 'Not yet determined' }],
+      showNext: st.step < 4,
+      qBtnBg: st.qState === 'sending' ? '#c9633f' : '#F05A28',
+      qBtnCursor: st.qState === 'sending' ? 'default' : 'pointer',
+      qBtnLabel: st.qState === 'sending' ? 'Submitting…' : 'SUBMIT REQUEST',
+      whatNext: [
+        { n: '1', t: 'We review your requirements.' },
+        { n: '2', t: 'We assess the information you\u2019ve provided.' },
+        { n: '3', t: 'A member of the Gauvis team can follow up with you.' }
+      ],
+      isLegal: r === 'privacy-policy' || r === 'terms-and-conditions',
+      legalTitle: r === 'terms-and-conditions' ? 'Terms & Conditions' : 'Privacy Policy',
+      legalIntro: r === 'terms-and-conditions'
+        ? 'These terms govern the use of this website and describe how we work with clients in general terms.'
+        : 'This policy explains how this website handles information submitted through it.',
+      legalSections: r === 'terms-and-conditions' ? [
+        { t: 'Introduction', d: 'These terms apply to your use of the Gauvis Technology Holdings website. By using the site you accept them. If you do not agree with them, please do not use the site.' },
+        { t: 'Website Use', d: 'You may use this website to learn about our services and to contact us. Please do not attempt to disrupt the site, misuse the forms, or use the content in a way that misrepresents Gauvis Technology Holdings.' },
+        { t: 'Services', d: 'The service descriptions on this site are summaries. The exact scope of any work is agreed directly with the client before it begins, in writing.' },
+        { t: 'Quotes', d: 'Quotes are prepared based on the information supplied to us. If the requirement changes, or the information provided turns out to be incomplete, the quote may need to be revised. A quote is not a contract until it is accepted by both parties.' },
+        { t: 'Payments', d: 'Payment terms are agreed per engagement and confirmed in writing before work begins. Nothing on this website constitutes a fixed price for any service.' },
+        { t: 'Intellectual Property', d: 'The content, layout and branding of this website belong to Gauvis Technology Holdings. Third-party names and marks referred to on this site belong to their respective owners and are used only to describe the technologies we work with.' },
+        { t: 'Third-Party Services', d: 'We work with technology from a range of vendors. References to those technologies do not imply a partnership, certification or endorsement in either direction.' },
+        { t: 'Limitation of Liability', d: 'The information on this website is provided in good faith and for general guidance. It is not a substitute for advice on your specific environment. To the extent permitted by law, we are not liable for decisions taken solely on the basis of general website content.' },
+        { t: 'Changes to Services', d: 'We may change the services we offer, and the content of this site, from time to time. Agreed work in progress is governed by what was agreed with the client, not by later changes to this page.' },
+        { t: 'Contact Information', d: 'Gauvis Technology Holdings, Soweto, South Africa. Phone 084 035 6925 or 064 367 0274. Email thabash.mampa@gmail.com.' }
+      ] : [
+        { t: 'Introduction', d: 'This is a website privacy policy. It covers information submitted through this website — primarily the contact and quote request forms — rather than the internal systems of clients we work with.' },
+        { t: 'Information We Collect', d: 'Through the forms on this site we collect the details you choose to give us: your name, company name, email address, phone number, the service you are interested in, and whatever you write in the message or project description.' },
+        { t: 'How Information Is Used', d: 'We use the information you submit to respond to your enquiry, to understand what you need, and to prepare a quote where you have asked for one. We do not sell it.' },
+        { t: 'Contact Forms', d: 'Submitting a form is voluntary. Only the fields marked as required are needed for us to respond. If you would rather not use a form, you can phone or email us directly.' },
+        { t: 'Cookies', d: 'This website does not set advertising or tracking cookies. If that changes, this section will be updated to say what is set and why.' },
+        { t: 'Third-Party Services', d: 'Where a third-party service is used to host this site or handle email, your information may pass through it in the ordinary course of delivery. We do not list specific providers here that have not been selected.' },
+        { t: 'Data Security', d: 'We take reasonable care with the information you send us. No transmission over the internet can be guaranteed to be completely secure, and we will not claim otherwise.' },
+        { t: 'Data Retention', d: 'We keep enquiry information for as long as it is useful to the conversation it relates to, and for our own records afterwards. If you would like your enquiry removed, ask us and we will remove it.' },
+        { t: 'Your Rights', d: 'You can ask what information we hold about you, ask us to correct it, or ask us to delete it. Contact us using the details below and we will deal with the request.' },
+        { t: 'Contact Information', d: 'Gauvis Technology Holdings, Soweto, South Africa. Phone 084 035 6925 or 064 367 0274. Email thabash.mampa@gmail.com.' },
+        { t: 'Policy Updates', d: 'If this policy changes, the updated version will appear on this page.' }
+      ],
+      step1: st.step === 1, step2: st.step === 2, step3: st.step === 3, step4: st.step === 4,
+      stepNot1: st.step > 1,
+      qSending: st.qState === 'sending', qIdle: st.qState !== 'sending',
+      onQ: {
+        name: e => this.setQ('name', e.target.value),
+        company: e => this.setQ('company', e.target.value),
+        email: e => this.setQ('email', e.target.value),
+        phone: e => this.setQ('phone', e.target.value),
+        service: e => this.setQ('service', e.target.value),
+        users: e => this.setQ('users', e.target.value),
+        location: e => this.setQ('location', e.target.value),
+        desc: e => this.setQ('desc', e.target.value),
+        budget: e => this.setQ('budget', e.target.value),
+        pref: e => this.setQ('pref', e.target.value)
+      },
+      nextStep: () => this.nextStep(),
+      prevStep: () => this.prevStep(),
+      editStep1: () => this.gotoStep(1),
+      editStep2: () => this.gotoStep(2),
+      editStep3: () => this.gotoStep(3),
+      submitQuote: e => this.submitQuote(e),
+      qErrName: !!st.qErr.name, qErrEmail: !!st.qErr.email, qErrPhone: !!st.qErr.phone,
+      qErrService: !!st.qErr.service, qErrLocation: !!st.qErr.location, qErrDesc: !!st.qErr.desc,
+
+      doneService: st.done.service || 'General enquiry',
+      doneEmail: st.done.email || 'your email address'
+    };
+  }
+}
+
+</script>
+</body>
+</html>

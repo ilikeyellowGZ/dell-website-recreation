@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Gauvis - Technology Partner for South Africa</title>
+    <link rel="stylesheet" href="index.html" />
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,400;0,500;0,600;0,700;0,800;1,800&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-dark: #0A2A52;
+            --secondary-dark: #0B2C55;
+            --accent-orange: #F05A28;
+            --accent-orange-hover: #d9491a;
+            --text-dark: #0B2C55;
+            --text-medium: #41536b;
+            --text-light: #5a6b80;
+            --bg-light: #F2F5F9;
+            --border-light: #e2e8f0;
+            --white: #ffffff;
+        }
+
+        body {
+            font-family: 'Barlow', system-ui, sans-serif;
+            color: var(--text-dark);
+            background: var(--white);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .hero-about {
+            background: linear-gradient(135deg, var(--primary-dark) 0%, #0A2A52 100%);
+            padding: 70px 28px 76px;
+            animation: fadeInUp 0.7s ease;
+        }
+
+        .hero-about-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 48px;
+            align-items: center;
+        }
+
+        .hero-about h1 {
+            font-size: 46px;
+            line-height: 1.1;
+            font-weight: 700;
+            color: var(--white);
+            letter-spacing: -1px;
+            margin-bottom: 24px;
+            animation: slideInFromLeft 0.7s ease 0.2s both;
+        }
+
+        .hero-about p {
+            font-size: 15.5px;
+            line-height: 1.74;
+            color: #c7d6e8;
+            max-width: 480px;
+            animation: slideInFromLeft 0.7s ease 0.25s both;
+        }
+
+        .hero-about-buttons {
+            display: flex;
+            gap: 14px;
+            margin-top: 32px;
+            flex-wrap: wrap;
+            animation: slideInFromLeft 0.7s ease 0.3s both;
+        }
+
+        .btn-primary {
+            background: var(--accent-orange);
+            color: var(--white);
+            padding: 13px 26px;
+            border-radius: 5px;
+            font-weight: 600;
+            font-size: 14.5px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(240, 90, 40, 0.25);
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-orange-hover);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(240, 90, 40, 0.35);
+        }
+
+        .btn-secondary {
+            border: 1.5px solid rgba(255, 255, 255, 0.65);
+            color: var(--white);
+            padding: 13px 26px;
+            border-radius: 5px;
+            font-weight: 600;
+            font-size: 14.5px;
+            background: transparent;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(240, 90, 40, 0.15);
+            border-color: var(--accent-orange);
+            transform: translateY(-3px);
+        }
+
+        .about-hero-image {
+            width: 100%;
+            height: 360px;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            animation: slideInFromRight 0.7s ease 0.2s both;
+        }
+
+        .about-hero-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .about-hero-image:hover img {
+            transform: scale(1.05);
+        }
+
+        section {
+            padding: 70px 28px;
+            margin: 0;
+        }
+
+        .section-title {
+            color: var(--accent-orange);
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 2.4px;
+            text-transform: uppercase;
+            margin-bottom: 16px;
+            animation: fadeInUp 0.6s ease;
+        }
+
+        .section-heading {
+            font-size: 32px;
+            line-height: 1.24;
+            font-weight: 700;
+            color: var(--text-dark);
+            letter-spacing: -0.5px;
+            margin-bottom: 22px;
+            animation: fadeInUp 0.6s ease 0.1s both;
+        }
+
+        .section-divider {
+            width: 54px;
+            height: 3px;
+            background: var(--accent-orange);
+            margin: 22px 0;
+        }
+
+        .about-who {
+            background: var(--white);
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 44px;
+            align-items: center;
+        }
+
+        .who-image {
+            position: relative;
+            height: 360px;
+        }
+
+        .who-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 6px;
+        }
+
+        .vision-mission {
+            background: var(--primary-dark);
+            color: var(--white);
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            padding: 0;
+        }
+
+        .vision-item {
+            padding: 64px 44px;
+            border-left: 1px solid rgba(255, 255, 255, 0.12);
+        }
+
+        .vision-item:first-child {
+            border-left: none;
+        }
+
+        .vision-item h2 {
+            font-size: 30px;
+            line-height: 1.26;
+            font-weight: 700;
+            color: var(--white);
+            letter-spacing: -0.4px;
+            margin: 16px 0 0;
+        }
+
+        .vision-item p {
+            font-size: 17px;
+            line-height: 1.7;
+            color: #e3ecf7;
+            max-width: 460px;
+            margin: 20px 0 0;
+            text-wrap: pretty;
+        }
+
+        .approach-grid {
+            background: var(--bg-light);
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            padding-top: 70px;
+            padding-bottom: 70px;
+        }
+
+        .approach-card {
+            background: var(--white);
+            border: 1px solid var(--border-light);
+            border-radius: 8px;
+            padding: 26px 24px 28px;
+            transition: all 0.3s ease;
+            animation: fadeInUp 0.6s ease;
+            animation-fill-mode: both;
+        }
+
+        .approach-card:nth-child(1) { animation-delay: 0.1s; }
+        .approach-card:nth-child(2) { animation-delay: 0.15s; }
+        .approach-card:nth-child(3) { animation-delay: 0.2s; }
+        .approach-card:nth-child(4) { animation-delay: 0.25s; }
+
+        .approach-card:hover {
+            border-color: var(--accent-orange);
+            transform: translateY(-8px);
+            box-shadow: 0 12px 30px rgba(11, 44, 85, 0.1);
+        }
+
+        .approach-number {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--accent-orange);
+            letter-spacing: 1.4px;
+            text-transform: uppercase;
+        }
+
+        .approach-title {
+            font-size: 19px;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-top: 14px;
+        }
+
+        .approach-desc {
+            margin: 9px 0 0;
+            font-size: 14px;
+            line-height: 1.7;
+            color: var(--text-light);
+        }
+
+        header {
+            background: var(--white);
+            border-bottom: 1px solid #e6ebf1;
+            position: sticky;
+            top: 0;
+            z-index: 60;
+            box-shadow: 0 1px 10px rgba(11, 44, 85, 0.06);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 12px 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo img {
+            height: 46px;
+            width: auto;
+        }
+
+        nav {
+            display: flex;
+            gap: 24px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        nav a {
+            color: var(--text-medium);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        nav a:hover {
+            color: var(--accent-orange);
+        }
+
+        footer {
+            background: var(--secondary-dark);
+            color: var(--white);
+            padding: 60px 28px 40px;
+            margin-top: 40px;
+            border-top: 1px solid rgba(240, 90, 40, 0.1);
+        }
+
+        .footer-content {
+            margin: 0;
+            padding: 0 28px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .footer-section h3 {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--accent-orange);
+            letter-spacing: 1.6px;
+            text-transform: uppercase;
+            margin-bottom: 16px;
+        }
+
+        .footer-section a {
+            color: #a9c4e4;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .footer-section a:hover {
+            color: var(--accent-orange);
+            transform: translateX(4px);
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideInFromLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slideInFromRight {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hero-about-content {
+                grid-template-columns: 1fr;
+                gap: 36px;
+            }
+
+            .about-who {
+                grid-template-columns: 1fr;
+                gap: 28px;
+            }
+
+            .vision-mission {
+                grid-template-columns: 1fr;
+            }
+
+            .vision-item {
+                border-left: none;
+                border-top: 1px solid rgba(255, 255, 255, 0.12);
+                padding: 44px;
+            }
+
+            .vision-item:first-child {
+                border-top: none;
+            }
+
+            nav {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="header-content">
+            <a href="index.html" class="logo">
+                <img src="./project/gvt-logo.png" alt="Gauvis Tech" />
+            </a>
+            <nav>
+                <a href="index.html">Home</a>
+                <a href="about.html" style="color: var(--accent-orange);">About</a>
+                <a href="services.html">Services</a>
+                <a href="#contact">Contact</a>
+            </nav>
+            <button class="btn-primary" style="margin: 0;">Request a Quote</button>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero-about">
+        <div class="hero-about-content">
+            <div>
+                <div class="section-title" style="color: var(--accent-orange);">About Gauvis</div>
+                <h1>Technology Built Around Your Business.</h1>
+                <p>Gauvis Technology Holdings provides practical technology solutions that help businesses operate efficiently, securely and confidently.</p>
+                <div class="hero-about-buttons">
+                    <button class="btn-primary">Request a Quote</button>
+                    <button class="btn-secondary">Explore Our Services</button>
+                </div>
+            </div>
+            <div class="about-hero-image">
+                <img src="./project/img/hero-city-desk.png" alt="Business team at work" loading="lazy" />
+            </div>
+        </div>
+    </section>
+
+    <!-- Who We Are -->
+    <section>
+        <div class="about-who">
+            <div>
+                <div class="section-title">Who We Are</div>
+                <h2 class="section-heading">Your Technology Partner.<br />Not Just Your IT Supplier.</h2>
+                <div class="section-divider"></div>
+                <p style="font-size: 15px; line-height: 1.78; color: var(--text-light); max-width: 500px; margin-bottom: 16px;">
+                    Gauvis Technology Holdings is a growing South African IT solutions provider focused on helping businesses with their technology infrastructure, software, hardware and support requirements.
+                </p>
+                <p style="font-size: 15px; line-height: 1.78; color: var(--text-light); max-width: 500px;">
+                    We were founded in 2026 and work from Soweto with businesses across South Africa. We would rather tell you plainly what we can do than overstate a history we do not have yet.
+                </p>
+                <div style="display: flex; gap: 34px; flex-wrap: wrap; margin-top: 30px;">
+                    <div>
+                        <div style="font-size: 12px; font-weight: 700; letter-spacing: 1.6px; text-transform: uppercase; color: var(--text-light);">Founded</div>
+                        <div style="font-size: 20px; font-weight: 700; color: var(--text-dark); margin-top: 5px;">2026</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 12px; font-weight: 700; letter-spacing: 1.6px; text-transform: uppercase; color: var(--text-light);">Based in</div>
+                        <div style="font-size: 20px; font-weight: 700; color: var(--text-dark); margin-top: 5px;">Soweto, South Africa</div>
+                    </div>
+                </div>
+            </div>
+            <div class="who-image">
+                <img src="./project/img/hero-technician.png" alt="Technician at work" loading="lazy" />
+            </div>
+        </div>
+    </section>
+
+    <!-- Vision & Mission -->
+    <section style="padding: 0;">
+        <div class="vision-mission">
+            <div class="vision-item">
+                <div class="section-title" style="color: var(--accent-orange);">Our Vision</div>
+                <h2>Where We're Going.</h2>
+                <p>To be the leading IT support and solutions partner for businesses nationwide.</p>
+            </div>
+            <div class="vision-item">
+                <div class="section-title" style="color: var(--accent-orange);">Our Mission</div>
+                <h2>What Drives Us.</h2>
+                <p>To provide innovative, customer-centric IT services that enhance productivity, security and growth.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Our Approach -->
+    <section style="background: var(--bg-light);">
+        <div style="max-width: 1200px; margin: 0 auto;">
+            <div class="section-title">Our Approach</div>
+            <h2 class="section-heading" style="margin-bottom: 36px;">Four principles, on every engagement.</h2>
+            <div class="approach-grid">
+                <div class="approach-card">
+                    <div class="approach-number">01</div>
+                    <div class="approach-title">Listen First</div>
+                    <p class="approach-desc">We understand your business, challenges, and goals before proposing solutions.</p>
+                </div>
+                <div class="approach-card">
+                    <div class="approach-number">02</div>
+                    <div class="approach-title">Be Practical</div>
+                    <p class="approach-desc">Real solutions for real businesses, not over-engineered complexity.</p>
+                </div>
+                <div class="approach-card">
+                    <div class="approach-number">03</div>
+                    <div class="approach-title">Stay Transparent</div>
+                    <p class="approach-desc">Clear communication, honest pricing, no hidden costs or surprises.</p>
+                </div>
+                <div class="approach-card">
+                    <div class="approach-number">04</div>
+                    <div class="approach-title">Follow Through</div>
+                    <p class="approach-desc">Ongoing support and maintenance, so your systems keep working.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>Quick Links</h3>
+                <ul style="list-style: none;">
+                    <li style="margin-bottom: 12px;"><a href="index.html">Home</a></li>
+                    <li style="margin-bottom: 12px;"><a href="about.html">About</a></li>
+                    <li style="margin-bottom: 12px;"><a href="services.html">Services</a></li>
+                    <li style="margin-bottom: 12px;"><a href="#">Contact</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Services</h3>
+                <ul style="list-style: none;">
+                    <li style="margin-bottom: 12px;"><a href="#">PC Support</a></li>
+                    <li style="margin-bottom: 12px;"><a href="#">Security Solutions</a></li>
+                    <li style="margin-bottom: 12px;"><a href="#">Network Solutions</a></li>
+                    <li style="margin-bottom: 12px;"><a href="#">Server Support</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Company</h3>
+                <ul style="list-style: none;">
+                    <li style="margin-bottom: 12px;"><a href="#">About Us</a></li>
+                    <li style="margin-bottom: 12px;"><a href="#">Our Team</a></li>
+                    <li style="margin-bottom: 12px;"><a href="#">Careers</a></li>
+                    <li style="margin-bottom: 12px;"><a href="#">Blog</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Contact</h3>
+                <ul style="list-style: none;">
+                    <li style="margin-bottom: 12px;"><a href="tel:0840356925">084 035 6925</a></li>
+                    <li style="margin-bottom: 12px;"><a href="mailto:thabash.mampa@gmail.com">thabash.mampa@gmail.com</a></li>
+                    <li style="margin-bottom: 12px;">Soweto, South Africa</li>
+                </ul>
+            </div>
+        </div>
+        <div style="border-top: 1px solid rgba(255, 255, 255, 0.1); padding-top: 30px; text-align: center; color: #8fa9c8; font-size: 14px;">
+            <p>&copy; 2026 Gauvis Technology Holdings. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>
