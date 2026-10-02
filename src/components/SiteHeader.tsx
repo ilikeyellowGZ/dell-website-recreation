@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom'
 import { assets } from '../assets'
 import { ButtonLink } from './ButtonLink'
 
-type ActivePage = 'home' | 'about'
+type ActivePage = 'home' | 'about' | 'contact'
 
 type SiteHeaderProps = {
   activePage: ActivePage
@@ -106,14 +106,19 @@ export function SiteHeader({ activePage }: SiteHeaderProps) {
                 </li>
               ))}
               <li>
-                <a className="nav-link" href="#footer-contact" onClick={() => closeMenu()}>
+                <Link
+                  className="nav-link"
+                  to="/contact"
+                  aria-current={activePage === 'contact' ? 'page' : undefined}
+                  onClick={() => closeMenu()}
+                >
                   Contact
-                </a>
+                </Link>
               </li>
             </ul>
           </nav>
 
-          <ButtonLink className="header-quote" href="tel:0840356925">
+          <ButtonLink className="header-quote" href="/contact#request-quote">
             Request a Quote
           </ButtonLink>
           <button

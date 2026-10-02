@@ -71,7 +71,7 @@ export function About() {
             <p className="about-hero__lead">
               Practical IT solutions that help your business stay connected, secure and productive.
             </p>
-            <ButtonLink href="tel:0840356925" showArrow>
+            <ButtonLink href="/contact#request-quote" showArrow>
               Request a Quote
             </ButtonLink>
           </div>
@@ -188,7 +188,7 @@ export function About() {
             </h2>
             <p>Get in touch for a no-obligation discussion with our team.</p>
           </div>
-          <ButtonLink href="tel:0840356925" showArrow>
+          <ButtonLink href="/contact#request-quote" showArrow>
             Request a Quote
           </ButtonLink>
         </div>

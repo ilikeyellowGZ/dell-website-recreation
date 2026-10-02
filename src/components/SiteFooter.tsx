@@ -1,17 +1,20 @@
-import { MapPin, Phone } from '@phosphor-icons/react'
-import { Link } from 'react-router-dom'
+import { FacebookLogo, InstagramLogo, LinkedinLogo, MapPin, Phone, YoutubeLogo } from '@phosphor-icons/react'
+import { Link, useLocation } from 'react-router-dom'
 import { assets } from '../assets'
 
 const services = [
-  'Hardware & Devices',
+  'Hardware & ICT',
   'Software Solutions',
-  'Networking & Infrastructure',
+  'Network Solutions',
   'IT Support & Maintenance',
   'Security Solutions',
   'Web Development',
+  'Custom IT Solutions',
 ]
 
 export function SiteFooter() {
+  const { pathname } = useLocation()
+
   return (
     <footer className="site-footer">
       <div className="site-shell footer-grid">
@@ -20,9 +23,15 @@ export function SiteFooter() {
             <img src={assets.logo} width="575" height="204" alt="GVT Gauvis Tech" />
           </Link>
           <p>
-            Gauvis Technology Holdings provides practical IT solutions to help businesses stay connected, secure and
-            productive across South Africa.
+            Gauvis Technology Holdings is an IT solutions provider delivering hardware, software, networks and support
+            services across South Africa.
           </p>
+          <div className="footer-socials" aria-hidden="true">
+            <LinkedinLogo size={18} weight="fill" />
+            <FacebookLogo size={18} weight="fill" />
+            <InstagramLogo size={18} weight="bold" />
+            <YoutubeLogo size={18} weight="fill" />
+          </div>
         </div>
 
         <div>
@@ -34,7 +43,11 @@ export function SiteFooter() {
             <li><span aria-disabled="true">Solutions</span></li>
             <li><span aria-disabled="true">Case Studies</span></li>
             <li><span aria-disabled="true">FAQ</span></li>
-            <li><a href="#footer-contact">Contact</a></li>
+            <li>
+              <Link className={pathname === '/contact' ? 'is-current' : undefined} to="/contact">
+                Contact
+              </Link>
+            </li>
           </ul>
         </div>
 
@@ -50,20 +63,20 @@ export function SiteFooter() {
         </div>
 
         <div id="footer-contact">
-          <h2 className="footer-heading">Contact</h2>
+          <h2 className="footer-heading">South Africa</h2>
           <ul className="footer-links footer-contact">
             <li className="contact-item">
               <MapPin aria-hidden="true" size={18} weight="fill" />
-              <span>South Africa</span>
+              <span>Serving Businesses<br />Across South Africa</span>
             </li>
             <li>
-              <a className="contact-item" href="tel:0840356925">
+              <a className="contact-item" href="tel:+27840356925">
                 <Phone aria-hidden="true" size={18} weight="fill" />
                 <span>Thabang: 084 035 6925</span>
               </a>
             </li>
             <li>
-              <a className="contact-item" href="tel:0643670274">
+              <a className="contact-item" href="tel:+27643670274">
                 <Phone aria-hidden="true" size={18} weight="fill" />
                 <span>Pontsho: 064 367 0274</span>
               </a>

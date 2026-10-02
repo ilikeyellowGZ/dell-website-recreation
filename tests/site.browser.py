@@ -49,7 +49,7 @@ with sync_playwright() as playwright:
 
         quote_links = page.locator('a.button:has-text("Request a Quote")')
         for index in range(quote_links.count()):
-            assert quote_links.nth(index).get_attribute("href") == "tel:0840356925"
+            assert quote_links.nth(index).get_attribute("href") == "/contact#request-quote"
 
         assert_page_health(page, width)
         page.evaluate("window.scrollTo(0, 0)")
@@ -86,8 +86,74 @@ with sync_playwright() as playwright:
         assert page.get_by_role("heading", name="Your Technology Partner. Built Around Your Business.").is_visible()
 
         page.screenshot(path=str(ARTIFACTS / f"about-{width}.png"), full_page=True)
+
+        primary = page.locator("#primary-navigation")
+        if width < 1024:
+            page.get_by_role("button", name="Open menu").click()
+        primary.locator('a[href="/contact"]').click()
+        page.wait_for_url(f"{BASE_URL}/contact")
+        assert page.get_by_role("heading", name="Let’s Talk About Your IT Needs.").is_visible()
+
+        response = page.reload(wait_until="networkidle")
+        assert response and response.ok, f"/contact failed to refresh at {width}px"
+        primary = page.locator("#primary-navigation")
+        assert primary.locator('a[href="/contact"]').get_attribute("aria-current") == "page"
+        assert primary.locator('a[href="/"]').get_attribute("href") == "/"
+        assert page.locator('a[href="tel:+27840356925"]').count() >= 2
+        assert page.locator('a[href="tel:+27643670274"]').count() >= 2
+        assert page.locator('a[href^="mailto:"]').count() == 0
+        assert page.get_by_role("button", name="Chat on WhatsApp").is_disabled()
+
+        send_button = page.get_by_role("button", name="Send Enquiry")
+        send_button.click()
+        assert page.locator("#quote-full-name").evaluate("node => node === document.activeElement")
+        assert page.get_by_text("Enter your full name.").is_visible()
+        assert page.get_by_text("Enter your email address.").is_visible()
+        assert page.get_by_text("Enter your phone number.").is_visible()
+        assert page.get_by_text("Select a service.").is_visible()
+        assert page.get_by_text("Tell us what you need.").is_visible()
+
+        page.get_by_label("Full name").fill("Thandi Ndlovu")
+        page.get_by_label("Business name (optional)").fill("Ndlovu Trading")
+        page.get_by_label("Email address").fill("thandi@invalid")
+        page.get_by_label("Phone number").fill("123")
+        page.get_by_label("Service required").select_option("Hardware Support")
+        page.get_by_label("Location").fill("Cape Town")
+        page.get_by_label("Tell us what you need").fill("Please help us replace three office computers.")
+        page.get_by_label("I agree to be contacted about my enquiry.").check()
+        send_button.click()
+        assert page.get_by_text("Enter a valid email address.").is_visible()
+        assert page.get_by_text("Enter a valid phone number.").is_visible()
+        assert page.get_by_label("Email address").input_value() == "thandi@invalid"
+        assert page.get_by_label("Phone number").input_value() == "123"
+
+        page.get_by_label("Email address").fill("thandi@example.com")
+        page.get_by_label("Phone number").fill("+27 84 123 4567")
+        send_button.click()
+        status = page.get_by_role("alert")
+        assert "Online enquiry delivery is not configured" in status.inner_text()
+        assert page.get_by_label("Full name").input_value() == "Thandi Ndlovu"
+        assert page.get_by_label("Tell us what you need").input_value() == "Please help us replace three office computers."
+
+        page.goto(f"{BASE_URL}/contact#request-quote", wait_until="networkidle")
+        assert page.url == f"{BASE_URL}/contact#request-quote"
+        quote_card = page.locator("#request-quote")
+        assert quote_card.is_visible()
+        assert quote_card.evaluate("node => Math.abs(node.getBoundingClientRect().top - 84) < 100")
+
+        page.goto(f"{BASE_URL}/contact", wait_until="networkidle")
+        assert_page_health(page, width)
+        page.evaluate("window.scrollTo(0, 0); document.activeElement?.blur()")
+        page.screenshot(path=str(ARTIFACTS / f"contact-{width}.png"), full_page=True)
+
+        primary = page.locator("#primary-navigation")
+        if width < 1024:
+            page.get_by_role("button", name="Open menu").click()
+        primary.locator('a[href="/"]').click()
+        page.wait_for_url(f"{BASE_URL}/")
+        assert page.get_by_role("heading", name="Powering Your Digital Future.").is_visible()
+
         if width == 1440:
-            page.goto(f"{BASE_URL}/", wait_until="networkidle")
             page.screenshot(path=str(ARTIFACTS / "homepage-1440.png"), full_page=True)
 
         relevant_errors = [error for error in browser_errors if "favicon" not in error.lower()]

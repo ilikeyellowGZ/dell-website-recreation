@@ -77,7 +77,7 @@ export function Home() {
               support, we keep you connected, secure and productive.
             </p>
             <div className="home-hero__actions">
-              <ButtonLink href="tel:0840356925">Request a Quote</ButtonLink>
+              <ButtonLink href="/contact#request-quote">Request a Quote</ButtonLink>
               <ButtonLink href="#services" variant="outline">Explore Services</ButtonLink>
             </div>
           </div>
@@ -200,7 +200,7 @@ export function Home() {
               team can help. We come to you for all your IT needs.
             </p>
             <div className="home-cta__actions">
-              <ButtonLink href="tel:0840356925">Request a Quote</ButtonLink>
+              <ButtonLink href="/contact#request-quote">Request a Quote</ButtonLink>
               <ButtonLink href="tel:0840356925" variant="light">
                 <Phone aria-hidden="true" size={15} weight="fill" /> Call 084 035 6925
               </ButtonLink>

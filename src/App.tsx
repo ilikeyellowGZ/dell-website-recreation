@@ -3,30 +3,36 @@ import { Route, Routes, useLocation } from 'react-router-dom'
 import { SiteFooter } from './components/SiteFooter'
 import { SiteHeader } from './components/SiteHeader'
 import { About } from './pages/About'
+import { Contact } from './pages/Contact'
 import { Home } from './pages/Home'
 
 const routeTitles: Record<string, string> = {
   '/': 'Gauvis Technology Holdings | IT Solutions for South Africa',
   '/about': 'About Gauvis | Technology Partner for South Africa',
+  '/contact': 'Contact Gauvis | Request an IT Quote',
 }
 
 function RouteEffects() {
-  const { pathname } = useLocation()
+  const { hash, pathname } = useLocation()
 
   useEffect(() => {
     document.title = routeTitles[pathname] ?? routeTitles['/']
     if (!navigator.userAgent.toLowerCase().includes('jsdom')) {
-      window.scrollTo({ top: 0, left: 0, behavior: 'auto' })
+      if (hash) {
+        requestAnimationFrame(() => document.querySelector<HTMLElement>(hash)?.scrollIntoView({ block: 'start' }))
+      } else {
+        window.scrollTo({ top: 0, left: 0, behavior: 'auto' })
+      }
     }
-    queueMicrotask(() => document.querySelector<HTMLElement>('main h1')?.focus())
-  }, [pathname])
+    if (!hash) queueMicrotask(() => document.querySelector<HTMLElement>('main h1')?.focus())
+  }, [hash, pathname])
 
   return null
 }
 
 export function App() {
   const { pathname } = useLocation()
-  const activePage = pathname === '/about' ? 'about' : 'home'
+  const activePage = pathname === '/about' ? 'about' : pathname === '/contact' ? 'contact' : 'home'
 
   return (
     <>
@@ -38,6 +44,7 @@ export function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/about" element={<About />} />
+        <Route path="/contact" element={<Contact />} />
         <Route path="*" element={<Home />} />
       </Routes>
       <SiteFooter />

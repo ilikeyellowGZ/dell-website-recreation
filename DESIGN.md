@@ -6,10 +6,11 @@ The approved visual references are:
 
 - Homepage: `pictures/ChatGPT Image Sep 11, 2026, 08_42_25 PM.png`
 - About page: `pictures/a3228311-2ad9-4cf5-8565-67cf1e577e6d.png`
+- Contact page: `pictures/b88bc9d6-f2cd-4f70-a769-dbcef539595f.png`
 
 These pages are faithful screenshot recreations, not redesigns. The implementation uses React and TypeScript with shared site components.
 
-- Routes in scope: `/` and `/about`
+- Routes in scope: `/`, `/about`, and `/contact`
 - Audience: South African businesses seeking practical IT services
 - Character: credible, technical, compact, high-contrast
 - Dials: design variance 4, motion intensity 3 on About, visual density 6
@@ -29,6 +30,8 @@ These pages are faithful screenshot recreations, not redesigns. The implementati
 - `--text: #53677f` body copy on light surfaces
 - `--pale: #edf4fa` nationwide support and other light-blue surfaces
 - `--line: #dbe5ef` light dividers and card borders
+- `--field-line: #c7d7e7` Contact form and contact-card borders
+- `--error: #b42318` inline form validation text and invalid field borders
 - `--white: #ffffff`
 
 ### Typography
@@ -76,7 +79,18 @@ The exact About photographs are present only inside the approved composite mocku
 - Media frames preserve their reference aspect ratios and crop intentionally with `object-fit` or clipped approved-reference regions.
 - The page must reflow at 320px, support 200% zoom, and never create horizontal page scrolling.
 
-## 6. Reusable React primitives and states
+## 6. Contact page reference geometry and states
+
+1. Short split navy hero with the breadcrumb and two-line heading on the left, a server-aisle image on the right, a navy-to-transparent blend at the join, and the orange diagonal accent at the trailing edge.
+2. White enquiry section with a narrower contact-information column and a wider bordered form card. At the 1024px reference width, the left column is about one third of the content area and the form is about two thirds.
+3. Contact cards show only the confirmed phone names/numbers and “Serving South Africa”; the pale-blue panel communicates on-site assistance without adding an address.
+4. The quote form has paired name/business and email/phone rows, followed by full-width service, location, message, consent, and submit controls. Fields expose default, hover, focus-visible, invalid, and disabled/pending-ready states.
+5. Client validation keeps entered values, connects inline messages to their fields, and focuses the first invalid field. Because no enquiry service is configured, an otherwise-valid submit announces the missing integration and never shows a success state.
+6. The WhatsApp action keeps the approved button appearance but remains unavailable until the user confirms whether Thabang or Pontsho receives enquiries; no phone is selected implicitly.
+7. Pale-blue “What happens next?” section contains the approved three steps and stacks at narrow widths.
+8. `#request-quote` uses sticky-header-safe scroll margin. All Request a Quote controls route to `/contact#request-quote`.
+
+## 7. Reusable React primitives and states
 
 - `SiteHeader`: utility bar, brand, desktop nav, accessible mobile disclosure, active route state.
 - `SiteFooter`: reusable brand, quick links, services, confirmed phone contacts, and legal strip.
@@ -86,20 +100,23 @@ The exact About photographs are present only inside the approved composite mocku
 - `ReferencePhoto`: fixed-ratio clipped media frame for approved imagery embedded in a reference composite.
 - `Home`: the preserved homepage at `/`.
 - `About`: the approved About page at `/about`.
+- `Contact`: the approved Contact page at `/contact`, including local validation and truthful unconfigured-delivery feedback.
 
-## 7. Motion
+## 8. Motion
 
 - The About mockup does not specify decorative animation, so it remains static apart from interaction feedback and mobile-menu state.
+- The Contact mockup and brief do not specify decorative animation, so Contact remains static apart from focus, hover, press, validation, and mobile-menu state feedback.
 - The preserved homepage may retain its restrained hero hierarchy and in-view reveals.
 - Only transforms and opacity animate.
 - All automatic motion honors `prefers-reduced-motion`; menu state changes remain immediate and usable.
 
-## 8. Accessibility and content constraints
+## 9. Accessibility and content constraints
 
 - One `h1` per route, coherent heading order, semantic landmarks, a skip link, native links and buttons.
 - On SPA route changes, update the document title, scroll to the top, and focus the route heading.
 - Visible 2px focus ring, 44px touch targets, descriptive image alternatives, and decorative imagery hidden from assistive technology.
-- About is marked with `aria-current="page"` on `/about`; Home is current only on `/`.
+- About is marked with `aria-current="page"` on `/about`, Contact on `/contact`, and Home only on `/`.
 - Do not invent services, claims, certifications, statistics, testimonials, employees, projects, addresses, hours, or email addresses.
 - Confirmed phone destinations are Thabang at 084 035 6925 and Pontsho at 064 367 0274.
-- Since no quote/contact React route exists yet, quote CTAs use the confirmed Thabang phone destination and this limitation is reported.
+- Quote CTAs use `/contact#request-quote`.
+- No form endpoint or established WhatsApp destination exists. The page must not invent either integration, simulate delivery, or imply a successful enquiry.
