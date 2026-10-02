@@ -3,7 +3,9 @@ import { Route, Routes, useLocation } from 'react-router-dom'
 import { SiteFooter } from './components/SiteFooter'
 import { SiteHeader } from './components/SiteHeader'
 import { About } from './pages/About'
+import { CaseStudies } from './pages/CaseStudies'
 import { Contact } from './pages/Contact'
+import { FAQ } from './pages/FAQ'
 import { Home } from './pages/Home'
 import { Services } from './pages/Services'
 
@@ -11,6 +13,8 @@ const routeTitles: Record<string, string> = {
   '/': 'Gauvis Technology Holdings | IT Solutions for South Africa',
   '/about': 'About Gauvis | Technology Partner for South Africa',
   '/services': 'Services | Gauvis Technology Holdings',
+  '/case-studies': 'Case Studies | Gauvis Technology Holdings',
+  '/faq': 'FAQ | Gauvis Technology Holdings',
   '/contact': 'Contact Gauvis | Request an IT Quote',
 }
 
@@ -35,7 +39,17 @@ function RouteEffects() {
 export function App() {
   const { pathname } = useLocation()
   const activePage =
-    pathname === '/about' ? 'about' : pathname === '/services' ? 'services' : pathname === '/contact' ? 'contact' : 'home'
+    pathname === '/about'
+      ? 'about'
+      : pathname === '/services'
+        ? 'services'
+        : pathname === '/case-studies'
+          ? 'case-studies'
+          : pathname === '/faq'
+            ? 'faq'
+            : pathname === '/contact'
+              ? 'contact'
+              : 'home'
 
   return (
     <>
@@ -48,6 +62,8 @@ export function App() {
         <Route path="/" element={<Home />} />
         <Route path="/about" element={<About />} />
         <Route path="/services" element={<Services />} />
+        <Route path="/case-studies" element={<CaseStudies />} />
+        <Route path="/faq" element={<FAQ />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="*" element={<Home />} />
       </Routes>

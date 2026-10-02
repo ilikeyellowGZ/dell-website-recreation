@@ -124,6 +124,98 @@ with sync_playwright() as playwright:
         primary = page.locator("#primary-navigation")
         if width < 1024:
             page.get_by_role("button", name="Open menu").click()
+        primary.locator('a[href="/case-studies"]').click()
+        page.wait_for_url(f"{BASE_URL}/case-studies")
+        assert page.get_by_role("heading", name="Practical Solutions. Projects in Focus.").is_visible()
+
+        response = page.reload(wait_until="networkidle")
+        assert response and response.ok, f"/case-studies failed to refresh at {width}px"
+        primary = page.locator("#primary-navigation")
+        assert primary.locator('a[href="/case-studies"]').get_attribute("aria-current") == "page"
+        assert primary.locator('a[href="/"]').get_attribute("href") == "/"
+
+        expected_projects = [
+            "Office Network Setup",
+            "Business CCTV Installation",
+            "Business Website Design",
+            "Workstation & Microsoft 365 Setup",
+        ]
+        for project in expected_projects:
+            assert page.get_by_role("heading", name=project).is_visible()
+            assert page.get_by_role("button", name=f"Explore project scope for {project}").is_visible()
+        assert page.get_by_text("ILLUSTRATIVE EXAMPLE").count() == 4
+
+        page.get_by_role("button", name="Security").click()
+        assert page.get_by_role("button", name="Security").get_attribute("aria-pressed") == "true"
+        assert page.get_by_text("Showing 1 illustrative project example.").count() == 1
+        assert page.get_by_role("heading", name="Business CCTV Installation").is_visible()
+        assert page.get_by_role("heading", name="Office Network Setup").count() == 0
+
+        page.get_by_role("button", name="All Projects").click()
+        assert page.get_by_role("heading", name="Office Network Setup").is_visible()
+
+        scope_button = page.get_by_role("button", name="Explore project scope for Office Network Setup")
+        scope_button.click()
+        dialog = page.get_by_role("dialog", name="Office Network Setup")
+        assert dialog.is_visible()
+        assert "Network layout, device connections and shared access." in dialog.inner_text()
+        assert dialog.get_by_role("link", name="Discuss Your Project").get_attribute("href") == "/contact#request-quote"
+        page.keyboard.press("Escape")
+        assert dialog.count() == 0
+        assert scope_button.evaluate("node => node === document.activeElement")
+
+        assert page.get_by_role("link", name="Discuss Your Project").get_attribute("href") == "/contact#request-quote"
+        assert_page_health(page, width)
+        page.evaluate("window.scrollTo(0, 0); document.activeElement?.blur()")
+        page.screenshot(path=str(ARTIFACTS / f"case-studies-{width}.png"), full_page=True)
+
+        primary = page.locator("#primary-navigation")
+        if width < 1024:
+            page.get_by_role("button", name="Open menu").click()
+        primary.locator('a[href="/faq"]').click()
+        page.wait_for_url(f"{BASE_URL}/faq")
+        assert page.get_by_role("heading", name="Clear Answers. Confident Decisions.").is_visible()
+
+        response = page.reload(wait_until="networkidle")
+        assert response and response.ok, f"/faq failed to refresh at {width}px"
+        primary = page.locator("#primary-navigation")
+        assert primary.locator('a[href="/faq"]').get_attribute("aria-current") == "page"
+        assert primary.locator('a[href="/"]').get_attribute("href") == "/"
+
+        first_faq = page.get_by_role("button", name="What services do you offer?")
+        assert first_faq.get_attribute("aria-expanded") == "true"
+        assert page.get_by_text("We assist with hardware repairs").is_visible()
+        support_faq = page.get_by_role("button", name="Do you provide on-site support?")
+        assert support_faq.get_attribute("aria-expanded") == "false"
+        support_faq.click()
+        assert support_faq.get_attribute("aria-expanded") == "true"
+        assert page.get_by_text("Gauvis Tech provides on-site assistance").is_visible()
+
+        page.get_by_role("button", name="Quotes").click()
+        assert page.get_by_role("button", name="Quotes").get_attribute("aria-pressed") == "true"
+        assert page.get_by_role("heading", name="Quotes questions").is_visible()
+        assert page.get_by_role("button", name="How do I request a quote?").is_visible()
+
+        page.get_by_label("Search questions").fill("printer")
+        assert page.get_by_role("button", name="What services do you offer?").is_visible()
+        page.get_by_label("Search questions").fill("zzzz")
+        assert page.get_by_text("No questions match your search.").is_visible()
+        page.get_by_role("button", name="Clear search").click()
+        assert page.get_by_role("button", name="How do I request a quote?").is_visible()
+
+        assert page.get_by_role("link", name="Contact Us").get_attribute("href") == "/contact"
+        assert page.get_by_role("button", name="WhatsApp Us").is_disabled()
+        quote_hrefs = page.get_by_role("link", name="Request a Quote").evaluate_all(
+            "links => links.map(link => link.getAttribute('href'))"
+        )
+        assert "/contact#request-quote" in quote_hrefs
+        assert_page_health(page, width)
+        page.evaluate("window.scrollTo(0, 0); document.activeElement?.blur()")
+        page.screenshot(path=str(ARTIFACTS / f"faq-{width}.png"), full_page=True)
+
+        primary = page.locator("#primary-navigation")
+        if width < 1024:
+            page.get_by_role("button", name="Open menu").click()
         primary.locator('a[href="/contact"]').click()
         page.wait_for_url(f"{BASE_URL}/contact")
         assert page.get_by_role("heading", name="Let’s Talk About Your IT Needs.").is_visible()

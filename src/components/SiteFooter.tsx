@@ -1,4 +1,4 @@
-import { FacebookLogo, InstagramLogo, LinkedinLogo, MapPin, Phone, YoutubeLogo } from '@phosphor-icons/react'
+import { MapPin, Phone } from '@phosphor-icons/react'
 import { Link, useLocation } from 'react-router-dom'
 import { assets } from '../assets'
 
@@ -27,12 +27,6 @@ export function SiteFooter() {
             Gauvis Technology Holdings is an IT solutions provider delivering hardware, software, networks and support
             services across South Africa.
           </p>
-          <div className="footer-socials" aria-hidden="true">
-            <LinkedinLogo size={18} weight="fill" />
-            <FacebookLogo size={18} weight="fill" />
-            <InstagramLogo size={18} weight="bold" />
-            <YoutubeLogo size={18} weight="fill" />
-          </div>
         </div>
 
         <div>
@@ -46,8 +40,16 @@ export function SiteFooter() {
               </Link>
             </li>
             <li><span aria-disabled="true">Solutions</span></li>
-            <li><span aria-disabled="true">Case Studies</span></li>
-            <li><span aria-disabled="true">FAQ</span></li>
+            <li>
+              <Link className={pathname === '/case-studies' ? 'is-current' : undefined} to="/case-studies">
+                Case Studies
+              </Link>
+            </li>
+            <li>
+              <Link className={pathname === '/faq' ? 'is-current' : undefined} to="/faq">
+                FAQ
+              </Link>
+            </li>
             <li>
               <Link className={pathname === '/contact' ? 'is-current' : undefined} to="/contact">
                 Contact

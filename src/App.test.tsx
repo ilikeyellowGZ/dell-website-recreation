@@ -99,6 +99,119 @@ describe('Services route', () => {
   })
 })
 
+describe('Case Studies route', () => {
+  it('renders approved illustrative projects, filters them, opens scope details, and marks Case Studies active', () => {
+    renderRoute('/case-studies')
+
+    expect(screen.getByRole('heading', { level: 1, name: /practical solutions\. projects in focus\./i })).toBeInTheDocument()
+    expect(screen.getByText('Illustrative project examples.')).toBeInTheDocument()
+    expect(screen.getAllByText('ILLUSTRATIVE EXAMPLE')).toHaveLength(4)
+
+    const expectedProjects = [
+      'Office Network Setup',
+      'Business CCTV Installation',
+      'Business Website Design',
+      'Workstation & Microsoft 365 Setup',
+    ]
+
+    for (const project of expectedProjects) {
+      expect(screen.getByRole('heading', { name: project })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: `Explore project scope for ${project}` })).toBeInTheDocument()
+    }
+
+    fireEvent.click(screen.getByRole('button', { name: 'Security' }))
+    expect(screen.getByRole('button', { name: 'Security' })).toHaveAttribute('aria-pressed', 'true')
+    expect(screen.getByRole('status')).toHaveTextContent('Showing 1 illustrative project example.')
+    expect(screen.getByRole('heading', { name: 'Business CCTV Installation' })).toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: 'Office Network Setup' })).not.toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: 'All Projects' }))
+    expect(screen.getByRole('heading', { name: 'Office Network Setup' })).toBeInTheDocument()
+
+    const trigger = screen.getByRole('button', { name: 'Explore project scope for Office Network Setup' })
+    fireEvent.click(trigger)
+    const dialog = screen.getByRole('dialog', { name: 'Office Network Setup' })
+    expect(dialog).toHaveTextContent('Networking')
+    expect(dialog).toHaveTextContent('Illustrative project examples.')
+    expect(dialog).toHaveTextContent('Network layout, device connections and shared access.')
+    expect(within(dialog).getByRole('link', { name: 'Discuss Your Project' })).toHaveAttribute(
+      'href',
+      '/contact#request-quote',
+    )
+    fireEvent(dialog, new Event('cancel', { bubbles: false, cancelable: true }))
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(trigger).toHaveFocus()
+
+    const primaryNavigation = screen.getByRole('navigation', { name: 'Primary' })
+    expect(within(primaryNavigation).getByRole('link', { name: 'Case Studies' })).toHaveAttribute(
+      'aria-current',
+      'page',
+    )
+    expect(within(primaryNavigation).getByRole('link', { name: 'FAQ' })).toHaveAttribute('href', '/faq')
+  })
+})
+
+describe('FAQ route', () => {
+  it('renders approved FAQs, filters by search and category, and marks FAQ active', () => {
+    renderRoute('/faq')
+
+    expect(screen.getByRole('heading', { level: 1, name: /clear answers\. confident decisions\./i })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'General questions' })).toBeInTheDocument()
+
+    const firstQuestion = screen.getByRole('button', { name: 'What services do you offer?' })
+    expect(firstQuestion).toHaveAttribute('aria-expanded', 'true')
+    expect(screen.getByText(/we assist with hardware repairs/i)).toBeInTheDocument()
+
+    const expectedQuestions = [
+      'What services do you offer?',
+      'Do you provide on-site support?',
+      'Can you help my small business?',
+      'How do I request a quote?',
+      'Can I combine multiple services?',
+      'What information should I provide when enquiring?',
+    ]
+
+    for (const question of expectedQuestions) {
+      expect(screen.getByRole('button', { name: question })).toBeInTheDocument()
+    }
+
+    fireEvent.click(screen.getByRole('button', { name: 'Quotes' }))
+    expect(screen.getByRole('button', { name: 'Quotes' })).toHaveAttribute('aria-pressed', 'true')
+    expect(screen.getByRole('heading', { name: 'Quotes questions' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'How do I request a quote?' })).toBeInTheDocument()
+
+    fireEvent.change(screen.getByPlaceholderText('Search questions...'), { target: { value: 'printer' } })
+    expect(screen.getByRole('button', { name: 'What services do you offer?' })).toBeInTheDocument()
+
+    fireEvent.change(screen.getByPlaceholderText('Search questions...'), { target: { value: 'zzzz' } })
+    expect(screen.getByText('No questions match your search.')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Clear search' }))
+    expect(screen.getByRole('button', { name: 'How do I request a quote?' })).toBeInTheDocument()
+
+    expect(screen.getByRole('link', { name: 'Contact Us' })).toHaveAttribute('href', '/contact')
+    expect(screen.getByRole('button', { name: 'WhatsApp Us' })).toBeDisabled()
+    const quoteLinks = screen.getAllByRole('link', { name: 'Request a Quote' })
+    expect(quoteLinks.some((link) => link.getAttribute('href') === '/contact#request-quote')).toBe(true)
+
+    const primaryNavigation = screen.getByRole('navigation', { name: 'Primary' })
+    expect(within(primaryNavigation).getByRole('link', { name: 'FAQ' })).toHaveAttribute('aria-current', 'page')
+    expect(within(primaryNavigation).getByRole('link', { name: 'Case Studies' })).toHaveAttribute(
+      'href',
+      '/case-studies',
+    )
+  })
+
+  it('toggles FAQ answers with an accessible accordion button', () => {
+    renderRoute('/faq')
+
+    const supportQuestion = screen.getByRole('button', { name: 'Do you provide on-site support?' })
+    expect(supportQuestion).toHaveAttribute('aria-expanded', 'false')
+    fireEvent.click(supportQuestion)
+    expect(supportQuestion).toHaveAttribute('aria-expanded', 'true')
+    expect(screen.getByText(/gauvis tech provides on-site assistance/i)).toBeInTheDocument()
+  })
+})
+
 describe('Contact route', () => {
   it('renders the approved Contact content, destinations, and active navigation state', () => {
     renderRoute('/contact')

@@ -8,10 +8,12 @@ The approved visual references are:
 - About page: `pictures/a3228311-2ad9-4cf5-8565-67cf1e577e6d.png`
 - Contact page: `pictures/b88bc9d6-f2cd-4f70-a769-dbcef539595f.png`
 - Services page: `pictures/47500cdb-dad1-4b55-86da-cf51840a8eb1.png`
+- Case Studies page: `pictures/30a3f00b-57e1-427d-9c26-714892264e48.png`
+- FAQ page: `pictures/104f9e2f-49be-4b24-8a5d-943516574ba1.png`
 
 These pages are faithful screenshot recreations, not redesigns. The implementation uses React and TypeScript with shared site components.
 
-- Routes in scope: `/`, `/about`, `/services`, and `/contact`
+- Routes in scope: `/`, `/about`, `/services`, `/contact`, `/case-studies`, and `/faq`
 - Audience: South African businesses seeking practical IT services
 - Character: credible, technical, compact, high-contrast
 - Dials: design variance 4, motion intensity 3 on About, visual density 6
@@ -103,6 +105,8 @@ The exact About photographs are present only inside the approved composite mocku
 - `About`: the approved About page at `/about`.
 - `Contact`: the approved Contact page at `/contact`, including local validation and truthful unconfigured-delivery feedback.
 - `Services`: the approved Services catalogue at `/services`, using a reusable service-card data structure and routing enquiry links to `/contact#request-quote`.
+- `CaseStudies`: the approved illustrative project examples page at `/case-studies`, including category filters, result announcements, persistent illustrative-example badges, and an accessible scope dialog.
+- `FAQ`: the approved FAQ page at `/faq`, including static category/search filtering, accessible accordion controls, empty state, and disabled WhatsApp action until a recipient is configured.
 
 ## 8. Motion
 
@@ -119,6 +123,8 @@ The exact About photographs are present only inside the approved composite mocku
 - Visible 2px focus ring, 44px touch targets, descriptive image alternatives, and decorative imagery hidden from assistive technology.
 - About is marked with `aria-current="page"` on `/about`, Contact on `/contact`, and Home only on `/`.
 - Services is marked with `aria-current="page"` on `/services`.
+- Case Studies is marked with `aria-current="page"` on `/case-studies`.
+- FAQ is marked with `aria-current="page"` on `/faq`.
 - Do not invent services, claims, certifications, statistics, testimonials, employees, projects, addresses, hours, or email addresses.
 - Confirmed phone destinations are Thabang at 084 035 6925 and Pontsho at 064 367 0274.
 - Quote CTAs use `/contact#request-quote`.
@@ -132,3 +138,32 @@ The exact About photographs are present only inside the approved composite mocku
 4. Service cards use the exact order and copy from the approved mockup: Hardware Support, Software Solutions, Networking Services, PC & Desktop Support, Microsoft 365 Support, CCTV & Security, Printer Services, Website Development.
 5. Navy CTA band with the approved `Not sure where to start?` heading, support copy, orange `Talk to Us` button, city imagery, and diagonal orange treatment.
 6. Enquiry links and CTA controls go to `/contact#request-quote`; no service detail pages or automatic service selection are claimed.
+
+## 11. Case Studies page reference geometry and states
+
+1. Shared utility bar and white navigation, with Case Studies active.
+2. Navy split hero with breadcrumb, the two-line heading `Practical Solutions.` / `Projects in Focus.`, the approved supporting sentence, server-rack imagery, and an orange diagonal accent.
+3. White project-example section with the pale-orange disclosure panel text `Illustrative project examples.`, filter buttons for All Projects, Networking, Security, Websites, and IT Support, and a two-column desktop project grid.
+4. Project cards use only the approved illustrative examples: Office Network Setup, Business CCTV Installation, Business Website Design, and Workstation & Microsoft 365 Setup. Every card retains an `ILLUSTRATIVE EXAMPLE` badge and approved category, title, and description.
+5. Filters are native buttons with `aria-pressed`; an assistive-status message announces the number of visible illustrative examples.
+6. Because no valid project-detail route exists, `Explore project scope` opens an accessible dialog containing only the approved title, category, illustrative-example disclosure, approved description, and a `Discuss Your Project` link to `/contact#request-quote`.
+7. Navy process band uses the approved Understand, Plan, Deliver stages and descriptions from the reference.
+8. Final CTA routes to `/contact#request-quote`.
+
+## 12. FAQ page reference geometry and states
+
+1. Shared utility bar and white navigation, with FAQ active.
+2. Navy split hero with breadcrumb, orange eyebrow `FREQUENTLY ASKED QUESTIONS`, the two-line heading `Clear Answers.` / `Confident Decisions.`, the approved supporting sentence, server imagery, and orange diagonal accent.
+3. White FAQ area includes a labelled search field, desktop category navigation, and the accordion panel headed by the active category.
+4. General is selected initially and the first approved answer is expanded initially.
+5. The FAQ dataset contains only the six approved questions and answers. Other categories filter the same dataset by relevant tags rather than adding new copy.
+6. Search is client-side and case-insensitive across question and answer text. Search and category selection work together; an accessible empty state offers `Clear search`.
+7. Accordion question headings contain native buttons with `aria-expanded` and `aria-controls`.
+8. Assistance panel includes `Contact Us` routed to `/contact`; `WhatsApp Us` remains disabled because no established WhatsApp destination exists.
+9. Final CTA routes to `/contact#request-quote`.
+
+## 13. Unresolved destinations
+
+- `/solutions` has no approved page yet and remains disabled in shared navigation/footer.
+- Privacy Policy and Terms & Conditions have no approved content or routes; they remain non-linked footer labels.
+- No WhatsApp recipient has been configured, so WhatsApp buttons remain disabled and do not select Thabang or Pontsho implicitly.
