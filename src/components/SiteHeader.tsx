@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom'
 import { assets } from '../assets'
 import { ButtonLink } from './ButtonLink'
 
-type ActivePage = 'home' | 'about' | 'contact'
+type ActivePage = 'home' | 'about' | 'services' | 'contact'
 
 type SiteHeaderProps = {
   activePage: ActivePage
@@ -94,9 +94,14 @@ export function SiteHeader({ activePage }: SiteHeaderProps) {
                 </Link>
               </li>
               <li>
-                <a className="nav-link" href="/services.html" onClick={() => closeMenu()}>
+                <Link
+                  className="nav-link"
+                  to="/services"
+                  aria-current={activePage === 'services' ? 'page' : undefined}
+                  onClick={() => closeMenu()}
+                >
                   Services
-                </a>
+                </Link>
               </li>
               {disabledItems.map((item) => (
                 <li key={item}>

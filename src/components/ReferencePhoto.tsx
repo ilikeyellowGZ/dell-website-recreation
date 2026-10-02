@@ -14,14 +14,26 @@ type ReferencePhotoProps = {
   crop: Crop
   eager?: boolean
   frame?: Pick<Crop, 'width' | 'height'>
+  naturalHeight?: number
+  naturalWidth?: number
+  src?: string
 }
 
-export function ReferencePhoto({ alt, className = '', crop, eager = false, frame }: ReferencePhotoProps) {
+export function ReferencePhoto({
+  alt,
+  className = '',
+  crop,
+  eager = false,
+  frame,
+  naturalHeight = 1536,
+  naturalWidth = 1024,
+  src = assets.aboutReference,
+}: ReferencePhotoProps) {
   const style: CSSProperties = {
     aspectRatio: `${frame?.width ?? crop.width} / ${frame?.height ?? crop.height}`,
   }
   const imageStyle: CSSProperties = {
-    width: `${(1024 / crop.width) * 100}%`,
+    width: `${(naturalWidth / crop.width) * 100}%`,
     left: `${(-crop.x / crop.width) * 100}%`,
     top: `${(-crop.y / crop.height) * 100}%`,
   }
@@ -32,11 +44,11 @@ export function ReferencePhoto({ alt, className = '', crop, eager = false, frame
         alt={alt}
         decoding="async"
         fetchPriority={eager ? 'high' : undefined}
-        height="1536"
+        height={naturalHeight}
         loading={eager ? 'eager' : 'lazy'}
-        src={assets.aboutReference}
+        src={src}
         style={imageStyle}
-        width="1024"
+        width={naturalWidth}
       />
     </div>
   )

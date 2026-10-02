@@ -3,13 +3,14 @@ import { Link, useLocation } from 'react-router-dom'
 import { assets } from '../assets'
 
 const services = [
-  'Hardware & ICT',
+  'Hardware Support',
   'Software Solutions',
-  'Network Solutions',
-  'IT Support & Maintenance',
-  'Security Solutions',
+  'Networking Services',
+  'PC & Desktop Support',
+  'Microsoft 365 Support',
+  'CCTV & Security',
+  'Printer Services',
   'Web Development',
-  'Custom IT Solutions',
 ]
 
 export function SiteFooter() {
@@ -39,7 +40,11 @@ export function SiteFooter() {
           <ul className="footer-links">
             <li><Link aria-label="Homepage" to="/">Home</Link></li>
             <li><Link aria-label="About Gauvis" to="/about">About</Link></li>
-            <li><a href="/services.html">Services</a></li>
+            <li>
+              <Link className={pathname === '/services' ? 'is-current' : undefined} to="/services">
+                Services
+              </Link>
+            </li>
             <li><span aria-disabled="true">Solutions</span></li>
             <li><span aria-disabled="true">Case Studies</span></li>
             <li><span aria-disabled="true">FAQ</span></li>
@@ -56,7 +61,7 @@ export function SiteFooter() {
           <ul className="footer-links">
             {services.map((service) => (
               <li key={service}>
-                <a href="/services.html">{service}</a>
+                <Link to="/services">{service}</Link>
               </li>
             ))}
           </ul>

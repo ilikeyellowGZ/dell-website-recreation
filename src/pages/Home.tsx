@@ -90,7 +90,7 @@ export function Home() {
       <nav className="category-strip" aria-label="Service categories">
         <div className="site-shell category-grid">
           {categories.map(([label, icon]) => (
-            <a className="category-link" href="/services.html" key={label}>
+            <a className="category-link" href="/services" key={label}>
               <img src={icon} width="88" height="76" alt="" />
               <span>{label}</span>
             </a>
@@ -129,13 +129,13 @@ export function Home() {
                 We provide end-to-end IT solutions, from hardware supply to ongoing support and maintenance.
               </p>
             </div>
-            <a className="home-services__all" href="/services.html">View All Services <span aria-hidden="true">→</span></a>
+            <a className="home-services__all" href="/services">View All Services <span aria-hidden="true">→</span></a>
           </m.div>
           <div className="services-grid">
             {services.map(([title, image, alt], index) => (
               <m.a
                 className="service-card"
-                href="/services.html"
+                href="/services"
                 initial={shouldReduceMotion ? undefined : { opacity: 0, y: 16 }}
                 key={title}
                 transition={

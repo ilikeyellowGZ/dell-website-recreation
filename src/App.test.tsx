@@ -59,6 +59,43 @@ describe('Homepage route', () => {
     const primaryNavigation = screen.getByRole('navigation', { name: 'Primary' })
     expect(within(primaryNavigation).getByRole('link', { name: 'Home' })).toHaveAttribute('aria-current', 'page')
     expect(within(primaryNavigation).getByRole('link', { name: 'About' })).toHaveAttribute('href', '/about')
+    expect(within(primaryNavigation).getByRole('link', { name: 'Services' })).toHaveAttribute('href', '/services')
+  })
+})
+
+describe('Services route', () => {
+  it('renders the approved Services catalogue, links enquiries to Contact, and marks Services active', () => {
+    renderRoute('/services')
+
+    expect(screen.getByRole('heading', { level: 1, name: /it services for every business need/i })).toBeInTheDocument()
+    expect(screen.getByText(/from everyday support to complete technology setups/i)).toBeInTheDocument()
+
+    const expectedServices = [
+      'Hardware Support',
+      'Software Solutions',
+      'Networking Services',
+      'PC & Desktop Support',
+      'Microsoft 365 Support',
+      'CCTV & Security',
+      'Printer Services',
+      'Website Development',
+    ]
+
+    for (const service of expectedServices) {
+      expect(screen.getByRole('heading', { name: service })).toBeInTheDocument()
+      expect(screen.getByRole('link', { name: `Enquire about ${service}` })).toHaveAttribute(
+        'href',
+        '/contact#request-quote',
+      )
+    }
+
+    expect(screen.getByRole('link', { name: 'Talk to Us' })).toHaveAttribute('href', '/contact#request-quote')
+    const primaryNavigation = screen.getByRole('navigation', { name: 'Primary' })
+    expect(within(primaryNavigation).getByRole('link', { name: 'Services' })).toHaveAttribute(
+      'aria-current',
+      'page',
+    )
+    expect(within(primaryNavigation).getByRole('link', { name: 'Home' })).toHaveAttribute('href', '/')
   })
 })
 

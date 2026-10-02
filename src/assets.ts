@@ -1,5 +1,7 @@
 import aboutReference from '../pictures/a3228311-2ad9-4cf5-8565-67cf1e577e6d.png'
+import servicesReference from '../pictures/47500cdb-dad1-4b55-86da-cf51840a8eb1.png'
 import logo from '../project/gvt-logo.png'
+import heroCabling from '../project/img/hero-cabling.png'
 import heroServerAisle from '../project/img/hero-server-aisle.png'
 import iconHardware from '../project/img/ic-hardware.png'
 import iconSoftware from '../project/img/ic-software.png'
@@ -21,7 +23,9 @@ import serviceSouthAfrica from '../project/img/svc-southafrica.png'
 
 export const assets = {
   aboutReference,
+  servicesReference,
   logo,
+  heroCabling,
   heroServerAisle,
   iconHardware,
   iconSoftware,

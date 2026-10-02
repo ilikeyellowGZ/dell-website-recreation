@@ -7,10 +7,11 @@ The approved visual references are:
 - Homepage: `pictures/ChatGPT Image Sep 11, 2026, 08_42_25 PM.png`
 - About page: `pictures/a3228311-2ad9-4cf5-8565-67cf1e577e6d.png`
 - Contact page: `pictures/b88bc9d6-f2cd-4f70-a769-dbcef539595f.png`
+- Services page: `pictures/47500cdb-dad1-4b55-86da-cf51840a8eb1.png`
 
 These pages are faithful screenshot recreations, not redesigns. The implementation uses React and TypeScript with shared site components.
 
-- Routes in scope: `/`, `/about`, and `/contact`
+- Routes in scope: `/`, `/about`, `/services`, and `/contact`
 - Audience: South African businesses seeking practical IT services
 - Character: credible, technical, compact, high-contrast
 - Dials: design variance 4, motion intensity 3 on About, visual density 6
@@ -101,6 +102,7 @@ The exact About photographs are present only inside the approved composite mocku
 - `Home`: the preserved homepage at `/`.
 - `About`: the approved About page at `/about`.
 - `Contact`: the approved Contact page at `/contact`, including local validation and truthful unconfigured-delivery feedback.
+- `Services`: the approved Services catalogue at `/services`, using a reusable service-card data structure and routing enquiry links to `/contact#request-quote`.
 
 ## 8. Motion
 
@@ -116,7 +118,17 @@ The exact About photographs are present only inside the approved composite mocku
 - On SPA route changes, update the document title, scroll to the top, and focus the route heading.
 - Visible 2px focus ring, 44px touch targets, descriptive image alternatives, and decorative imagery hidden from assistive technology.
 - About is marked with `aria-current="page"` on `/about`, Contact on `/contact`, and Home only on `/`.
+- Services is marked with `aria-current="page"` on `/services`.
 - Do not invent services, claims, certifications, statistics, testimonials, employees, projects, addresses, hours, or email addresses.
 - Confirmed phone destinations are Thabang at 084 035 6925 and Pontsho at 064 367 0274.
 - Quote CTAs use `/contact#request-quote`.
 - No form endpoint or established WhatsApp destination exists. The page must not invent either integration, simulate delivery, or imply a successful enquiry.
+
+## 10. Services page reference geometry
+
+1. Shared utility bar and white navigation, with Services active.
+2. Navy split hero with breadcrumb, the two-line heading `IT Services for` / `Every Business Need.`, the approved supporting sentence, server-rack image, and orange diagonal accent at the far right.
+3. White service catalogue with eight image cards in two desktop columns and four rows. Each card has a fixed-ratio photograph, title, short description, orange vertical accent, and an enquiry link aligned to the trailing edge.
+4. Service cards use the exact order and copy from the approved mockup: Hardware Support, Software Solutions, Networking Services, PC & Desktop Support, Microsoft 365 Support, CCTV & Security, Printer Services, Website Development.
+5. Navy CTA band with the approved `Not sure where to start?` heading, support copy, orange `Talk to Us` button, city imagery, and diagonal orange treatment.
+6. Enquiry links and CTA controls go to `/contact#request-quote`; no service detail pages or automatic service selection are claimed.

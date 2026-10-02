@@ -77,6 +77,7 @@ with sync_playwright() as playwright:
         assert page.get_by_role("heading", name="Powering Your Digital Future.").is_visible()
         primary = page.locator("#primary-navigation")
         assert primary.locator('a[href="/"]').get_attribute("aria-current") == "page"
+        assert primary.locator('a[href="/services"]').get_attribute("href") == "/services"
         assert_page_health(page, width)
 
         if width < 1024:
@@ -86,6 +87,39 @@ with sync_playwright() as playwright:
         assert page.get_by_role("heading", name="Your Technology Partner. Built Around Your Business.").is_visible()
 
         page.screenshot(path=str(ARTIFACTS / f"about-{width}.png"), full_page=True)
+
+        primary = page.locator("#primary-navigation")
+        if width < 1024:
+            page.get_by_role("button", name="Open menu").click()
+        primary.locator('a[href="/services"]').click()
+        page.wait_for_url(f"{BASE_URL}/services")
+        assert page.get_by_role("heading", name="IT Services for Every Business Need.").is_visible()
+
+        response = page.reload(wait_until="networkidle")
+        assert response and response.ok, f"/services failed to refresh at {width}px"
+        primary = page.locator("#primary-navigation")
+        assert primary.locator('a[href="/services"]').get_attribute("aria-current") == "page"
+        assert primary.locator('a[href="/"]').get_attribute("href") == "/"
+
+        expected_services = [
+            "Hardware Support",
+            "Software Solutions",
+            "Networking Services",
+            "PC & Desktop Support",
+            "Microsoft 365 Support",
+            "CCTV & Security",
+            "Printer Services",
+            "Website Development",
+        ]
+        for service in expected_services:
+            assert page.get_by_role("heading", name=service).is_visible()
+            assert page.get_by_role("link", name=f"Enquire about {service}").get_attribute("href") == "/contact#request-quote"
+
+        assert page.get_by_role("link", name="Talk to Us").get_attribute("href") == "/contact#request-quote"
+        assert page.locator('a[href="/services.html"]').count() == 0
+        assert_page_health(page, width)
+        page.evaluate("window.scrollTo(0, 0); document.activeElement?.blur()")
+        page.screenshot(path=str(ARTIFACTS / f"services-{width}.png"), full_page=True)
 
         primary = page.locator("#primary-navigation")
         if width < 1024:

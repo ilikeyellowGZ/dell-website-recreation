@@ -5,10 +5,12 @@ import { SiteHeader } from './components/SiteHeader'
 import { About } from './pages/About'
 import { Contact } from './pages/Contact'
 import { Home } from './pages/Home'
+import { Services } from './pages/Services'
 
 const routeTitles: Record<string, string> = {
   '/': 'Gauvis Technology Holdings | IT Solutions for South Africa',
   '/about': 'About Gauvis | Technology Partner for South Africa',
+  '/services': 'Services | Gauvis Technology Holdings',
   '/contact': 'Contact Gauvis | Request an IT Quote',
 }
 
@@ -32,7 +34,8 @@ function RouteEffects() {
 
 export function App() {
   const { pathname } = useLocation()
-  const activePage = pathname === '/about' ? 'about' : pathname === '/contact' ? 'contact' : 'home'
+  const activePage =
+    pathname === '/about' ? 'about' : pathname === '/services' ? 'services' : pathname === '/contact' ? 'contact' : 'home'
 
   return (
     <>
@@ -44,6 +47,7 @@ export function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/about" element={<About />} />
+        <Route path="/services" element={<Services />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="*" element={<Home />} />
       </Routes>
