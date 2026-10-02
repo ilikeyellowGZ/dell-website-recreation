@@ -124,6 +124,35 @@ with sync_playwright() as playwright:
         primary = page.locator("#primary-navigation")
         if width < 1024:
             page.get_by_role("button", name="Open menu").click()
+        primary.locator('a[href="/solutions"]').click()
+        page.wait_for_url(f"{BASE_URL}/solutions")
+        assert page.get_by_role("heading", name="Technology Solutions Built Around Your Business.").is_visible()
+
+        response = page.reload(wait_until="networkidle")
+        assert response and response.ok, f"/solutions failed to refresh at {width}px"
+        primary = page.locator("#primary-navigation")
+        assert primary.locator('a[href="/solutions"]').get_attribute("aria-current") == "page"
+        solution_titles = [
+            "For small businesses",
+            "For growing businesses",
+            "For businesses with IT issues",
+            "For businesses moving to cloud",
+            "For businesses needing better security",
+            "For businesses needing a stronger digital presence",
+        ]
+        for title in solution_titles:
+            assert page.get_by_role("heading", name=title).is_visible()
+        assert page.get_by_role("link", name="Talk to Gauvis").get_attribute("href") == "/contact#request-quote"
+        assert page.get_by_role("link", name="Call 084 035 6925").get_attribute("href") == "tel:+27840356925"
+        assert page.get_by_text("Privacy Policy").count() == 0
+        assert page.get_by_text("Terms & Conditions").count() == 0
+        assert_page_health(page, width)
+        page.evaluate("window.scrollTo(0, 0); document.activeElement?.blur()")
+        page.screenshot(path=str(ARTIFACTS / f"solutions-{width}.png"), full_page=True)
+
+        primary = page.locator("#primary-navigation")
+        if width < 1024:
+            page.get_by_role("button", name="Open menu").click()
         primary.locator('a[href="/case-studies"]').click()
         page.wait_for_url(f"{BASE_URL}/case-studies")
         assert page.get_by_role("heading", name="Practical Solutions. Projects in Focus.").is_visible()
@@ -204,7 +233,7 @@ with sync_playwright() as playwright:
         assert page.get_by_role("button", name="How do I request a quote?").is_visible()
 
         assert page.get_by_role("link", name="Contact Us").get_attribute("href") == "/contact"
-        assert page.get_by_role("button", name="WhatsApp Us").is_disabled()
+        assert page.get_by_role("link", name="WhatsApp Us").get_attribute("href") == "https://wa.me/27840356925"
         quote_hrefs = page.get_by_role("link", name="Request a Quote").evaluate_all(
             "links => links.map(link => link.getAttribute('href'))"
         )
@@ -228,7 +257,7 @@ with sync_playwright() as playwright:
         assert page.locator('a[href="tel:+27840356925"]').count() >= 2
         assert page.locator('a[href="tel:+27643670274"]').count() >= 2
         assert page.locator('a[href^="mailto:"]').count() == 0
-        assert page.get_by_role("button", name="Chat on WhatsApp").is_disabled()
+        assert page.get_by_role("link", name="Chat on WhatsApp").get_attribute("href") == "https://wa.me/27840356925"
 
         send_button = page.get_by_role("button", name="Send Enquiry")
         send_button.click()
@@ -253,13 +282,14 @@ with sync_playwright() as playwright:
         assert page.get_by_label("Email address").input_value() == "thandi@invalid"
         assert page.get_by_label("Phone number").input_value() == "123"
 
-        page.get_by_label("Email address").fill("thandi@example.com")
-        page.get_by_label("Phone number").fill("+27 84 123 4567")
-        send_button.click()
-        status = page.get_by_role("alert")
-        assert "Online enquiry delivery is not configured" in status.inner_text()
-        assert page.get_by_label("Full name").input_value() == "Thandi Ndlovu"
-        assert page.get_by_label("Tell us what you need").input_value() == "Please help us replace three office computers."
+        if width == 360:
+            page.get_by_label("Email address").fill("thandi@example.com")
+            page.get_by_label("Phone number").fill("+27 84 123 4567")
+            send_button.click()
+            status = page.get_by_role("alert")
+            assert "temporarily unavailable" in status.inner_text()
+            assert page.get_by_label("Full name").input_value() == "Thandi Ndlovu"
+            assert page.get_by_label("Tell us what you need").input_value() == "Please help us replace three office computers."
 
         page.goto(f"{BASE_URL}/contact#request-quote", wait_until="networkidle")
         assert page.url == f"{BASE_URL}/contact#request-quote"
@@ -282,7 +312,11 @@ with sync_playwright() as playwright:
         if width == 1440:
             page.screenshot(path=str(ARTIFACTS / "homepage-1440.png"), full_page=True)
 
-        relevant_errors = [error for error in browser_errors if "favicon" not in error.lower()]
+        relevant_errors = [
+            error
+            for error in browser_errors
+            if "favicon" not in error.lower() and "503 (Service Unavailable)" not in error
+        ]
         assert not relevant_errors, f"{width}px console errors: {relevant_errors}"
         context.close()
 

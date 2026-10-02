@@ -8,15 +8,27 @@ import { Contact } from './pages/Contact'
 import { FAQ } from './pages/FAQ'
 import { Home } from './pages/Home'
 import { Services } from './pages/Services'
+import { Solutions } from './pages/Solutions'
 
 const routeTitles: Record<string, string> = {
   '/': 'Gauvis Technology Holdings | IT Solutions for South Africa',
   '/about': 'About Gauvis | Technology Partner for South Africa',
   '/services': 'Services | Gauvis Technology Holdings',
+  '/solutions': 'Solutions | Gauvis Technology Holdings',
   '/case-studies': 'Case Studies | Gauvis Technology Holdings',
   '/faq': 'FAQ | Gauvis Technology Holdings',
   '/contact': 'Contact Gauvis | Request an IT Quote',
 }
+
+const activePageByPath = {
+  '/': 'home',
+  '/about': 'about',
+  '/services': 'services',
+  '/solutions': 'solutions',
+  '/case-studies': 'case-studies',
+  '/faq': 'faq',
+  '/contact': 'contact',
+} as const
 
 function RouteEffects() {
   const { hash, pathname } = useLocation()
@@ -38,18 +50,7 @@ function RouteEffects() {
 
 export function App() {
   const { pathname } = useLocation()
-  const activePage =
-    pathname === '/about'
-      ? 'about'
-      : pathname === '/services'
-        ? 'services'
-        : pathname === '/case-studies'
-          ? 'case-studies'
-          : pathname === '/faq'
-            ? 'faq'
-            : pathname === '/contact'
-              ? 'contact'
-              : 'home'
+  const activePage = activePageByPath[pathname as keyof typeof activePageByPath] ?? 'home'
 
   return (
     <>
@@ -62,6 +63,7 @@ export function App() {
         <Route path="/" element={<Home />} />
         <Route path="/about" element={<About />} />
         <Route path="/services" element={<Services />} />
+        <Route path="/solutions" element={<Solutions />} />
         <Route path="/case-studies" element={<CaseStudies />} />
         <Route path="/faq" element={<FAQ />} />
         <Route path="/contact" element={<Contact />} />

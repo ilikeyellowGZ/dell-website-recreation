@@ -4,13 +4,11 @@ import { Link } from 'react-router-dom'
 import { assets } from '../assets'
 import { ButtonLink } from './ButtonLink'
 
-type ActivePage = 'home' | 'about' | 'services' | 'case-studies' | 'faq' | 'contact'
+type ActivePage = 'home' | 'about' | 'services' | 'solutions' | 'case-studies' | 'faq' | 'contact'
 
 type SiteHeaderProps = {
   activePage: ActivePage
 }
-
-const disabledItems = ['Solutions']
 
 export function SiteHeader({ activePage }: SiteHeaderProps) {
   const [open, setOpen] = useState(false)
@@ -103,13 +101,16 @@ export function SiteHeader({ activePage }: SiteHeaderProps) {
                   Services
                 </Link>
               </li>
-              {disabledItems.map((item) => (
-                <li key={item}>
-                  <span className="nav-link nav-link--disabled" aria-disabled="true">
-                    {item}
-                  </span>
-                </li>
-              ))}
+              <li>
+                <Link
+                  className="nav-link"
+                  to="/solutions"
+                  aria-current={activePage === 'solutions' ? 'page' : undefined}
+                  onClick={() => closeMenu()}
+                >
+                  Solutions
+                </Link>
+              </li>
               <li>
                 <Link
                   className="nav-link"

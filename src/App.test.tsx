@@ -1,7 +1,11 @@
-import { fireEvent, render, screen, within } from '@testing-library/react'
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { App } from './App'
+
+afterEach(() => {
+  vi.unstubAllGlobals()
+})
 
 function renderRoute(route: string) {
   return render(
@@ -99,6 +103,46 @@ describe('Services route', () => {
   })
 })
 
+describe('Solutions route', () => {
+  it('renders the project-owned business-need solutions and marks Solutions active', () => {
+    renderRoute('/solutions')
+
+    expect(
+      screen.getByRole('heading', { level: 1, name: /technology solutions built around your business/i }),
+    ).toBeInTheDocument()
+
+    const solutionTitles = [
+      'For small businesses',
+      'For growing businesses',
+      'For businesses with IT issues',
+      'For businesses moving to cloud',
+      'For businesses needing better security',
+      'For businesses needing a stronger digital presence',
+    ]
+
+    for (const title of solutionTitles) {
+      expect(screen.getByRole('heading', { name: title })).toBeInTheDocument()
+    }
+
+    const primaryNavigation = screen.getByRole('navigation', { name: 'Primary' })
+    expect(within(primaryNavigation).getByRole('link', { name: 'Solutions' })).toHaveAttribute(
+      'aria-current',
+      'page',
+    )
+    for (const service of ['Hardware Support', 'Networking Services', 'IT Support', 'Website Development']) {
+      expect(screen.getAllByRole('link', { name: service }).some((link) => link.getAttribute('href') === '/services')).toBe(true)
+    }
+    expect(screen.getByRole('link', { name: /talk to gauvis/i })).toHaveAttribute('href', '/contact#request-quote')
+  })
+
+  it('does not present unapproved legal documents as website destinations', () => {
+    renderRoute('/solutions')
+
+    expect(screen.queryByText('Privacy Policy')).not.toBeInTheDocument()
+    expect(screen.queryByText('Terms & Conditions')).not.toBeInTheDocument()
+  })
+})
+
 describe('Case Studies route', () => {
   it('renders approved illustrative projects, filters them, opens scope details, and marks Case Studies active', () => {
     renderRoute('/case-studies')
@@ -189,7 +233,10 @@ describe('FAQ route', () => {
     expect(screen.getByRole('button', { name: 'How do I request a quote?' })).toBeInTheDocument()
 
     expect(screen.getByRole('link', { name: 'Contact Us' })).toHaveAttribute('href', '/contact')
-    expect(screen.getByRole('button', { name: 'WhatsApp Us' })).toBeDisabled()
+    expect(screen.getByRole('link', { name: 'WhatsApp Us' })).toHaveAttribute(
+      'href',
+      'https://wa.me/27840356925',
+    )
     const quoteLinks = screen.getAllByRole('link', { name: 'Request a Quote' })
     expect(quoteLinks.some((link) => link.getAttribute('href') === '/contact#request-quote')).toBe(true)
 
@@ -235,7 +282,10 @@ describe('Contact route', () => {
       'href',
       'tel:+27643670274',
     )
-    expect(screen.getByRole('button', { name: /chat on whatsapp/i })).toBeDisabled()
+    expect(screen.getByRole('link', { name: /chat on whatsapp/i })).toHaveAttribute(
+      'href',
+      'https://wa.me/27840356925',
+    )
     expect(document.querySelector('a[href^="mailto:"]')).not.toBeInTheDocument()
   })
 
@@ -264,7 +314,12 @@ describe('Contact route', () => {
     expect(screen.getByLabelText(/phone number/i)).toHaveValue('123')
   })
 
-  it('does not fake delivery when no enquiry integration is configured', () => {
+  it('shows a pending state and only announces success after the API accepts the enquiry', async () => {
+    let acceptRequest: ((value: unknown) => void) | undefined
+    const fetchPromise = new Promise((resolve) => {
+      acceptRequest = resolve
+    })
+    vi.stubGlobal('fetch', vi.fn(() => fetchPromise))
     renderRoute('/contact')
 
     fireEvent.change(screen.getByLabelText(/full name/i), { target: { value: 'Thandi Ndlovu' } })
@@ -279,12 +334,85 @@ describe('Contact route', () => {
     fireEvent.click(screen.getByLabelText(/i agree to be contacted/i))
     fireEvent.click(screen.getByRole('button', { name: /send enquiry/i }))
 
-    expect(screen.getByRole('alert')).toHaveTextContent(/online enquiry delivery is not configured/i)
-    expect(screen.queryByText(/success|thank you for your enquiry/i)).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /sending enquiry/i })).toBeDisabled()
+    expect(screen.getByRole('status')).toHaveTextContent(/sending your enquiry/i)
+
+    await act(async () => {
+      acceptRequest?.({
+        ok: true,
+        status: 201,
+        json: async () => ({ accepted: true }),
+      })
+      await fetchPromise
+    })
+
+    expect(await screen.findByRole('status')).toHaveTextContent(/your enquiry has been received/i)
+    expect(screen.getByRole('button', { name: /send enquiry/i })).toBeEnabled()
+    expect(screen.getByLabelText(/full name/i)).toHaveValue('')
+    expect(screen.getByLabelText(/email address/i)).toHaveValue('')
+  })
+
+  it('keeps entered values and allows retrying when the API is unavailable', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: false,
+        status: 503,
+        json: async () => ({
+          accepted: false,
+          code: 'SERVICE_UNAVAILABLE',
+          message: 'Enquiry delivery is temporarily unavailable. Please try again or contact us by phone.',
+        }),
+      }),
+    )
+    renderRoute('/contact')
+
+    fireEvent.change(screen.getByLabelText(/full name/i), { target: { value: 'Thandi Ndlovu' } })
+    fireEvent.change(screen.getByLabelText(/email address/i), { target: { value: 'thandi@example.com' } })
+    fireEvent.change(screen.getByLabelText(/phone number/i), { target: { value: '+27 84 123 4567' } })
+    fireEvent.change(screen.getByLabelText(/service required/i), { target: { value: 'Hardware Support' } })
+    fireEvent.change(screen.getByLabelText(/tell us what you need/i), {
+      target: { value: 'Please help us replace three office computers.' },
+    })
+    fireEvent.click(screen.getByLabelText(/i agree to be contacted/i))
+    fireEvent.click(screen.getByRole('button', { name: /send enquiry/i }))
+
+    await waitFor(() => {
+      expect(screen.getByRole('alert')).toHaveTextContent(/temporarily unavailable/i)
+    })
     expect(screen.getByLabelText(/full name/i)).toHaveValue('Thandi Ndlovu')
     expect(screen.getByLabelText(/email address/i)).toHaveValue('thandi@example.com')
     expect(screen.getByLabelText(/tell us what you need/i)).toHaveValue(
       'Please help us replace three office computers.',
     )
+    expect(screen.getByRole('button', { name: /send enquiry/i })).toBeEnabled()
+  })
+
+  it('connects API validation errors to fields without clearing the form', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: false,
+        status: 422,
+        json: async () => ({
+          accepted: false,
+          code: 'VALIDATION_ERROR',
+          fieldErrors: { email: 'Enter a valid email address.' },
+        }),
+      }),
+    )
+    renderRoute('/contact')
+
+    fireEvent.change(screen.getByLabelText(/full name/i), { target: { value: 'Thandi Ndlovu' } })
+    fireEvent.change(screen.getByLabelText(/email address/i), { target: { value: 'thandi@example.com' } })
+    fireEvent.change(screen.getByLabelText(/phone number/i), { target: { value: '+27 84 123 4567' } })
+    fireEvent.change(screen.getByLabelText(/service required/i), { target: { value: 'Hardware Support' } })
+    fireEvent.change(screen.getByLabelText(/tell us what you need/i), { target: { value: 'Help with hardware.' } })
+    fireEvent.click(screen.getByLabelText(/i agree to be contacted/i))
+    fireEvent.click(screen.getByRole('button', { name: /send enquiry/i }))
+
+    expect(await screen.findByText('Enter a valid email address.')).toBeInTheDocument()
+    expect(screen.getByLabelText(/email address/i)).toHaveAttribute('aria-invalid', 'true')
+    expect(screen.getByLabelText(/email address/i)).toHaveValue('thandi@example.com')
   })
 })
