@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom'
 import { assets } from '../assets'
 import { ButtonLink } from './ButtonLink'
 
-type ActivePage = 'home' | 'about' | 'services' | 'solutions' | 'case-studies' | 'faq' | 'contact'
+type ActivePage = 'home' | 'about' | 'services' | 'solutions' | 'faq' | 'contact'
 
 type SiteHeaderProps = {
   activePage: ActivePage
@@ -16,7 +16,6 @@ const navItems: Array<{ label: string; page: ActivePage; to: string }> = [
   { label: 'About', page: 'about', to: '/about' },
   { label: 'Services', page: 'services', to: '/services' },
   { label: 'Solutions', page: 'solutions', to: '/solutions' },
-  { label: 'Case Studies', page: 'case-studies', to: '/case-studies' },
   { label: 'FAQ', page: 'faq', to: '/faq' },
   { label: 'Contact', page: 'contact', to: '/contact' },
 ]
@@ -212,13 +211,13 @@ export function SiteHeader({ activePage }: SiteHeaderProps) {
           >
             <div className="mobile-nav__header" data-mobile-nav-reveal>
               <div className="mobile-nav__identity">
-                <span className="mobile-nav__brand-mark" aria-hidden="true">
-                  GVT
-                </span>
-                <span>
-                  <strong>Gauvis Tech</strong>
-                  <small>Navigation</small>
-                </span>
+                <img
+                  alt="GVT Gauvis Tech"
+                  className="mobile-nav__logo"
+                  height="204"
+                  src={assets.logo}
+                  width="575"
+                />
               </div>
               <button
                 aria-label="Close navigation menu"

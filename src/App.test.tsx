@@ -15,6 +15,14 @@ function renderRoute(route: string) {
   )
 }
 
+describe('Shared footer', () => {
+  it('shows the confirmed CIPC registration number', () => {
+    renderRoute('/')
+
+    expect(screen.getByText('CIPC Registration Number: 2026/703930/07')).toBeInTheDocument()
+  })
+})
+
 describe('About route', () => {
   it('renders the approved About content and active navigation state', () => {
     renderRoute('/about')
@@ -41,6 +49,10 @@ describe('About route', () => {
     expect(screen.getByRole('button', { name: 'Close menu' })).toHaveAttribute('aria-expanded', 'true')
 
     const primaryNavigation = screen.getByRole('navigation', { name: 'Primary' })
+    expect(within(primaryNavigation).getByRole('img', { name: 'GVT Gauvis Tech' })).toHaveAttribute(
+      'src',
+      '/project/gvt-logo.png',
+    )
     const drawerClose = within(primaryNavigation).getByRole('button', { name: 'Close navigation menu' })
     const drawerQuote = within(primaryNavigation).getByRole('link', { name: 'Request a Quote' })
 
@@ -69,6 +81,22 @@ describe('About route', () => {
 })
 
 describe('Homepage route', () => {
+  it('keeps the outgoing page mounted while the destination transitions in', async () => {
+    renderRoute('/')
+
+    const homeHeading = screen.getByRole('heading', { level: 1, name: /powering your digital future/i })
+    const primaryNavigation = screen.getByRole('navigation', { name: 'Primary' })
+    fireEvent.click(within(primaryNavigation).getByRole('link', { name: 'About' }))
+
+    expect(homeHeading).toBeInTheDocument()
+    const aboutHeading = await screen.findByRole('heading', {
+      level: 1,
+      name: /your technology partner\. built around your business\./i,
+    })
+    expect(homeHeading).not.toBeInTheDocument()
+    await waitFor(() => expect(aboutHeading).toHaveFocus())
+  })
+
   it('keeps the homepage at the root and links About to the React route', () => {
     renderRoute('/')
 
@@ -78,6 +106,19 @@ describe('Homepage route', () => {
     expect(within(primaryNavigation).getByRole('link', { name: 'Home' })).toHaveAttribute('aria-current', 'page')
     expect(within(primaryNavigation).getByRole('link', { name: 'About' })).toHaveAttribute('href', '/about')
     expect(within(primaryNavigation).getByRole('link', { name: 'Services' })).toHaveAttribute('href', '/services')
+  })
+})
+
+describe('Removed routes', () => {
+  it('does not expose Case Studies in shared navigation or at its former route', () => {
+    renderRoute('/case-studies')
+
+    expect(screen.getByRole('heading', { level: 1, name: /powering your digital future/i })).toBeInTheDocument()
+    expect(screen.queryByRole('heading', { level: 1, name: /practical solutions\. projects in focus\./i })).not.toBeInTheDocument()
+
+    const primaryNavigation = screen.getByRole('navigation', { name: 'Primary' })
+    expect(within(primaryNavigation).queryByRole('link', { name: 'Case Studies' })).not.toBeInTheDocument()
+    expect(within(screen.getByRole('contentinfo')).queryByRole('link', { name: 'Case Studies' })).not.toBeInTheDocument()
   })
 })
 
@@ -157,58 +198,6 @@ describe('Solutions route', () => {
   })
 })
 
-describe('Case Studies route', () => {
-  it('renders approved illustrative projects, filters them, opens scope details, and marks Case Studies active', () => {
-    renderRoute('/case-studies')
-
-    expect(screen.getByRole('heading', { level: 1, name: /practical solutions\. projects in focus\./i })).toBeInTheDocument()
-    expect(screen.getByText('Illustrative project examples.')).toBeInTheDocument()
-    expect(screen.getAllByText('ILLUSTRATIVE EXAMPLE')).toHaveLength(4)
-
-    const expectedProjects = [
-      'Office Network Setup',
-      'Business CCTV Installation',
-      'Business Website Design',
-      'Workstation & Microsoft 365 Setup',
-    ]
-
-    for (const project of expectedProjects) {
-      expect(screen.getByRole('heading', { name: project })).toBeInTheDocument()
-      expect(screen.getByRole('button', { name: `Explore project scope for ${project}` })).toBeInTheDocument()
-    }
-
-    fireEvent.click(screen.getByRole('button', { name: 'Security' }))
-    expect(screen.getByRole('button', { name: 'Security' })).toHaveAttribute('aria-pressed', 'true')
-    expect(screen.getByRole('status')).toHaveTextContent('Showing 1 illustrative project example.')
-    expect(screen.getByRole('heading', { name: 'Business CCTV Installation' })).toBeInTheDocument()
-    expect(screen.queryByRole('heading', { name: 'Office Network Setup' })).not.toBeInTheDocument()
-
-    fireEvent.click(screen.getByRole('button', { name: 'All Projects' }))
-    expect(screen.getByRole('heading', { name: 'Office Network Setup' })).toBeInTheDocument()
-
-    const trigger = screen.getByRole('button', { name: 'Explore project scope for Office Network Setup' })
-    fireEvent.click(trigger)
-    const dialog = screen.getByRole('dialog', { name: 'Office Network Setup' })
-    expect(dialog).toHaveTextContent('Networking')
-    expect(dialog).toHaveTextContent('Illustrative project examples.')
-    expect(dialog).toHaveTextContent('Network layout, device connections and shared access.')
-    expect(within(dialog).getByRole('link', { name: 'Discuss Your Project' })).toHaveAttribute(
-      'href',
-      '/contact#request-quote',
-    )
-    fireEvent(dialog, new Event('cancel', { bubbles: false, cancelable: true }))
-    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
-    expect(trigger).toHaveFocus()
-
-    const primaryNavigation = screen.getByRole('navigation', { name: 'Primary' })
-    expect(within(primaryNavigation).getByRole('link', { name: 'Case Studies' })).toHaveAttribute(
-      'aria-current',
-      'page',
-    )
-    expect(within(primaryNavigation).getByRole('link', { name: 'FAQ' })).toHaveAttribute('href', '/faq')
-  })
-})
-
 describe('FAQ route', () => {
   it('renders approved FAQs, filters by search and category, and marks FAQ active', () => {
     renderRoute('/faq')
@@ -256,10 +245,6 @@ describe('FAQ route', () => {
 
     const primaryNavigation = screen.getByRole('navigation', { name: 'Primary' })
     expect(within(primaryNavigation).getByRole('link', { name: 'FAQ' })).toHaveAttribute('aria-current', 'page')
-    expect(within(primaryNavigation).getByRole('link', { name: 'Case Studies' })).toHaveAttribute(
-      'href',
-      '/case-studies',
-    )
   })
 
   it('toggles FAQ answers with an accessible accordion button', () => {

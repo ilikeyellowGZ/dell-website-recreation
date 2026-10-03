@@ -3246,41 +3246,13 @@ a.contact-card:hover {
     min-width: 0;
     display: flex;
     align-items: center;
-    gap: 0.75rem;
   }
 
-  .mobile-nav__identity > span:last-child {
-    min-width: 0;
-    display: grid;
-  }
-
-  .mobile-nav__identity strong {
-    color: var(--white);
-    font-size: 0.875rem;
-    letter-spacing: 0.04em;
-    line-height: 1.2;
-    text-transform: uppercase;
-  }
-
-  .mobile-nav__identity small {
-    margin-top: 0.1875rem;
-    color: rgb(255 255 255 / 68%);
-    font-size: 0.6875rem;
-    letter-spacing: 0.13em;
-    text-transform: uppercase;
-  }
-
-  .mobile-nav__brand-mark {
-    min-width: 2.75rem;
-    height: 2.75rem;
-    display: grid;
-    place-items: center;
-    border: 1px solid rgb(255 255 255 / 20%);
-    background: var(--orange-500);
-    color: var(--white);
-    font-size: 0.8125rem;
-    font-weight: 800;
-    letter-spacing: 0.08em;
+  .mobile-nav__logo {
+    width: 8.5rem;
+    max-height: 3rem;
+    object-fit: contain;
+    object-position: left center;
   }
 
   .mobile-nav__close {

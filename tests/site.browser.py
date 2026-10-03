@@ -74,6 +74,7 @@ with sync_playwright() as playwright:
             home_link.click()
 
         page.wait_for_url(f"{BASE_URL}/")
+        page.get_by_role("heading", name="Powering Your Digital Future.").wait_for(state="visible")
         assert page.get_by_role("heading", name="Powering Your Digital Future.").is_visible()
         primary = page.locator("#primary-navigation")
         assert primary.locator('a[href="/"]').get_attribute("aria-current") == "page"
@@ -84,6 +85,9 @@ with sync_playwright() as playwright:
             page.get_by_role("button", name="Open menu").click()
         primary.locator('a[href="/about"]').click()
         page.wait_for_url(f"{BASE_URL}/about")
+        page.get_by_role("heading", name="Your Technology Partner. Built Around Your Business.").wait_for(
+            state="visible"
+        )
         assert page.get_by_role("heading", name="Your Technology Partner. Built Around Your Business.").is_visible()
 
         page.screenshot(path=str(ARTIFACTS / f"about-{width}.png"), full_page=True)
@@ -93,6 +97,7 @@ with sync_playwright() as playwright:
             page.get_by_role("button", name="Open menu").click()
         primary.locator('a[href="/services"]').click()
         page.wait_for_url(f"{BASE_URL}/services")
+        page.get_by_role("heading", name="IT Services for Every Business Need.").wait_for(state="visible")
         assert page.get_by_role("heading", name="IT Services for Every Business Need.").is_visible()
 
         response = page.reload(wait_until="networkidle")
@@ -126,6 +131,9 @@ with sync_playwright() as playwright:
             page.get_by_role("button", name="Open menu").click()
         primary.locator('a[href="/solutions"]').click()
         page.wait_for_url(f"{BASE_URL}/solutions")
+        page.get_by_role("heading", name="Technology Solutions Built Around Your Business.").wait_for(
+            state="visible"
+        )
         assert page.get_by_role("heading", name="Technology Solutions Built Around Your Business.").is_visible()
 
         response = page.reload(wait_until="networkidle")
@@ -153,56 +161,9 @@ with sync_playwright() as playwright:
         primary = page.locator("#primary-navigation")
         if width < 1024:
             page.get_by_role("button", name="Open menu").click()
-        primary.locator('a[href="/case-studies"]').click()
-        page.wait_for_url(f"{BASE_URL}/case-studies")
-        assert page.get_by_role("heading", name="Practical Solutions. Projects in Focus.").is_visible()
-
-        response = page.reload(wait_until="networkidle")
-        assert response and response.ok, f"/case-studies failed to refresh at {width}px"
-        primary = page.locator("#primary-navigation")
-        assert primary.locator('a[href="/case-studies"]').get_attribute("aria-current") == "page"
-        assert primary.locator('a[href="/"]').get_attribute("href") == "/"
-
-        expected_projects = [
-            "Office Network Setup",
-            "Business CCTV Installation",
-            "Business Website Design",
-            "Workstation & Microsoft 365 Setup",
-        ]
-        for project in expected_projects:
-            assert page.get_by_role("heading", name=project).is_visible()
-            assert page.get_by_role("button", name=f"Explore project scope for {project}").is_visible()
-        assert page.get_by_text("ILLUSTRATIVE EXAMPLE").count() == 4
-
-        page.get_by_role("button", name="Security").click()
-        assert page.get_by_role("button", name="Security").get_attribute("aria-pressed") == "true"
-        assert page.get_by_text("Showing 1 illustrative project example.").count() == 1
-        assert page.get_by_role("heading", name="Business CCTV Installation").is_visible()
-        assert page.get_by_role("heading", name="Office Network Setup").count() == 0
-
-        page.get_by_role("button", name="All Projects").click()
-        assert page.get_by_role("heading", name="Office Network Setup").is_visible()
-
-        scope_button = page.get_by_role("button", name="Explore project scope for Office Network Setup")
-        scope_button.click()
-        dialog = page.get_by_role("dialog", name="Office Network Setup")
-        assert dialog.is_visible()
-        assert "Network layout, device connections and shared access." in dialog.inner_text()
-        assert dialog.get_by_role("link", name="Discuss Your Project").get_attribute("href") == "/contact#request-quote"
-        page.keyboard.press("Escape")
-        assert dialog.count() == 0
-        assert scope_button.evaluate("node => node === document.activeElement")
-
-        assert page.get_by_role("link", name="Discuss Your Project").get_attribute("href") == "/contact#request-quote"
-        assert_page_health(page, width)
-        page.evaluate("window.scrollTo(0, 0); document.activeElement?.blur()")
-        page.screenshot(path=str(ARTIFACTS / f"case-studies-{width}.png"), full_page=True)
-
-        primary = page.locator("#primary-navigation")
-        if width < 1024:
-            page.get_by_role("button", name="Open menu").click()
         primary.locator('a[href="/faq"]').click()
         page.wait_for_url(f"{BASE_URL}/faq")
+        page.get_by_role("heading", name="Clear Answers. Confident Decisions.").wait_for(state="visible")
         assert page.get_by_role("heading", name="Clear Answers. Confident Decisions.").is_visible()
 
         response = page.reload(wait_until="networkidle")
@@ -247,6 +208,7 @@ with sync_playwright() as playwright:
             page.get_by_role("button", name="Open menu").click()
         primary.locator('a[href="/contact"]').click()
         page.wait_for_url(f"{BASE_URL}/contact")
+        page.get_by_role("heading", name="Let’s Talk About Your IT Needs.").wait_for(state="visible")
         assert page.get_by_role("heading", name="Let’s Talk About Your IT Needs.").is_visible()
 
         response = page.reload(wait_until="networkidle")
@@ -307,6 +269,7 @@ with sync_playwright() as playwright:
             page.get_by_role("button", name="Open menu").click()
         primary.locator('a[href="/"]').click()
         page.wait_for_url(f"{BASE_URL}/")
+        page.get_by_role("heading", name="Powering Your Digital Future.").wait_for(state="visible")
         assert page.get_by_role("heading", name="Powering Your Digital Future.").is_visible()
 
         if width == 1440:

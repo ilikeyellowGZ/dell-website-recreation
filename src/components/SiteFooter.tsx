@@ -45,11 +45,6 @@ export function SiteFooter() {
               </Link>
             </li>
             <li>
-              <Link className={pathname === '/case-studies' ? 'is-current' : undefined} to="/case-studies">
-                Case Studies
-              </Link>
-            </li>
-            <li>
               <Link className={pathname === '/faq' ? 'is-current' : undefined} to="/faq">
                 FAQ
               </Link>
@@ -98,6 +93,7 @@ export function SiteFooter() {
       <div className="footer-bottom">
         <div className="site-shell footer-bottom__inner">
           <span>© 2026 Gauvis Technology Holdings. All rights reserved.</span>
+          <span>CIPC Registration Number: 2026/703930/07</span>
         </div>
       </div>
     </footer>
