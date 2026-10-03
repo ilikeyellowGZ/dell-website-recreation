@@ -24,9 +24,10 @@ The design medium is **HTML/CSS/JS** — these are prototypes, not production co
 ## Run the React website
 
 1. Install packages with `npm install`.
-2. Copy `.env.example` to `.env` and set `MONGODB_URI` and `MONGODB_DB_NAME`. The optional `MONGODB_COLLECTION` value defaults to `enquiries`.
-3. Run `npm run dev` to start the React client and enquiry API together.
-4. Open `http://localhost:5173`.
+2. Copy `.env.example` to `.env` and set `MONGODB_URI`. The database defaults to `gauvistech` and the collection defaults to `enquiries`.
+3. Run `npm run db:setup` once to create the validated enquiry collection and indexes.
+4. Run `npm run dev` to start the React client and enquiry API together.
+5. Open `http://localhost:5173`.
 
 For a production-style local preview, run `npm run build` followed by `npm run preview`, then open `http://localhost:4173`.
 

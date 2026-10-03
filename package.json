@@ -8,6 +8,7 @@
     "dev:client": "vite",
     "dev:server": "tsx watch server/index.ts",
     "build": "tsc -b && vite build",
+    "db:setup": "tsx server/setupDatabase.ts",
     "preview": "tsx server/index.ts --port 4173",
     "start": "tsx server/index.ts",
     "test": "vitest run",

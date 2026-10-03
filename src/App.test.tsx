@@ -32,13 +32,27 @@ describe('About route', () => {
     expect(document.querySelector('a[href^="mailto:"]')).not.toBeInTheDocument()
   })
 
-  it('opens and closes the accessible mobile navigation disclosure', () => {
+  it('opens the mobile drawer, traps focus, and restores focus when it closes', () => {
     renderRoute('/about')
 
     const toggle = screen.getByRole('button', { name: 'Open menu' })
     expect(toggle).toHaveAttribute('aria-expanded', 'false')
     fireEvent.click(toggle)
     expect(screen.getByRole('button', { name: 'Close menu' })).toHaveAttribute('aria-expanded', 'true')
+
+    const primaryNavigation = screen.getByRole('navigation', { name: 'Primary' })
+    const drawerClose = within(primaryNavigation).getByRole('button', { name: 'Close navigation menu' })
+    const drawerQuote = within(primaryNavigation).getByRole('link', { name: 'Request a Quote' })
+
+    drawerQuote.focus()
+    fireEvent.keyDown(document, { key: 'Tab' })
+    expect(drawerClose).toHaveFocus()
+
+    fireEvent.click(drawerClose)
+    expect(screen.getByRole('button', { name: 'Open menu' })).toHaveAttribute('aria-expanded', 'false')
+    expect(toggle).toHaveFocus()
+
+    fireEvent.click(toggle)
     fireEvent.keyDown(document, { key: 'Escape' })
     expect(screen.getByRole('button', { name: 'Open menu' })).toHaveAttribute('aria-expanded', 'false')
   })

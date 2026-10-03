@@ -97,6 +97,7 @@ The exact About photographs are present only inside the approved composite mocku
 ## 7. Reusable React primitives and states
 
 - `SiteHeader`: utility bar, brand, desktop nav, accessible mobile disclosure, active route state.
+- `Mobile navigation drawer`: full-height navy side panel below 1024px, dimmed backdrop, internal close control, numbered navigation rows, and the existing quote CTA. It traps keyboard focus while open and returns focus to the header toggle when dismissed.
 - `SiteFooter`: reusable brand, quick links, services, and confirmed phone contacts.
 - `ButtonLink`: primary, outline, and light variants with hover, active, focus-visible, and reduced-motion behavior.
 - `SectionEyebrow`: compact orange section label, used only where the reference includes one.
@@ -117,6 +118,7 @@ The exact About photographs are present only inside the approved composite mocku
 - The preserved homepage may retain its restrained hero hierarchy and in-view reveals.
 - Only transforms and opacity animate.
 - All automatic motion honors `prefers-reduced-motion`; menu state changes remain immediate and usable.
+- The mobile navigation panel enters from the left with a short GSAP timeline. Its heading, links, and quote action follow in a 65ms left-to-right stagger; dismissal reverses quickly. Reduced-motion users receive the final open or closed state without translation or stagger.
 
 ## 9. Accessibility and content constraints
 
