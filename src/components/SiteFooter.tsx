@@ -39,10 +39,9 @@ export function SiteFooter() {
                 Services
               </Link>
             </li>
-            <li><span aria-disabled="true">Solutions</span></li>
             <li>
-              <Link className={pathname === '/case-studies' ? 'is-current' : undefined} to="/case-studies">
-                Case Studies
+              <Link className={pathname === '/solutions' ? 'is-current' : undefined} to="/solutions">
+                Solutions
               </Link>
             </li>
             <li>
@@ -94,11 +93,7 @@ export function SiteFooter() {
       <div className="footer-bottom">
         <div className="site-shell footer-bottom__inner">
           <span>© 2026 Gauvis Technology Holdings. All rights reserved.</span>
-          <div className="legal-links" aria-label="Legal links">
-            <span>Privacy Policy</span>
-            <span aria-hidden="true">|</span>
-            <span>Terms &amp; Conditions</span>
-          </div>
+          <span>CIPC Registration Number: 2026/703930/07</span>
         </div>
       </div>
     </footer>

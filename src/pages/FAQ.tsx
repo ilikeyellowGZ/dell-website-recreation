@@ -15,6 +15,7 @@ import { useMemo, useState, type ComponentType } from 'react'
 import { Link } from 'react-router-dom'
 import { assets } from '../assets'
 import { ButtonLink } from '../components/ButtonLink'
+import { thabangWhatsAppUrl } from '../features/contact/ContactDetails'
 
 type FAQCategory = 'General' | 'IT Support' | 'Websites' | 'Security & CCTV' | 'Quotes'
 
@@ -250,13 +251,10 @@ export function FAQ() {
           </div>
           <div className="faq-assistance__actions">
             <ButtonLink href="/contact">Contact Us</ButtonLink>
-            <button className="faq-whatsapp" type="button" disabled aria-describedby="faq-whatsapp-unavailable">
+            <a className="faq-whatsapp" href={thabangWhatsAppUrl} rel="noreferrer" target="_blank">
               <WhatsappLogo aria-hidden="true" size={24} weight="regular" />
               <span>WhatsApp Us</span>
-            </button>
-            <span className="visually-hidden" id="faq-whatsapp-unavailable">
-              A WhatsApp recipient has not been configured.
-            </span>
+            </a>
           </div>
         </div>
       </section>

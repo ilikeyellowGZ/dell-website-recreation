@@ -20,3 +20,15 @@ The design medium is **HTML/CSS/JS** — these are prototypes, not production co
 
 - `dell-website-recreation/README.md` — this file
 - `dell-website-recreation/project/` — the `Dell website recreation` project files (HTML prototypes, assets, components)
+
+## Run the React website
+
+1. Install packages with `npm install`.
+2. Copy `.env.example` to `.env` and set `MONGODB_URI`. The database defaults to `gauvistech` and the collection defaults to `enquiries`.
+3. Run `npm run db:setup` once to create the validated enquiry collection and indexes.
+4. Run `npm run dev` to start the React client and enquiry API together.
+5. Open `http://localhost:5173`.
+
+For a production-style local preview, run `npm run build` followed by `npm run preview`, then open `http://localhost:4173`.
+
+The contact form never treats an unconfigured or unavailable database as a successful delivery. MongoDB credentials are loaded only by the server and must not use the `VITE_` prefix.

@@ -8,12 +8,11 @@ The approved visual references are:
 - About page: `pictures/a3228311-2ad9-4cf5-8565-67cf1e577e6d.png`
 - Contact page: `pictures/b88bc9d6-f2cd-4f70-a769-dbcef539595f.png`
 - Services page: `pictures/47500cdb-dad1-4b55-86da-cf51840a8eb1.png`
-- Case Studies page: `pictures/30a3f00b-57e1-427d-9c26-714892264e48.png`
 - FAQ page: `pictures/104f9e2f-49be-4b24-8a5d-943516574ba1.png`
 
 These pages are faithful screenshot recreations, not redesigns. The implementation uses React and TypeScript with shared site components.
 
-- Routes in scope: `/`, `/about`, `/services`, `/contact`, `/case-studies`, and `/faq`
+- Routes in scope: `/`, `/about`, `/services`, `/solutions`, `/contact`, and `/faq`
 - Audience: South African businesses seeking practical IT services
 - Character: credible, technical, compact, high-contrast
 - Dials: design variance 4, motion intensity 3 on About, visual density 6
@@ -88,25 +87,28 @@ The exact About photographs are present only inside the approved composite mocku
 2. White enquiry section with a narrower contact-information column and a wider bordered form card. At the 1024px reference width, the left column is about one third of the content area and the form is about two thirds.
 3. Contact cards show only the confirmed phone names/numbers and “Serving South Africa”; the pale-blue panel communicates on-site assistance without adding an address.
 4. The quote form has paired name/business and email/phone rows, followed by full-width service, location, message, consent, and submit controls. Fields expose default, hover, focus-visible, invalid, and disabled/pending-ready states.
-5. Client validation keeps entered values, connects inline messages to their fields, and focuses the first invalid field. Because no enquiry service is configured, an otherwise-valid submit announces the missing integration and never shows a success state.
-6. The WhatsApp action keeps the approved button appearance but remains unavailable until the user confirms whether Thabang or Pontsho receives enquiries; no phone is selected implicitly.
-7. Pale-blue “What happens next?” section contains the approved three steps and stacks at narrow widths.
-8. `#request-quote` uses sticky-header-safe scroll margin. All Request a Quote controls route to `/contact#request-quote`.
+5. Client and server validation keep entered values on errors, connect inline messages to fields, and focus the first invalid field. Submission is locked while pending and success is shown only after `/api/enquiries` returns an accepted response.
+6. The API validates and rate-limits public input before storing an enquiry in MongoDB. Database credentials remain server-only; missing configuration or database failure produces a retryable unavailable state and never a false success.
+7. WhatsApp actions open Thabang at `https://wa.me/27840356925` in a new tab.
+8. Pale-blue “What happens next?” section contains the approved three steps and stacks at narrow widths.
+9. `#request-quote` uses sticky-header-safe scroll margin. All Request a Quote controls route to `/contact#request-quote`.
 
 ## 7. Reusable React primitives and states
 
 - `SiteHeader`: utility bar, brand, desktop nav, accessible mobile disclosure, active route state.
-- `SiteFooter`: reusable brand, quick links, services, confirmed phone contacts, and legal strip.
+- `Mobile navigation drawer`: full-height navy side panel below 1024px, dimmed backdrop, internal close control, numbered navigation rows, and the existing quote CTA. It traps keyboard focus while open and returns focus to the header toggle when dismissed.
+- `RouteTransition`: shared Motion wrapper around route content; it coordinates page exit and entrance while the persistent header and footer remain stable.
+- `SiteFooter`: reusable brand, quick links, services, and confirmed phone contacts.
 - `ButtonLink`: primary, outline, and light variants with hover, active, focus-visible, and reduced-motion behavior.
 - `SectionEyebrow`: compact orange section label, used only where the reference includes one.
 - `Icon`: one Phosphor icon family with consistent weight.
 - `ReferencePhoto`: fixed-ratio clipped media frame for approved imagery embedded in a reference composite.
 - `Home`: the preserved homepage at `/`.
 - `About`: the approved About page at `/about`.
-- `Contact`: the approved Contact page at `/contact`, including local validation and truthful unconfigured-delivery feedback.
+- `Contact`: the approved Contact page at `/contact`, composed from `ContactDetails`, `QuoteForm`, field groups, submission state, and `NextSteps`.
 - `Services`: the approved Services catalogue at `/services`, using a reusable service-card data structure and routing enquiry links to `/contact#request-quote`.
-- `CaseStudies`: the approved illustrative project examples page at `/case-studies`, including category filters, result announcements, persistent illustrative-example badges, and an accessible scope dialog.
-- `FAQ`: the approved FAQ page at `/faq`, including static category/search filtering, accessible accordion controls, empty state, and disabled WhatsApp action until a recipient is configured.
+- `Solutions`: the project-owned Solutions page at `/solutions`, grouping confirmed services around six business situations from the original design bundle.
+- `FAQ`: the approved FAQ page at `/faq`, including static category/search filtering, accessible accordion controls, empty state, and the confirmed Thabang WhatsApp action.
 
 ## 8. Motion
 
@@ -115,6 +117,8 @@ The exact About photographs are present only inside the approved composite mocku
 - The preserved homepage may retain its restrained hero hierarchy and in-view reveals.
 - Only transforms and opacity animate.
 - All automatic motion honors `prefers-reduced-motion`; menu state changes remain immediate and usable.
+- The mobile navigation panel enters from the left with a short GSAP timeline. Its heading, links, and quote action follow in a 65ms left-to-right stagger; dismissal reverses quickly. Reduced-motion users receive the final open or closed state without translation or stagger.
+- Route changes use a 220ms Motion transition to prevent abrupt content replacement: the outgoing page fades and moves up 8px, then the destination fades in from 12px below using the strong ease-out curve. Reduced-motion users receive a 120ms opacity-only crossfade.
 
 ## 9. Accessibility and content constraints
 
@@ -123,12 +127,13 @@ The exact About photographs are present only inside the approved composite mocku
 - Visible 2px focus ring, 44px touch targets, descriptive image alternatives, and decorative imagery hidden from assistive technology.
 - About is marked with `aria-current="page"` on `/about`, Contact on `/contact`, and Home only on `/`.
 - Services is marked with `aria-current="page"` on `/services`.
-- Case Studies is marked with `aria-current="page"` on `/case-studies`.
 - FAQ is marked with `aria-current="page"` on `/faq`.
+- Solutions is marked with `aria-current="page"` on `/solutions`.
 - Do not invent services, claims, certifications, statistics, testimonials, employees, projects, addresses, hours, or email addresses.
 - Confirmed phone destinations are Thabang at 084 035 6925 and Pontsho at 064 367 0274.
+- Confirmed company registration is CIPC Registration Number 2026/703930/07 and appears in the shared footer.
 - Quote CTAs use `/contact#request-quote`.
-- No form endpoint or established WhatsApp destination exists. The page must not invent either integration, simulate delivery, or imply a successful enquiry.
+- Contact submissions use the same-origin `/api/enquiries` endpoint; success requires server acceptance. WhatsApp uses only the user-confirmed Thabang destination.
 
 ## 10. Services page reference geometry
 
@@ -139,18 +144,7 @@ The exact About photographs are present only inside the approved composite mocku
 5. Navy CTA band with the approved `Not sure where to start?` heading, support copy, orange `Talk to Us` button, city imagery, and diagonal orange treatment.
 6. Enquiry links and CTA controls go to `/contact#request-quote`; no service detail pages or automatic service selection are claimed.
 
-## 11. Case Studies page reference geometry and states
-
-1. Shared utility bar and white navigation, with Case Studies active.
-2. Navy split hero with breadcrumb, the two-line heading `Practical Solutions.` / `Projects in Focus.`, the approved supporting sentence, server-rack imagery, and an orange diagonal accent.
-3. White project-example section with the pale-orange disclosure panel text `Illustrative project examples.`, filter buttons for All Projects, Networking, Security, Websites, and IT Support, and a two-column desktop project grid.
-4. Project cards use only the approved illustrative examples: Office Network Setup, Business CCTV Installation, Business Website Design, and Workstation & Microsoft 365 Setup. Every card retains an `ILLUSTRATIVE EXAMPLE` badge and approved category, title, and description.
-5. Filters are native buttons with `aria-pressed`; an assistive-status message announces the number of visible illustrative examples.
-6. Because no valid project-detail route exists, `Explore project scope` opens an accessible dialog containing only the approved title, category, illustrative-example disclosure, approved description, and a `Discuss Your Project` link to `/contact#request-quote`.
-7. Navy process band uses the approved Understand, Plan, Deliver stages and descriptions from the reference.
-8. Final CTA routes to `/contact#request-quote`.
-
-## 12. FAQ page reference geometry and states
+## 11. FAQ page reference geometry and states
 
 1. Shared utility bar and white navigation, with FAQ active.
 2. Navy split hero with breadcrumb, orange eyebrow `FREQUENTLY ASKED QUESTIONS`, the two-line heading `Clear Answers.` / `Confident Decisions.`, the approved supporting sentence, server imagery, and orange diagonal accent.
@@ -159,11 +153,18 @@ The exact About photographs are present only inside the approved composite mocku
 5. The FAQ dataset contains only the six approved questions and answers. Other categories filter the same dataset by relevant tags rather than adding new copy.
 6. Search is client-side and case-insensitive across question and answer text. Search and category selection work together; an accessible empty state offers `Clear search`.
 7. Accordion question headings contain native buttons with `aria-expanded` and `aria-controls`.
-8. Assistance panel includes `Contact Us` routed to `/contact`; `WhatsApp Us` remains disabled because no established WhatsApp destination exists.
+8. Assistance panel includes `Contact Us` routed to `/contact`; `WhatsApp Us` opens Thabang’s confirmed destination.
 9. Final CTA routes to `/contact#request-quote`.
+
+## 12. Solutions page geometry and states
+
+1. Shared utility bar and white navigation, with Solutions active.
+2. Navy split hero uses the original bundle’s `Technology Solutions` / `Built Around Your Business.` heading, supporting sentence, and approved South African business-district asset.
+3. Six stacked cards pair `The situation` with `What we do about it`, using only the business-need records and service names already present in the project bundle.
+4. Related service pills route to `/services`; no unsupported service-detail route is claimed.
+5. The final navy CTA routes to `/contact#request-quote` and the confirmed Thabang telephone number.
+6. Cards become one column below 768px and CTA controls become full width below 560px.
 
 ## 13. Unresolved destinations
 
-- `/solutions` has no approved page yet and remains disabled in shared navigation/footer.
-- Privacy Policy and Terms & Conditions have no approved content or routes; they remain non-linked footer labels.
-- No WhatsApp recipient has been configured, so WhatsApp buttons remain disabled and do not select Thabang or Pontsho implicitly.
+- Privacy Policy and Terms & Conditions still require approved, legally reviewed content. Dead footer labels are omitted until valid routes exist.
