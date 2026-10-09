@@ -1,3 +1,43 @@
+@font-face {
+  font-family: 'Barlow';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('./fonts/barlow-400-latin.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Barlow';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('./fonts/barlow-500-latin.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Barlow';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('./fonts/barlow-600-latin.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Barlow';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('./fonts/barlow-700-latin.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Barlow';
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url('./fonts/barlow-800-latin.woff2') format('woff2');
+}
+
 :root {
   --navy-950: #061a33;
   --navy-900: #08294f;
@@ -5,6 +45,9 @@
   --navy-700: #12497f;
   --orange-500: #f15a29;
   --orange-600: #d9471b;
+  --orange-700: #c94318;
+  --orange-800: #b93712;
+  --orange-on-dark: #f36a3d;
   --ink: #0b2c55;
   --text: #53677f;
   --pale: #edf4fa;
@@ -13,6 +56,7 @@
   --error: #b42318;
   --white: #fff;
   --page-gutter: clamp(1.75rem, 6vw, 4rem);
+  --large-display-root: clamp(1rem, 0.571rem + 0.476vw, 1.5rem);
   --radius: 0.3125rem;
   --ease: cubic-bezier(0.16, 1, 0.3, 1);
   color: var(--ink);
@@ -31,6 +75,12 @@
 html {
   min-width: 20rem;
   scroll-behavior: smooth;
+}
+
+@media (min-width: 90rem) {
+  html {
+    font-size: var(--large-display-root);
+  }
 }
 
 body {
@@ -217,7 +267,7 @@ main h1[tabindex='-1']:focus {
 
 .nav-link:hover,
 .nav-link[aria-current='page'] {
-  color: var(--orange-500);
+  color: var(--orange-700);
 }
 
 .nav-link:hover::after,
@@ -254,13 +304,13 @@ main h1[tabindex='-1']:focus {
 }
 
 .button--primary {
-  background: var(--orange-500);
+  background: var(--orange-700);
   color: var(--white);
   box-shadow: 0 8px 22px rgb(241 90 41 / 18%);
 }
 
 .button--primary:hover {
-  background: var(--orange-600);
+  background: var(--orange-800);
 }
 
 .button--outline {
@@ -344,7 +394,7 @@ main h1[tabindex='-1']:focus {
 
 .section-kicker {
   margin-bottom: 0.625rem;
-  color: var(--orange-500);
+  color: var(--orange-700);
   font-size: 0.6875rem;
   font-weight: 800;
   letter-spacing: 0.16em;
@@ -403,6 +453,7 @@ main h1[tabindex='-1']:focus {
 
 .about-hero .section-kicker {
   margin-bottom: 0.625rem;
+  color: var(--orange-on-dark);
 }
 
 .about-hero h1 {
@@ -673,7 +724,7 @@ main h1[tabindex='-1']:focus {
   inset: 0;
   background:
     linear-gradient(90deg, var(--navy-900) 0%, rgb(8 41 79 / 86%) 42%, rgb(8 41 79 / 15%) 100%),
-    url('../project/img/svc-southafrica.png') right center / 58% 220% no-repeat;
+    url('../project/img/webp/svc-southafrica.webp') right center / 58% 220% no-repeat;
   opacity: 0.95;
 }
 
@@ -1386,6 +1437,10 @@ a.contact-card:hover {
   color: var(--white);
 }
 
+.home-services .section-kicker {
+  color: var(--orange-on-dark);
+}
+
 .home-services__header {
   display: flex;
   align-items: end;
@@ -1498,6 +1553,7 @@ a.contact-card:hover {
 
 .ecosystem-logos img {
   width: 100%;
+  height: auto;
   filter: brightness(0) saturate(100%) invert(15%) sepia(34%) saturate(1744%) hue-rotate(176deg) brightness(89%) contrast(97%);
 }
 
@@ -1545,7 +1601,7 @@ a.contact-card:hover {
   border: 1px solid rgb(241 90 41 / 42%);
   border-radius: 50%;
   background: #fff7f3;
-  color: var(--orange-500);
+  color: var(--orange-700);
   font-size: 0.625rem;
   font-weight: 800;
 }
@@ -1579,7 +1635,7 @@ a.contact-card:hover {
   content: '';
   position: absolute;
   inset: 0 0 0 54%;
-  background: linear-gradient(90deg, var(--navy-900), rgb(8 41 79 / 20%)), url('../project/img/svc-southafrica.png') center / cover no-repeat;
+  background: linear-gradient(90deg, var(--navy-900), rgb(8 41 79 / 20%)), url('../project/img/webp/svc-southafrica.webp') center / cover no-repeat;
   opacity: 0.9;
 }
 
@@ -1826,7 +1882,7 @@ a.contact-card:hover {
   inset: 0 0 0 48%;
   background:
     linear-gradient(90deg, var(--navy-900) 0%, rgb(8 41 79 / 62%) 25%, rgb(8 41 79 / 14%) 100%),
-    url('../project/img/svc-southafrica.png') center / cover no-repeat;
+    url('../project/img/webp/svc-southafrica.webp') center / cover no-repeat;
   opacity: 0.98;
 }
 
@@ -1957,6 +2013,7 @@ a.contact-card:hover {
 
 .faq-hero .section-kicker {
   margin-bottom: 0.75rem;
+  color: var(--orange-on-dark);
   font-size: 0.875rem;
 }
 
@@ -2169,7 +2226,7 @@ a.contact-card:hover {
   inset: 0 0 0 70%;
   background:
     linear-gradient(90deg, var(--navy-900), rgb(8 41 79 / 14%)),
-    url('../project/img/hero-cabling.png') center / cover no-repeat;
+    url('../project/img/webp/hero-cabling.webp') center / cover no-repeat;
   opacity: 0.9;
 }
 
@@ -2690,6 +2747,7 @@ a.contact-card:hover {
 
 .solutions-hero .section-kicker {
   margin-bottom: 1rem;
+  color: var(--orange-on-dark);
 }
 
 .solutions-hero h1 {
@@ -2907,7 +2965,7 @@ a.contact-card:hover {
   inset: 0 0 0 38%;
   background:
     linear-gradient(90deg, var(--navy-900), rgb(8 41 79 / 20%)),
-    url('../project/img/svc-southafrica.png') center / cover no-repeat;
+    url('../project/img/webp/svc-southafrica.webp') center / cover no-repeat;
   opacity: 0.95;
 }
 
@@ -2990,6 +3048,12 @@ a.contact-card:hover {
   color: #aebfd2;
   font-size: 0.6875rem;
   line-height: 1.25;
+}
+
+.footer-links a {
+  min-height: 1.75rem;
+  display: inline-flex;
+  align-items: center;
 }
 
 .footer-links a:hover {
@@ -3699,7 +3763,7 @@ a.contact-card:hover {
     inset: 0;
     background:
       linear-gradient(90deg, var(--navy-900) 0%, rgb(8 41 79 / 90%) 55%, rgb(8 41 79 / 55%) 100%),
-      url('../project/img/svc-southafrica.png') center / cover no-repeat;
+      url('../project/img/webp/svc-southafrica.webp') center / cover no-repeat;
   }
 
   .services-cta::after {
@@ -3813,7 +3877,7 @@ a.contact-card:hover {
     inset: 0;
     background:
       linear-gradient(90deg, var(--navy-900) 0%, rgb(8 41 79 / 90%) 55%, rgb(8 41 79 / 55%) 100%),
-      url('../project/img/svc-southafrica.png') center / cover no-repeat;
+      url('../project/img/webp/svc-southafrica.webp') center / cover no-repeat;
   }
 
   .faq-cta__inner {
@@ -4157,6 +4221,12 @@ a.contact-card:hover {
     align-items: flex-start;
     flex-direction: column;
     padding-block: 0.875rem;
+  }
+}
+
+@media (min-width: 100rem) {
+  .service-catalogue__grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 

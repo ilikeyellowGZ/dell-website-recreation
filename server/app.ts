@@ -1,3 +1,4 @@
+import compression from 'compression'
 import express, { type ErrorRequestHandler } from 'express'
 import rateLimit from 'express-rate-limit'
 import helmet from 'helmet'
@@ -20,15 +21,16 @@ export function createApp({ enquiryRepository, staticDirectory }: CreateAppOptio
   const app = express()
 
   app.disable('x-powered-by')
+  app.use(compression())
   app.use(
     helmet({
       contentSecurityPolicy: {
         directives: {
           defaultSrc: ["'self'"],
-          fontSrc: ["'self'", 'https://fonts.gstatic.com'],
+          fontSrc: ["'self'"],
           imgSrc: ["'self'", 'data:'],
           scriptSrc: ["'self'"],
-          styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
+          styleSrc: ["'self'", "'unsafe-inline'"],
         },
       },
     }),
@@ -94,6 +96,14 @@ export function createApp({ enquiryRepository, staticDirectory }: CreateAppOptio
   })
 
   if (staticDirectory) {
+    app.use(
+      '/assets',
+      express.static(join(staticDirectory, 'assets'), {
+        immutable: true,
+        index: false,
+        maxAge: '1y',
+      }),
+    )
     app.use(express.static(staticDirectory, { index: false }))
     app.use((request, response, next) => {
       if (request.method === 'GET' && request.accepts('html')) {

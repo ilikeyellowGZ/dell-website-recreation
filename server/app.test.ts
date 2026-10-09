@@ -1,6 +1,9 @@
 // @vitest-environment node
 
 import type { Server } from 'node:http'
+import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
 import { afterEach, describe, expect, it } from 'vitest'
 import { createApp } from './app'
 import type { Enquiry, EnquiryRepository } from './enquiryRepository'
@@ -18,6 +21,7 @@ const validPayload = {
 }
 
 const servers: Server[] = []
+const temporaryDirectories: string[] = []
 
 afterEach(async () => {
   await Promise.all(
@@ -28,16 +32,36 @@ afterEach(async () => {
         }),
     ),
   )
+  await Promise.all(temporaryDirectories.splice(0).map((directory) => rm(directory, { force: true, recursive: true })))
 })
 
-async function start(repository: EnquiryRepository | null) {
-  const server = createApp({ enquiryRepository: repository }).listen(0)
+async function start(repository: EnquiryRepository | null, staticDirectory?: string) {
+  const server = createApp({ enquiryRepository: repository, staticDirectory }).listen(0)
   servers.push(server)
   await new Promise<void>((resolve) => server.once('listening', resolve))
   const address = server.address()
   if (!address || typeof address === 'string') throw new Error('Expected a TCP server address')
   return `http://127.0.0.1:${address.port}`
 }
+
+describe('Production static assets', () => {
+  it('compresses text assets and gives hashed assets an immutable cache policy', async () => {
+    const staticDirectory = await mkdtemp(join(tmpdir(), 'gauvis-static-'))
+    temporaryDirectories.push(staticDirectory)
+    await mkdir(join(staticDirectory, 'assets'))
+    await writeFile(join(staticDirectory, 'index.html'), '<!doctype html><title>Gauvis</title>')
+    await writeFile(join(staticDirectory, 'assets', 'app-abc123.css'), 'body { color: navy; }\n'.repeat(1_000))
+    const baseUrl = await start(null, staticDirectory)
+
+    const response = await fetch(`${baseUrl}/assets/app-abc123.css`, {
+      headers: { 'accept-encoding': 'gzip' },
+    })
+
+    expect(response.status).toBe(200)
+    expect(response.headers.get('content-encoding')).toBe('gzip')
+    expect(response.headers.get('cache-control')).toBe('public, max-age=31536000, immutable')
+  })
+})
 
 describe('POST /api/enquiries', () => {
   it('validates, normalizes, and stores an accepted website enquiry', async () => {

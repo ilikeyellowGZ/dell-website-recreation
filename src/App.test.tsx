@@ -51,7 +51,7 @@ describe('About route', () => {
     const primaryNavigation = screen.getByRole('navigation', { name: 'Primary' })
     expect(within(primaryNavigation).getByRole('img', { name: 'GVT Gauvis Tech' })).toHaveAttribute(
       'src',
-      '/project/gvt-logo.png',
+      '/project/gvt-logo.webp',
     )
     const drawerClose = within(primaryNavigation).getByRole('button', { name: 'Close navigation menu' })
     const drawerQuote = within(primaryNavigation).getByRole('link', { name: 'Request a Quote' })

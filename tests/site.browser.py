@@ -14,7 +14,7 @@ def assert_page_health(page, width: int) -> None:
     overflow = page.evaluate("document.documentElement.scrollWidth - window.innerWidth")
     assert overflow <= 1, f"{width}px viewport overflows horizontally by {overflow}px"
 
-    for image in page.locator("img").all():
+    for image in page.locator("img:visible").all():
         image.scroll_into_view_if_needed()
     page.wait_for_function(
         "Array.from(document.images).every(image => image.complete && image.naturalWidth > 0)",

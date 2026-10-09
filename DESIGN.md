@@ -28,6 +28,9 @@ These pages are faithful screenshot recreations, not redesigns. The implementati
 - `--navy-700: #12497f` blue icon circles and dark borders
 - `--orange-500: #f15a29` primary accent and CTA
 - `--orange-600: #d9471b` CTA hover
+- `--orange-700: #c94318` accessible orange text and CTA fill on light surfaces
+- `--orange-800: #b93712` accessible CTA hover on light surfaces
+- `--orange-on-dark: #f36a3d` accessible orange text on navy surfaces
 - `--ink: #0b2c55` headings on light surfaces
 - `--text: #53677f` body copy on light surfaces
 - `--pale: #edf4fa` nationwide support and other light-blue surfaces
@@ -38,11 +41,12 @@ These pages are faithful screenshot recreations, not redesigns. The implementati
 
 ### Typography
 
-- Family: Barlow, then system sans-serif
+- Family: self-hosted Barlow Latin subset, then system sans-serif
 - Display: 700-800 weight, tight tracking, 1.04-1.2 line height
 - Body: 400-500 weight, 1.55-1.75 line height
 - Eyebrows: 700-800 weight, uppercase, 0.14-0.18em tracking
 - Scale: 11, 12, 13, 14, 15, 18, 22, 28, 34, 48, 58px, with fluid heading scaling
+- Large-display scale: from 1440px upward, the root type size grows fluidly from 16px to 24px by 3200px so all rem-based typography and controls remain proportionate on 1920px, 2560px, and larger displays.
 
 ### Space and shape
 
@@ -52,6 +56,7 @@ These pages are faithful screenshot recreations, not redesigns. The implementati
 - Mobile gutter: 20px
 - Radius: 4-6px for buttons and bordered content, 0 for full-width sections
 - Section spacing: 54-74px desktop, 44-56px mobile
+- Large-display geometry: rem-based gutters, spacing, controls, cards, and section heights inherit the same fluid root scale; the layout remains full width without a desktop max-width.
 
 ## 3. Shared layout grammar
 
@@ -79,7 +84,9 @@ The exact About photographs are present only inside the approved composite mocku
 - Below 768px: hero, story, and nationwide sections stack in reading order; expectation items and process stages stack or use two columns; footer columns reduce.
 - Below 560px: content grids become one column and CTA controls can become full width.
 - Media frames preserve their reference aspect ratios and crop intentionally with `object-fit` or clipped approved-reference regions.
+- Production media uses WebP derivatives of the approved PNG references; source PNGs remain the visual masters.
 - The page must reflow at 320px, support 200% zoom, and never create horizontal page scrolling.
+- At 1440px and above, use the shared large-display root scale rather than isolated per-page overrides. Typography, spacing, button dimensions, media frames, and section geometry must grow together and remain uncapped by a content-width maximum.
 
 ## 6. Contact page reference geometry and states
 
@@ -124,7 +131,7 @@ The exact About photographs are present only inside the approved composite mocku
 
 - One `h1` per route, coherent heading order, semantic landmarks, a skip link, native links and buttons.
 - On SPA route changes, update the document title, scroll to the top, and focus the route heading.
-- Visible 2px focus ring, 44px touch targets, descriptive image alternatives, and decorative imagery hidden from assistive technology.
+- Visible 2px focus ring, at least 24px WCAG 2.2 targets (44px for primary controls), descriptive image alternatives, and decorative imagery hidden from assistive technology.
 - About is marked with `aria-current="page"` on `/about`, Contact on `/contact`, and Home only on `/`.
 - Services is marked with `aria-current="page"` on `/services`.
 - FAQ is marked with `aria-current="page"` on `/faq`.
@@ -139,7 +146,7 @@ The exact About photographs are present only inside the approved composite mocku
 
 1. Shared utility bar and white navigation, with Services active.
 2. Navy split hero with breadcrumb, the two-line heading `IT Services for` / `Every Business Need.`, the approved supporting sentence, server-rack image, and orange diagonal accent at the far right.
-3. White service catalogue with eight image cards in two desktop columns and four rows. Each card has a fixed-ratio photograph, title, short description, orange vertical accent, and an enquiry link aligned to the trailing edge.
+3. White service catalogue with eight image cards: three columns from 1600px upward, two columns from tablet through standard desktop widths, and one column at 768px and below. Each card has a fixed-ratio photograph, title, short description, orange vertical accent, and an enquiry link aligned to the trailing edge.
 4. Service cards use the exact order and copy from the approved mockup: Hardware Support, Software Solutions, Networking Services, PC & Desktop Support, Microsoft 365 Support, CCTV & Security, Printer Services, Website Development.
 5. Navy CTA band with the approved `Not sure where to start?` heading, support copy, orange `Talk to Us` button, city imagery, and diagonal orange treatment.
 6. Enquiry links and CTA controls go to `/contact#request-quote`; no service detail pages or automatic service selection are claimed.
