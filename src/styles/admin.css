@@ -1,0 +1,150 @@
+.admin-page {
+  min-height: 60vh;
+  background: var(--pale);
+}
+
+.admin-login,
+.admin-enquiries {
+  padding-block: clamp(3rem, 7vw, 6rem);
+}
+
+.admin-card {
+  width: min(100% - 2rem, 29rem);
+  margin-inline: auto;
+  padding: clamp(1.5rem, 4vw, 2.5rem);
+  border: 1px solid var(--line);
+  border-top: 0.25rem solid var(--orange-500);
+  border-radius: var(--radius);
+  background: var(--white);
+  box-shadow: 0 1.5rem 3rem rgb(6 26 51 / 12%);
+}
+
+.admin-card h1,
+.admin-enquiries h1 {
+  color: var(--ink);
+  font-size: clamp(2rem, 5vw, 3rem);
+  line-height: 1.05;
+}
+
+.admin-card > p:not(.section-kicker) {
+  margin-top: 0.75rem;
+  color: var(--text);
+  line-height: 1.6;
+}
+
+.admin-card form {
+  display: grid;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+}
+
+.admin-card label {
+  margin-top: 0.5rem;
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.admin-card input {
+  min-height: 3rem;
+  padding-inline: 0.875rem;
+  border: 1px solid var(--field-line);
+  border-radius: var(--radius);
+  color: var(--ink);
+}
+
+.admin-card .button {
+  margin-top: 1rem;
+}
+
+.admin-error {
+  color: var(--error);
+  font-weight: 600;
+}
+
+.admin-enquiries__header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.admin-enquiry-list {
+  display: grid;
+  gap: 1rem;
+}
+
+.admin-enquiry,
+.admin-empty {
+  padding: clamp(1.25rem, 3vw, 2rem);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--white);
+}
+
+.admin-enquiry > header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.admin-enquiry h2 {
+  color: var(--ink);
+  font-size: 1.25rem;
+}
+
+.admin-enquiry header p,
+.admin-enquiry time,
+.admin-empty {
+  color: var(--text);
+}
+
+.admin-enquiry dl {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem;
+  margin-block: 1.25rem;
+}
+
+.admin-enquiry dl div {
+  min-width: 0;
+}
+
+.admin-enquiry dt {
+  color: var(--text);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.admin-enquiry dd {
+  margin: 0.25rem 0 0;
+  overflow-wrap: anywhere;
+  color: var(--ink);
+}
+
+.admin-enquiry dd a {
+  color: var(--navy-700);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.admin-enquiry__message {
+  color: var(--text);
+  line-height: 1.65;
+  white-space: pre-wrap;
+}
+
+@media (max-width: 48rem) {
+  .admin-enquiries__header,
+  .admin-enquiry > header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .admin-enquiry dl {
+    grid-template-columns: 1fr 1fr;
+  }
+}

@@ -1,5 +1,5 @@
 import type { CSSProperties } from 'react'
-import { assets } from '../assets'
+import { pageImages } from '../imageAssets'
 
 type Crop = {
   x: number
@@ -27,7 +27,7 @@ export function ReferencePhoto({
   frame,
   naturalHeight = 1536,
   naturalWidth = 1024,
-  src = assets.aboutReference,
+  src = pageImages.about.story.src,
 }: ReferencePhotoProps) {
   const style: CSSProperties = {
     aspectRatio: `${frame?.width ?? crop.width} / ${frame?.height ?? crop.height}`,

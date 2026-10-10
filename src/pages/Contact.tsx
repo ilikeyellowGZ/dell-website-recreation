@@ -1,8 +1,10 @@
 import { Link } from 'react-router-dom'
-import { assets } from '../assets'
+import { ResponsiveImage } from '../components/ResponsiveImage'
 import { ContactDetails } from '../features/contact/ContactDetails'
 import { NextSteps } from '../features/contact/NextSteps'
 import { QuoteForm } from '../features/contact/QuoteForm'
+import { pageImages } from '../imageAssets'
+import '../styles/contact.css'
 
 export function Contact() {
   return (
@@ -21,12 +23,11 @@ export function Contact() {
             <p>Tell us what you need and start a conversation with our team.</p>
           </div>
           <div className="contact-hero__media">
-            <img
-              src={assets.heroServerAisle}
-              width="255"
-              height="226"
+            <ResponsiveImage
               alt="Blue-lit server racks in a data centre"
-              fetchPriority="high"
+              eager
+              image={pageImages.contact.hero}
+              sizes="(max-width: 48rem) 100vw, 55vw"
             />
           </div>
           <span className="contact-hero__accent" aria-hidden="true" />

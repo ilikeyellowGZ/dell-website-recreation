@@ -1,9 +1,15 @@
 // @vitest-environment node
 
 import { describe, expect, it } from 'vitest'
-import { createConfiguredMongoEnquiryRepository } from './enquiryRepository'
+import { clampEnquiryLimit, createConfiguredMongoEnquiryRepository } from './enquiryRepository'
 
 describe('MongoDB enquiry storage configuration', () => {
+  it('bounds admin list sizes to a safe fixed range', () => {
+    expect(clampEnquiryLimit(-5)).toBe(1)
+    expect(clampEnquiryLimit(25)).toBe(25)
+    expect(clampEnquiryLimit(500)).toBe(100)
+  })
+
   it('uses gauvistech and enquiries when only the MongoDB URI is configured', () => {
     const repository = createConfiguredMongoEnquiryRepository({
       MONGODB_URI: 'mongodb://127.0.0.1:27017',

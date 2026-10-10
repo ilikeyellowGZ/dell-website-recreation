@@ -1,0 +1,11 @@
+Eight individual assets matching the navy reference. Monochrome adaptations, not certification or authorised-partner badges.
+Microsoft 365: official Microsoft press-kit PNG, recoloured navy with original alpha.
+https://msftstories.thesourcemediaassets.com/2019/11/Microsoft365_logo_horiz_c-gray_rgb.png
+SAP and Cisco: Simple Icons SVG artwork recoloured navy.
+https://cdn.simpleicons.org/sap/0D2E4A
+https://cdn.simpleicons.org/cisco/0D2E4A
+Oracle: https://upload.wikimedia.org/wikipedia/commons/5/50/Oracle_logo.svg
+ServiceNow: official header SVG recoloured navy.
+https://www.servicenow.com/content/dam/servicenow-assets/images/naas/servicenow-header-logo.svg
+VPN, Wi-Fi, Remote Desktop: custom generic vector icons with labels, based on the supplied reference; these are not branded product logos.
+Transparent PNGs include outer padding. SVGs are provided for seven assets; Microsoft 365 preserves the original high-resolution raster artwork.

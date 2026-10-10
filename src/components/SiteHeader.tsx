@@ -1,5 +1,4 @@
 import { ArrowRight, MapPin, X } from '@phosphor-icons/react'
-import gsap from 'gsap'
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { assets } from '../assets'
@@ -22,11 +21,7 @@ const navItems: Array<{ label: string; page: ActivePage; to: string }> = [
 
 export function SiteHeader({ activePage }: SiteHeaderProps) {
   const [open, setOpen] = useState(false)
-  const backdropRef = useRef<HTMLDivElement>(null)
-  const headerRef = useRef<HTMLElement>(null)
   const navRef = useRef<HTMLElement>(null)
-  const openRef = useRef(open)
-  const timelineRef = useRef<gsap.core.Timeline | null>(null)
   const toggleRef = useRef<HTMLButtonElement>(null)
 
   const closeMenu = (restoreFocus = false) => {
@@ -35,101 +30,16 @@ export function SiteHeader({ activePage }: SiteHeaderProps) {
   }
 
   useLayoutEffect(() => {
-    const header = headerRef.current
-    const nav = navRef.current
-    const backdrop = backdropRef.current
-    if (!header || !nav || !backdrop) return
+    if (!open || window.matchMedia('(min-width: 64rem)').matches) return
+    navRef.current?.removeAttribute('inert')
+  }, [open])
 
-    const desktopMedia = window.matchMedia('(min-width: 64rem)')
-    const reducedMotionMedia = window.matchMedia('(prefers-reduced-motion: reduce)')
-    let animationContext: gsap.Context | null = null
-
-    const buildAnimation = () => {
-      animationContext?.revert()
-      animationContext = gsap.context(() => {
-        const revealItems = nav.querySelectorAll<HTMLElement>('[data-mobile-nav-reveal]')
-        timelineRef.current = null
-
-        if (desktopMedia.matches) {
-          gsap.set([nav, backdrop, ...revealItems], { clearProps: 'all' })
-          return
-        }
-
-        if (reducedMotionMedia.matches) {
-          gsap.set(nav, {
-            opacity: openRef.current ? 1 : 0,
-            xPercent: openRef.current ? 0 : -100,
-          })
-          gsap.set(backdrop, { autoAlpha: openRef.current ? 1 : 0 })
-          gsap.set(revealItems, { autoAlpha: 1, x: 0 })
-          return
-        }
-
-        const timeline = gsap.timeline({
-          paused: true,
-          defaults: { ease: 'power3.out' },
-          onReverseComplete: () => {
-            gsap.set(nav, { opacity: 0 })
-            gsap.set(backdrop, { visibility: 'hidden' })
-          },
-        })
-
-        timeline
-          .fromTo(backdrop, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.28, ease: 'power1.out' }, 0)
-          .fromTo(nav, { opacity: 1, xPercent: -100 }, { duration: 0.54, opacity: 1, xPercent: 0 }, 0)
-          .fromTo(
-            revealItems,
-            { autoAlpha: 0, x: -30 },
-            { autoAlpha: 1, duration: 0.42, stagger: 0.065, x: 0 },
-            0.14,
-          )
-
-        timelineRef.current = timeline
-        if (openRef.current) {
-          gsap.set(backdrop, { visibility: 'visible' })
-          timeline.progress(1)
-        } else {
-          timeline.progress(0)
-          gsap.set(nav, { opacity: 0 })
-          gsap.set(backdrop, { autoAlpha: 0, visibility: 'hidden' })
-        }
-      }, header)
-    }
-
-    buildAnimation()
-    desktopMedia.addEventListener('change', buildAnimation)
-    reducedMotionMedia.addEventListener('change', buildAnimation)
-
-    return () => {
-      desktopMedia.removeEventListener('change', buildAnimation)
-      reducedMotionMedia.removeEventListener('change', buildAnimation)
-      animationContext?.revert()
-      timelineRef.current = null
-    }
-  }, [])
-
-  useLayoutEffect(() => {
-    openRef.current = open
-    const nav = navRef.current
-    const backdrop = backdropRef.current
-    if (!nav || !backdrop || window.matchMedia('(min-width: 64rem)').matches) return
-
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      gsap.set(nav, { opacity: open ? 1 : 0, xPercent: open ? 0 : -100 })
-      gsap.set(backdrop, { autoAlpha: open ? 1 : 0 })
-      return
-    }
-
-    const timeline = timelineRef.current
-    if (!timeline) return
-
-    if (open) {
-      gsap.set(nav, { opacity: 1 })
-      gsap.set(backdrop, { visibility: 'visible' })
-      timeline.timeScale(1).play()
-    } else {
-      timeline.timeScale(1.2).reverse()
-    }
+  useEffect(() => {
+    if (!open || window.matchMedia('(min-width: 64rem)').matches) return
+    const focusTimer = window.setTimeout(() => {
+      navRef.current?.querySelector<HTMLAnchorElement>('.nav-link')?.focus()
+    }, 50)
+    return () => window.clearTimeout(focusTimer)
   }, [open])
 
   useEffect(() => {
@@ -139,8 +49,6 @@ export function SiteHeader({ activePage }: SiteHeaderProps) {
     const backgroundRegions = [document.querySelector('main'), document.querySelector('footer')]
     for (const region of backgroundRegions) region?.toggleAttribute('inert', open)
     nav?.toggleAttribute('inert', !desktopMedia.matches && !open)
-
-    if (open) queueMicrotask(() => navRef.current?.querySelector<HTMLAnchorElement>('.nav-link')?.focus())
 
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape' && open) {
@@ -197,7 +105,7 @@ export function SiteHeader({ activePage }: SiteHeaderProps) {
           </div>
         </div>
       </div>
-      <header className="site-header" ref={headerRef}>
+      <header className="site-header">
         <div className="site-shell header-inner">
           <Link className="brand" to="/" aria-label="Gauvis Tech home" onClick={() => closeMenu()}>
             <img src={assets.logo} width="575" height="204" alt="GVT Gauvis Tech" />
@@ -267,7 +175,6 @@ export function SiteHeader({ activePage }: SiteHeaderProps) {
           <div
             aria-hidden="true"
             className={`mobile-nav-backdrop${open ? ' is-open' : ''}`}
-            ref={backdropRef}
           />
 
           <ButtonLink className="header-quote" href="/contact#request-quote">

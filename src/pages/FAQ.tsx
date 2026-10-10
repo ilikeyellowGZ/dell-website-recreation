@@ -13,9 +13,11 @@ import {
 } from '@phosphor-icons/react'
 import { useMemo, useState, type ComponentType } from 'react'
 import { Link } from 'react-router-dom'
-import { assets } from '../assets'
 import { ButtonLink } from '../components/ButtonLink'
+import { ResponsiveImage } from '../components/ResponsiveImage'
 import { thabangWhatsAppUrl } from '../features/contact/ContactDetails'
+import { pageImages } from '../imageAssets'
+import '../styles/faq.css'
 
 type FAQCategory = 'General' | 'IT Support' | 'Websites' | 'Security & CCTV' | 'Quotes'
 
@@ -161,12 +163,11 @@ export function FAQ() {
             <p>Find answers about our services, support and getting started.</p>
           </div>
           <div className="faq-hero__media">
-            <img
-              src={assets.heroServerAisle}
-              width="255"
-              height="226"
+            <ResponsiveImage
               alt="Blue-lit server racks in a data centre"
-              fetchPriority="high"
+              eager
+              image={pageImages.faq.hero}
+              sizes="(max-width: 48rem) 100vw, 55vw"
             />
           </div>
           <span className="faq-hero__accent" aria-hidden="true" />
