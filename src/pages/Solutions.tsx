@@ -1,7 +1,9 @@
 import { ArrowRight } from '@phosphor-icons/react'
 import { Link } from 'react-router-dom'
-import { assets } from '../assets'
 import { ButtonLink } from '../components/ButtonLink'
+import { ResponsiveImage } from '../components/ResponsiveImage'
+import { pageImages } from '../imageAssets'
+import '../styles/solutions.css'
 
 type Solution = {
   answer: string
@@ -91,13 +93,24 @@ export function Solutions() {
             <p>Most businesses do not arrive with a shopping list — they arrive with a problem. Find the situation that sounds like yours.</p>
           </div>
           <div className="solutions-hero__media">
-            <img src={assets.serviceSouthAfrica} width="1600" height="900" alt="South African business district" fetchPriority="high" />
+            <ResponsiveImage
+              alt="A modern South African office with connected workstations and server infrastructure"
+              eager
+              image={pageImages.solutions.hero}
+              sizes="(max-width: 48rem) 100vw, 54vw"
+            />
           </div>
         </div>
       </section>
 
       <section className="solutions-list" aria-label="Solutions by business need">
         <div className="site-shell solutions-list__inner">
+          <ResponsiveImage
+            alt="A modern office connected to on-site server infrastructure"
+            className="solutions-list__image"
+            image={pageImages.solutions.approach}
+            sizes="(max-width: 48rem) 100vw, 88vw"
+          />
           {solutions.map((solution) => <SolutionCard {...solution} key={solution.title} />)}
         </div>
       </section>

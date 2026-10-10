@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
+﻿import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { App } from './App'
@@ -7,25 +7,28 @@ afterEach(() => {
   vi.unstubAllGlobals()
 })
 
-function renderRoute(route: string) {
-  return render(
-    <MemoryRouter initialEntries={[route]}>
-      <App />
-    </MemoryRouter>,
-  )
+async function renderRoute(route: string) {
+  await act(async () => {
+    render(
+      <MemoryRouter initialEntries={[route]}>
+        <App />
+      </MemoryRouter>,
+    )
+  })
+  await waitFor(() => expect(screen.queryByText('Loading page…')).not.toBeInTheDocument(), { timeout: 10_000 })
 }
 
 describe('Shared footer', () => {
-  it('shows the confirmed CIPC registration number', () => {
-    renderRoute('/')
+  it('shows the confirmed CIPC registration number', async () => {
+    await renderRoute('/')
 
     expect(screen.getByText('CIPC Registration Number: 2026/703930/07')).toBeInTheDocument()
   })
 })
 
 describe('About route', () => {
-  it('renders the approved About content and active navigation state', () => {
-    renderRoute('/about')
+  it('renders the approved About content and active navigation state', async () => {
+    await renderRoute('/about')
 
     expect(
       screen.getByRole('heading', { level: 1, name: /your technology partner\. built around your business\./i }),
@@ -40,8 +43,8 @@ describe('About route', () => {
     expect(document.querySelector('a[href^="mailto:"]')).not.toBeInTheDocument()
   })
 
-  it('opens the mobile drawer, traps focus, and restores focus when it closes', () => {
-    renderRoute('/about')
+  it('opens the mobile drawer, traps focus, and restores focus when it closes', async () => {
+    await renderRoute('/about')
 
     const toggle = screen.getByRole('button', { name: 'Open menu' })
     expect(toggle).toHaveAttribute('aria-expanded', 'false')
@@ -69,8 +72,8 @@ describe('About route', () => {
     expect(screen.getByRole('button', { name: 'Open menu' })).toHaveAttribute('aria-expanded', 'false')
   })
 
-  it('routes quote calls to action to the Contact form', () => {
-    renderRoute('/about')
+  it('routes quote calls to action to the Contact form', async () => {
+    await renderRoute('/about')
 
     const quoteLinks = screen.getAllByRole('link', { name: /request a quote/i })
     expect(quoteLinks.length).toBeGreaterThan(0)
@@ -81,24 +84,21 @@ describe('About route', () => {
 })
 
 describe('Homepage route', () => {
-  it('keeps the outgoing page mounted while the destination transitions in', async () => {
-    renderRoute('/')
+  it('moves focus to the destination heading after client-side navigation', async () => {
+    await renderRoute('/')
 
-    const homeHeading = screen.getByRole('heading', { level: 1, name: /powering your digital future/i })
     const primaryNavigation = screen.getByRole('navigation', { name: 'Primary' })
     fireEvent.click(within(primaryNavigation).getByRole('link', { name: 'About' }))
 
-    expect(homeHeading).toBeInTheDocument()
     const aboutHeading = await screen.findByRole('heading', {
       level: 1,
       name: /your technology partner\. built around your business\./i,
     })
-    expect(homeHeading).not.toBeInTheDocument()
     await waitFor(() => expect(aboutHeading).toHaveFocus())
   })
 
-  it('keeps the homepage at the root and links About to the React route', () => {
-    renderRoute('/')
+  it('keeps the homepage at the root and links About to the React route', async () => {
+    await renderRoute('/')
 
     const title = screen.getByRole('heading', { level: 1, name: /powering your/i })
     expect(within(title).getByText(/digital future/i)).toBeInTheDocument()
@@ -110,8 +110,8 @@ describe('Homepage route', () => {
 })
 
 describe('Removed routes', () => {
-  it('does not expose Case Studies in shared navigation or at its former route', () => {
-    renderRoute('/case-studies')
+  it('does not expose Case Studies in shared navigation or at its former route', async () => {
+    await renderRoute('/case-studies')
 
     expect(screen.getByRole('heading', { level: 1, name: /powering your digital future/i })).toBeInTheDocument()
     expect(screen.queryByRole('heading', { level: 1, name: /practical solutions\. projects in focus\./i })).not.toBeInTheDocument()
@@ -123,8 +123,8 @@ describe('Removed routes', () => {
 })
 
 describe('Services route', () => {
-  it('renders the approved Services catalogue, links enquiries to Contact, and marks Services active', () => {
-    renderRoute('/services')
+  it('renders the approved Services catalogue, links enquiries to Contact, and marks Services active', async () => {
+    await renderRoute('/services')
 
     expect(screen.getByRole('heading', { level: 1, name: /it services for every business need/i })).toBeInTheDocument()
     expect(screen.getByText(/from everyday support to complete technology setups/i)).toBeInTheDocument()
@@ -159,8 +159,8 @@ describe('Services route', () => {
 })
 
 describe('Solutions route', () => {
-  it('renders the project-owned business-need solutions and marks Solutions active', () => {
-    renderRoute('/solutions')
+  it('renders the project-owned business-need solutions and marks Solutions active', async () => {
+    await renderRoute('/solutions')
 
     expect(
       screen.getByRole('heading', { level: 1, name: /technology solutions built around your business/i }),
@@ -190,8 +190,8 @@ describe('Solutions route', () => {
     expect(screen.getByRole('link', { name: /talk to gauvis/i })).toHaveAttribute('href', '/contact#request-quote')
   })
 
-  it('does not present unapproved legal documents as website destinations', () => {
-    renderRoute('/solutions')
+  it('does not present unapproved legal documents as website destinations', async () => {
+    await renderRoute('/solutions')
 
     expect(screen.queryByText('Privacy Policy')).not.toBeInTheDocument()
     expect(screen.queryByText('Terms & Conditions')).not.toBeInTheDocument()
@@ -199,8 +199,8 @@ describe('Solutions route', () => {
 })
 
 describe('FAQ route', () => {
-  it('renders approved FAQs, filters by search and category, and marks FAQ active', () => {
-    renderRoute('/faq')
+  it('renders approved FAQs, filters by search and category, and marks FAQ active', async () => {
+    await renderRoute('/faq')
 
     expect(screen.getByRole('heading', { level: 1, name: /clear answers\. confident decisions\./i })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'General questions' })).toBeInTheDocument()
@@ -247,8 +247,8 @@ describe('FAQ route', () => {
     expect(within(primaryNavigation).getByRole('link', { name: 'FAQ' })).toHaveAttribute('aria-current', 'page')
   })
 
-  it('toggles FAQ answers with an accessible accordion button', () => {
-    renderRoute('/faq')
+  it('toggles FAQ answers with an accessible accordion button', async () => {
+    await renderRoute('/faq')
 
     const supportQuestion = screen.getByRole('button', { name: 'Do you provide on-site support?' })
     expect(supportQuestion).toHaveAttribute('aria-expanded', 'false')
@@ -259,8 +259,8 @@ describe('FAQ route', () => {
 })
 
 describe('Contact route', () => {
-  it('renders the approved Contact content, destinations, and active navigation state', () => {
-    renderRoute('/contact')
+  it('renders the approved Contact content, destinations, and active navigation state', async () => {
+    await renderRoute('/contact')
 
     expect(screen.getByRole('heading', { level: 1, name: /let’s talk about your it needs/i })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: /get in touch/i })).toBeInTheDocument()
@@ -288,8 +288,8 @@ describe('Contact route', () => {
     expect(document.querySelector('a[href^="mailto:"]')).not.toBeInTheDocument()
   })
 
-  it('shows connected validation errors, focuses the first invalid field, and preserves invalid values', () => {
-    renderRoute('/contact')
+  it('shows connected validation errors, focuses the first invalid field, and preserves invalid values', async () => {
+    await renderRoute('/contact')
 
     fireEvent.click(screen.getByRole('button', { name: /send enquiry/i }))
 
@@ -319,7 +319,7 @@ describe('Contact route', () => {
       acceptRequest = resolve
     })
     vi.stubGlobal('fetch', vi.fn(() => fetchPromise))
-    renderRoute('/contact')
+    await renderRoute('/contact')
 
     fireEvent.change(screen.getByLabelText(/full name/i), { target: { value: 'Thandi Ndlovu' } })
     fireEvent.change(screen.getByLabelText(/business name/i), { target: { value: 'Ndlovu Trading' } })
@@ -364,7 +364,7 @@ describe('Contact route', () => {
         }),
       }),
     )
-    renderRoute('/contact')
+    await renderRoute('/contact')
 
     fireEvent.change(screen.getByLabelText(/full name/i), { target: { value: 'Thandi Ndlovu' } })
     fireEvent.change(screen.getByLabelText(/email address/i), { target: { value: 'thandi@example.com' } })
@@ -400,7 +400,7 @@ describe('Contact route', () => {
         }),
       }),
     )
-    renderRoute('/contact')
+    await renderRoute('/contact')
 
     fireEvent.change(screen.getByLabelText(/full name/i), { target: { value: 'Thandi Ndlovu' } })
     fireEvent.change(screen.getByLabelText(/email address/i), { target: { value: 'thandi@example.com' } })
@@ -413,5 +413,15 @@ describe('Contact route', () => {
     expect(await screen.findByText('Enter a valid email address.')).toBeInTheDocument()
     expect(screen.getByLabelText(/email address/i)).toHaveAttribute('aria-invalid', 'true')
     expect(screen.getByLabelText(/email address/i)).toHaveValue('thandi@example.com')
+  })
+})
+
+describe('Admin routes', () => {
+  it('renders a dedicated admin sign-in screen', async () => {
+    await renderRoute('/admin/login')
+
+    expect(screen.getByRole('heading', { level: 1, name: /admin sign in/i })).toBeInTheDocument()
+    expect(screen.getByLabelText(/username/i)).toBeInTheDocument()
+    expect(screen.getByLabelText(/password/i)).toBeInTheDocument()
   })
 })

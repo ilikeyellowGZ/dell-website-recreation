@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 
-from playwright.sync_api import sync_playwright
+from playwright.sync_api import expect, sync_playwright
 
 
 BASE_URL = os.getenv("BASE_URL", "http://127.0.0.1:4173")
@@ -14,7 +14,7 @@ def assert_page_health(page, width: int) -> None:
     overflow = page.evaluate("document.documentElement.scrollWidth - window.innerWidth")
     assert overflow <= 1, f"{width}px viewport overflows horizontally by {overflow}px"
 
-    for image in page.locator("img:visible").all():
+    for image in page.locator("img:visible").element_handles():
         image.scroll_into_view_if_needed()
     page.wait_for_function(
         "Array.from(document.images).every(image => image.complete && image.naturalWidth > 0)",
@@ -60,7 +60,11 @@ with sync_playwright() as playwright:
             toggle.click()
             assert page.get_by_role("button", name="Close menu").get_attribute("aria-expanded") == "true"
             assert primary.get_attribute("class") and "is-open" in primary.get_attribute("class")
-            assert primary.locator("a").first.evaluate("node => node === document.activeElement")
+            try:
+                expect(primary.locator("a").first).to_be_focused()
+            except AssertionError as error:
+                active_element = page.evaluate("document.activeElement?.outerHTML")
+                raise AssertionError(f"{width}px focus stayed on {active_element}") from error
             page.keyboard.press("Escape")
             toggle = page.get_by_role("button", name="Open menu")
             assert toggle.get_attribute("aria-expanded") == "false"
@@ -222,36 +226,11 @@ with sync_playwright() as playwright:
         assert page.get_by_role("link", name="Chat on WhatsApp").get_attribute("href") == "https://wa.me/27840356925"
 
         send_button = page.get_by_role("button", name="Send Enquiry")
-        send_button.click()
-        assert page.locator("#quote-full-name").evaluate("node => node === document.activeElement")
-        assert page.get_by_text("Enter your full name.").is_visible()
-        assert page.get_by_text("Enter your email address.").is_visible()
-        assert page.get_by_text("Enter your phone number.").is_visible()
-        assert page.get_by_text("Select a service.").is_visible()
-        assert page.get_by_text("Tell us what you need.").is_visible()
-
-        page.get_by_label("Full name").fill("Thandi Ndlovu")
-        page.get_by_label("Business name (optional)").fill("Ndlovu Trading")
-        page.get_by_label("Email address").fill("thandi@invalid")
-        page.get_by_label("Phone number").fill("123")
-        page.get_by_label("Service required").select_option("Hardware Support")
-        page.get_by_label("Location").fill("Cape Town")
-        page.get_by_label("Tell us what you need").fill("Please help us replace three office computers.")
-        page.get_by_label("I agree to be contacted about my enquiry.").check()
-        send_button.click()
-        assert page.get_by_text("Enter a valid email address.").is_visible()
-        assert page.get_by_text("Enter a valid phone number.").is_visible()
-        assert page.get_by_label("Email address").input_value() == "thandi@invalid"
-        assert page.get_by_label("Phone number").input_value() == "123"
-
-        if width == 360:
-            page.get_by_label("Email address").fill("thandi@example.com")
-            page.get_by_label("Phone number").fill("+27 84 123 4567")
-            send_button.click()
-            status = page.get_by_role("alert")
-            assert "temporarily unavailable" in status.inner_text()
-            assert page.get_by_label("Full name").input_value() == "Thandi Ndlovu"
-            assert page.get_by_label("Tell us what you need").input_value() == "Please help us replace three office computers."
+        assert send_button.is_disabled()
+        assert page.get_by_text("Online enquiries are not open yet.").is_visible()
+        assert page.locator("#request-quote fieldset").get_attribute("disabled") is not None
+        assert page.locator("#enquiry-unavailable a[href='tel:+27840356925']").is_visible()
+        assert page.locator("#enquiry-unavailable a[href='https://wa.me/27840356925']").is_visible()
 
         page.goto(f"{BASE_URL}/contact#request-quote", wait_until="networkidle")
         assert page.url == f"{BASE_URL}/contact#request-quote"

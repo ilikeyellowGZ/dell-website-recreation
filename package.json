@@ -7,7 +7,7 @@
     "dev": "concurrently -k \"npm:dev:client\" \"npm:dev:server\"",
     "dev:client": "vite",
     "dev:server": "tsx watch server/index.ts",
-    "build": "tsc -b && vite build",
+    "build": "npm run images:generate && tsc -b && vite build",
     "db:setup": "tsx server/setupDatabase.ts",
     "preview": "tsx server/index.ts --port 4173",
     "start": "tsx server/index.ts",
@@ -15,7 +15,9 @@
     "test:watch": "vitest",
     "typecheck": "tsc -b --pretty false",
     "lint": "eslint .",
-    "doctor": "react-doctor src --no-score --blocking warning"
+    "doctor": "react-doctor src --no-score --blocking warning",
+    "images:generate": "node scripts/generate-responsive-images.mjs",
+    "admin:credentials": "tsx server/generateAdminCredentials.ts"
   },
   "dependencies": {
     "@phosphor-icons/react": "2.1.10",
@@ -25,6 +27,7 @@
     "express-rate-limit": "8.7.0",
     "gsap": "3.15.0",
     "helmet": "8.1.0",
+    "jose": "^6.1.0",
     "mongodb": "7.0.0",
     "motion": "13.5.0",
     "react": "19.3.0",
@@ -49,6 +52,7 @@
     "react-doctor": "0.9.14",
     "react-grab": "0.2.0",
     "react-scan": "0.5.7",
+    "sharp": "0.35.5",
     "tsx": "4.23.15",
     "typescript": "6.0.2",
     "typescript-eslint": "8.71.0",

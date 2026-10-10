@@ -9,7 +9,9 @@ import {
 } from '@phosphor-icons/react'
 import { Link } from 'react-router-dom'
 import { ButtonLink } from '../components/ButtonLink'
-import { ReferencePhoto } from '../components/ReferencePhoto'
+import { ResponsiveImage } from '../components/ResponsiveImage'
+import { pageImages } from '../imageAssets'
+import '../styles/about.css'
 
 const expectations = [
   {
@@ -75,11 +77,12 @@ export function About() {
               Request a Quote
             </ButtonLink>
           </div>
-          <ReferencePhoto
+          <ResponsiveImage
             alt="A technician working with network equipment in a server room"
             className="about-hero__photo"
-            crop={{ x: 476, y: 92, width: 548, height: 263 }}
             eager
+            image={pageImages.about.hero}
+            sizes="(max-width: 48rem) 100vw, 57vw"
           />
         </div>
       </section>
@@ -103,10 +106,11 @@ export function About() {
               connected, secure and productive.
             </p>
           </div>
-          <ReferencePhoto
+          <ResponsiveImage
             alt="A technology specialist guiding a colleague at a workstation"
             className="story__photo"
-            crop={{ x: 475, y: 375, width: 529, height: 224 }}
+            image={pageImages.about.story}
+            sizes="(max-width: 48rem) 100vw, 52vw"
           />
         </div>
       </section>
@@ -172,10 +176,11 @@ export function About() {
               On-Site Support
             </ButtonLink>
           </div>
-          <ReferencePhoto
+          <ResponsiveImage
             alt="A field technician arriving to provide on-site technology support"
             className="nationwide__photo"
-            crop={{ x: 501, y: 1062, width: 523, height: 205 }}
+            image={pageImages.about.onsite}
+            sizes="(max-width: 48rem) 100vw, 51vw"
           />
         </div>
       </section>

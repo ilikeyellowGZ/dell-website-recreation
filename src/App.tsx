@@ -1,14 +1,18 @@
-import { useEffect } from 'react'
-import { AnimatePresence, domAnimation, LazyMotion, m, useReducedMotion } from 'motion/react'
+import { lazy, Suspense, useEffect } from 'react'
 import { Route, Routes, useLocation, type Location } from 'react-router-dom'
 import { SiteFooter } from './components/SiteFooter'
 import { SiteHeader } from './components/SiteHeader'
-import { About } from './pages/About'
-import { Contact } from './pages/Contact'
-import { FAQ } from './pages/FAQ'
-import { Home } from './pages/Home'
-import { Services } from './pages/Services'
-import { Solutions } from './pages/Solutions'
+
+const Home = lazy(() => import('./pages/Home').then((module) => ({ default: module.Home })))
+const About = lazy(() => import('./pages/About').then((module) => ({ default: module.About })))
+const Services = lazy(() => import('./pages/Services').then((module) => ({ default: module.Services })))
+const Solutions = lazy(() => import('./pages/Solutions').then((module) => ({ default: module.Solutions })))
+const FAQ = lazy(() => import('./pages/FAQ').then((module) => ({ default: module.FAQ })))
+const Contact = lazy(() => import('./pages/Contact').then((module) => ({ default: module.Contact })))
+const AdminLogin = lazy(() => import('./pages/AdminLogin').then((module) => ({ default: module.AdminLogin })))
+const AdminEnquiries = lazy(() =>
+  import('./pages/AdminEnquiries').then((module) => ({ default: module.AdminEnquiries })),
+)
 
 const routeTitles: Record<string, string> = {
   '/': 'Gauvis Technology Holdings | IT Solutions for South Africa',
@@ -17,6 +21,8 @@ const routeTitles: Record<string, string> = {
   '/solutions': 'Solutions | Gauvis Technology Holdings',
   '/faq': 'FAQ | Gauvis Technology Holdings',
   '/contact': 'Contact Gauvis | Request an IT Quote',
+  '/admin/login': 'Admin Sign In | Gauvis Technology Holdings',
+  '/admin/enquiries': 'Website Enquiries | Gauvis Technology Holdings',
 }
 
 const activePageByPath = {
@@ -38,12 +44,7 @@ function RouteEffects() {
   return null
 }
 
-type RouteSceneProps = {
-  location: Location
-  reduceMotion: boolean
-}
-
-function RouteScene({ location, reduceMotion }: RouteSceneProps) {
+function ReadyRouteEffects({ location }: { location: Location }) {
   const { hash, pathname } = location
 
   useEffect(() => {
@@ -57,46 +58,35 @@ function RouteScene({ location, reduceMotion }: RouteSceneProps) {
     if (!hash) queueMicrotask(() => document.querySelector<HTMLElement>('main h1')?.focus())
   }, [hash, pathname])
 
-  return (
-    <m.div
-      animate={{ opacity: 1, transform: 'translate3d(0, 0, 0)' }}
-      className="route-transition"
-      exit={{
-        opacity: 0,
-        transform: reduceMotion ? 'translate3d(0, 0, 0)' : 'translate3d(0, -0.5rem, 0)',
-      }}
-      initial={{
-        opacity: 0,
-        transform: reduceMotion ? 'translate3d(0, 0, 0)' : 'translate3d(0, 0.75rem, 0)',
-      }}
-      transition={{
-        duration: reduceMotion ? 0.12 : 0.22,
-        ease: [0.23, 1, 0.32, 1],
-      }}
-    >
-      <Routes location={location}>
-        <Route path="/" element={<Home />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/services" element={<Services />} />
-        <Route path="/solutions" element={<Solutions />} />
-        <Route path="/faq" element={<FAQ />} />
-        <Route path="/contact" element={<Contact />} />
-        <Route path="*" element={<Home />} />
-      </Routes>
-    </m.div>
-  )
+  return null
 }
 
-function AnimatedRoutes() {
+function LazyRoutes() {
   const location = useLocation()
-  const reduceMotion = Boolean(useReducedMotion())
 
   return (
-    <LazyMotion features={domAnimation} strict>
-      <AnimatePresence initial={false} mode="wait">
-        <RouteScene key={location.pathname} location={location} reduceMotion={reduceMotion} />
-      </AnimatePresence>
-    </LazyMotion>
+    <div className="route-transition" key={location.pathname}>
+      <Suspense
+        fallback={
+          <main className="route-loading" id="main-content">
+            <p role="status">Loading page…</p>
+          </main>
+        }
+      >
+        <ReadyRouteEffects location={location} />
+        <Routes location={location}>
+          <Route path="/" element={<Home />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/services" element={<Services />} />
+          <Route path="/solutions" element={<Solutions />} />
+          <Route path="/faq" element={<FAQ />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/admin/login" element={<AdminLogin />} />
+          <Route path="/admin/enquiries" element={<AdminEnquiries />} />
+          <Route path="*" element={<Home />} />
+        </Routes>
+      </Suspense>
+    </div>
   )
 }
 
@@ -111,7 +101,7 @@ export function App() {
       </a>
       <RouteEffects />
       <SiteHeader activePage={activePage} />
-      <AnimatedRoutes />
+      <LazyRoutes />
       <SiteFooter />
     </>
   )

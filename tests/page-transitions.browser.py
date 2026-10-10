@@ -26,25 +26,18 @@ with sync_playwright() as playwright:
             page.wait_for_timeout(850)
 
         page.locator("#primary-navigation a[href='/about']").click()
-        page.wait_for_timeout(80)
-
         assert page.url == f"{BASE_URL}/about"
-        assert page.locator("#home-hero-title").count() == 1
-        assert page.locator("#about-hero-title").count() == 0
-        exit_state = page.locator(".route-transition").evaluate(
-            "element => ({ opacity: Number.parseFloat(getComputedStyle(element).opacity), "
-            "transform: getComputedStyle(element).transform })"
-        )
-        assert exit_state["opacity"] < 1
-        assert exit_state["transform"] != "none"
 
         destination_heading = page.get_by_role(
             "heading",
             name="Your Technology Partner. Built Around Your Business.",
         )
         destination_heading.wait_for(state="visible")
-        page.wait_for_timeout(250)
         assert page.locator("#home-hero-title").count() == 0
+        transition_name = page.locator(".route-transition").evaluate(
+            "element => getComputedStyle(element).animationName"
+        )
+        assert transition_name == "route-enter"
         assert destination_heading.evaluate("element => element === document.activeElement")
         assert page.evaluate("document.documentElement.scrollWidth - window.innerWidth") <= 1
         assert not browser_errors, f"{width}px browser errors: {browser_errors}"

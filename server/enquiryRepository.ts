@@ -13,6 +13,7 @@ export type Enquiry = Omit<EnquiryInput, 'website'> & {
 export interface EnquiryRepository {
   close?: () => Promise<void>
   insert: (enquiry: Enquiry) => Promise<void>
+  listRecent?: (limit: number) => Promise<Enquiry[]>
 }
 
 type MongoRepositoryOptions = {
@@ -26,6 +27,11 @@ type EnquiryCollectionDefinition = {
   dbName: string
   indexes: IndexDescription[]
   validator: Document
+}
+
+export function clampEnquiryLimit(limit: number): number {
+  if (!Number.isFinite(limit)) return 100
+  return Math.min(Math.max(Math.trunc(limit), 1), 100)
 }
 
 export function getEnquiryCollectionDefinition({
@@ -134,6 +140,14 @@ export function createMongoEnquiryRepository({
     async insert(enquiry) {
       const collection = await getCollection()
       await collection.insertOne(enquiry)
+    },
+    async listRecent(limit) {
+      const collection = await getCollection()
+      return collection
+        .find({}, { projection: { _id: 0 } })
+        .sort({ createdAt: -1 })
+        .limit(clampEnquiryLimit(limit))
+        .toArray()
     },
     async close() {
       await client.close()

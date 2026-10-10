@@ -4,6 +4,9 @@ import { domAnimation, LazyMotion, m, useReducedMotion } from 'motion/react'
 import { useLayoutEffect, useRef } from 'react'
 import { assets } from '../assets'
 import { ButtonLink } from '../components/ButtonLink'
+import { ResponsiveImage } from '../components/ResponsiveImage'
+import { brandLogos, pageImages } from '../imageAssets'
+import '../styles/home.css'
 
 const categories = [
   ['Hardware', assets.iconHardware],
@@ -15,14 +18,14 @@ const categories = [
 ] as const
 
 const services = [
-  ['Hardware OEM', assets.serviceHardware, 'Dell laptops for hardware supply and support'],
-  ['Software Solutions', assets.serviceSoftware, 'Business software displayed on a laptop'],
-  ['Network Services', assets.serviceNetwork, 'Network router and connected cables'],
-  ['PC & End User Support', assets.servicePc, 'Desktop computer workstations'],
-  ['Microsoft 365 Support', assets.serviceMicrosoft, 'Microsoft 365 application icons'],
-  ['CCTV & Security', assets.serviceCctv, 'CCTV security camera'],
-  ['Printer Services', assets.servicePrinter, 'Office printer'],
-  ['Website Development', assets.serviceWebsite, 'Website code and interface on a desktop monitor'],
+  ['Hardware OEM', pageImages.services.cards[0], 'A technician repairing computer hardware'],
+  ['Software Solutions', pageImages.services.cards[1], 'Software code displayed on a workstation'],
+  ['Network Services', pageImages.services.cards[2], 'Network switches with connected blue cables'],
+  ['PC & End User Support', pageImages.services.cards[3], 'Desktop computer workstations'],
+  ['Microsoft 365 Support', pageImages.services.cards[4], 'Microsoft 365 application icons'],
+  ['CCTV & Security', pageImages.services.cards[5], 'CCTV security camera'],
+  ['Printer Services', pageImages.services.cards[6], 'Office printer'],
+  ['Website Development', pageImages.services.cards[7], 'Business website displayed on a laptop'],
 ] as const
 
 const process = [
@@ -82,7 +85,7 @@ export function Home() {
             </div>
           </div>
           <div className="home-hero__media" aria-hidden="true">
-            <img src={assets.heroServerAisle} width="255" height="226" alt="" fetchPriority="high" />
+            <ResponsiveImage alt="" eager image={pageImages.services.hero} sizes="(max-width: 48rem) 100vw, 55vw" />
           </div>
         </div>
       </section>
@@ -112,7 +115,7 @@ export function Home() {
           </div>
           <div className="home-about__media" aria-hidden="true">
             <div className="home-about__media-frame">
-              <img src={assets.heroServerAisle} width="255" height="226" alt="" loading="lazy" />
+              <ResponsiveImage alt="" image={pageImages.about.story} sizes="(max-width: 48rem) 100vw, 50vw" />
             </div>
             <div className="home-about__wedge" />
           </div>
@@ -147,7 +150,7 @@ export function Home() {
                 whileInView={shouldReduceMotion ? undefined : { opacity: 1, y: 0 }}
               >
                 <div className="service-card__image">
-                  <img src={image} width="255" height="171" alt={alt} loading="lazy" />
+                  <ResponsiveImage image={image} alt={alt} sizes="(max-width: 35rem) 100vw, (max-width: 64rem) 50vw, 25vw" />
                 </div>
                 <div className="service-card__body">
                   <h3>{title}</h3>
@@ -162,9 +165,10 @@ export function Home() {
       <m.section className="ecosystems" aria-labelledby="ecosystems-title" {...revealProps}>
         <div className="site-shell ecosystems__inner">
           <h2 id="ecosystems-title">Technology ecosystems we work with</h2>
-          <div className="ecosystem-logos">
-            <img src={assets.logosRowOne} width="745" height="56" alt="Dell, HP, Lenovo, Microsoft 365, SAP and Oracle" />
-            <img src={assets.logosRowTwo} width="745" height="54" alt="Cisco, ServiceNow, VPN, Wi-Fi and Remote Desktop" />
+          <div className="ecosystem-logos" aria-label="Technology ecosystems">
+            {brandLogos.map((brand) => (
+              <img alt={brand.alt} key={brand.alt} loading="lazy" src={brand.src} />
+            ))}
           </div>
         </div>
       </m.section>

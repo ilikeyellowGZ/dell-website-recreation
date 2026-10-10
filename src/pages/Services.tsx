@@ -1,67 +1,60 @@
 import { ArrowRight } from '@phosphor-icons/react'
 import { Link } from 'react-router-dom'
-import { assets } from '../assets'
 import { ButtonLink } from '../components/ButtonLink'
-import { ReferencePhoto } from '../components/ReferencePhoto'
+import { ResponsiveImage } from '../components/ResponsiveImage'
+import { pageImages, type ResponsiveImageAsset } from '../imageAssets'
+import '../styles/services.css'
 
 const services = [
   {
     title: 'Hardware Support',
     description: 'Repairs, maintenance and upgrades.',
-    crop: { x: 51, y: 328, width: 450, height: 130 },
     alt: 'A technician repairing computer hardware inside a server rack',
   },
   {
     title: 'Software Solutions',
     description: 'Development, testing and business applications.',
-    crop: { x: 523, y: 328, width: 450, height: 130 },
     alt: 'Code displayed on a development workstation',
   },
   {
     title: 'Networking Services',
     description: 'Reliable business networks and connectivity.',
-    crop: { x: 51, y: 541, width: 450, height: 131 },
     alt: 'Network rack with connected blue cables',
   },
   {
     title: 'PC & Desktop Support',
     description: 'Setup, troubleshooting and ongoing assistance.',
-    crop: { x: 523, y: 541, width: 450, height: 131 },
     alt: 'Desktop computers in an office workstation setup',
   },
   {
     title: 'Microsoft 365 Support',
     description: 'Accounts, email and productivity tools.',
-    crop: { x: 51, y: 757, width: 450, height: 130 },
     alt: 'Microsoft 365 productivity application icons',
   },
   {
     title: 'CCTV & Security',
     description: 'Camera installation and security system setup.',
-    crop: { x: 523, y: 757, width: 450, height: 130 },
     alt: 'CCTV security camera mounted indoors',
   },
   {
     title: 'Printer Services',
     description: 'Installation, troubleshooting and repairs.',
-    crop: { x: 51, y: 972, width: 450, height: 130 },
     alt: 'Office printer in a business workspace',
   },
   {
     title: 'Website Development',
     description: 'Responsive websites for your business.',
-    crop: { x: 523, y: 972, width: 450, height: 130 },
     alt: 'Monitor displaying a Gauvis Tech business website',
   },
 ] as const
 
-type ServiceCatalogueCardProps = (typeof services)[number]
+type ServiceCatalogueCardProps = (typeof services)[number] & { image: ResponsiveImageAsset }
 
-function ServiceCatalogueCard({ title, description, crop, alt }: ServiceCatalogueCardProps) {
+function ServiceCatalogueCard({ title, description, image, alt }: ServiceCatalogueCardProps) {
   return (
     <article className="service-catalogue-card">
       <div className="service-catalogue-card__image">
-        <ReferencePhoto alt={alt} crop={crop} src={assets.servicesReference} />
+        <ResponsiveImage alt={alt} image={image} sizes="(max-width: 48rem) 100vw, (max-width: 100rem) 50vw, 33vw" />
       </div>
       <div className="service-catalogue-card__body">
         <span className="service-catalogue-card__accent" aria-hidden="true" />
@@ -95,12 +88,11 @@ export function Services() {
             <p>From everyday support to complete technology setups, find the right service for your business.</p>
           </div>
           <div className="services-hero__media">
-            <img
-              src={assets.heroCabling}
-              width="255"
-              height="226"
+            <ResponsiveImage
               alt="Network rack with orange and blue cables"
-              fetchPriority="high"
+              eager
+              image={pageImages.services.hero}
+              sizes="(max-width: 48rem) 100vw, 55vw"
             />
           </div>
           <span className="services-hero__accent" aria-hidden="true" />
@@ -109,8 +101,8 @@ export function Services() {
 
       <section className="service-catalogue" aria-label="IT service catalogue">
         <div className="site-shell service-catalogue__grid">
-          {services.map((service) => (
-            <ServiceCatalogueCard key={service.title} {...service} />
+          {services.map((service, index) => (
+            <ServiceCatalogueCard image={pageImages.services.cards[index]} key={service.title} {...service} />
           ))}
         </div>
       </section>
