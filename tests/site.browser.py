@@ -3,6 +3,7 @@
 import os
 import re
 from pathlib import Path
+from time import monotonic
 
 from playwright.sync_api import expect, sync_playwright
 
@@ -57,6 +58,27 @@ def test_mobile_service_detail_and_unknown_route(page) -> None:
         "href", "/contact#request-quote"
     )
     assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth")
+
+
+def assert_quote_heading_clears_sticky_header(page) -> None:
+    tolerance_px = 1
+    deadline = monotonic() + 5
+    while True:
+        geometry = page.evaluate("""() => {
+            const heading = document.querySelector('#request-quote h2').getBoundingClientRect();
+            const header = document.querySelector('.site-header').getBoundingClientRect();
+            return { headingTop: heading.top, headingBottom: heading.bottom,
+                headerBottom: header.bottom, viewportHeight: window.innerHeight };
+        }""")
+        if (
+            geometry["headingTop"] >= geometry["headerBottom"] - tolerance_px
+            and geometry["headingBottom"] <= geometry["viewportHeight"] + tolerance_px
+        ):
+            return
+        assert monotonic() < deadline, (
+            f"Quote heading must be visible below the sticky header (tolerance {tolerance_px}px): {geometry}"
+        )
+        page.wait_for_timeout(50)
 
 
 def inspect_service_detail_pages(browser) -> None:
@@ -125,9 +147,7 @@ def inspect_service_detail_pages(browser) -> None:
             expect(page).to_have_url(f"{BASE_URL}/contact#request-quote")
             expect(page.locator("#request-quote")).to_be_visible()
             expect(page.get_by_role("heading", name="Request a Quote", exact=True)).to_be_visible()
-            assert page.locator("#request-quote").evaluate(
-                "node => Math.abs(node.getBoundingClientRect().top - 84) < 100"
-            ), f"{slug} quote destination sits behind the header at {width}px"
+            assert_quote_heading_clears_sticky_header(page)
         assert not errors, f"Service-detail browser errors at {width}px: {errors}"
         context.close()
 
@@ -352,7 +372,7 @@ with sync_playwright() as playwright:
         assert page.url == f"{BASE_URL}/contact#request-quote"
         quote_card = page.locator("#request-quote")
         assert quote_card.is_visible()
-        assert quote_card.evaluate("node => Math.abs(node.getBoundingClientRect().top - 84) < 100")
+        assert_quote_heading_clears_sticky_header(page)
 
         page.goto(f"{BASE_URL}/contact", wait_until="networkidle")
         assert_page_health(page, width)
