@@ -1,4 +1,7 @@
+"""Run `python tests/site.browser.py` against `npm run preview` (default port 4173)."""
+
 import os
+import re
 from pathlib import Path
 
 from playwright.sync_api import expect, sync_playwright
@@ -14,20 +17,131 @@ def assert_page_health(page, width: int) -> None:
     overflow = page.evaluate("document.documentElement.scrollWidth - window.innerWidth")
     assert overflow <= 1, f"{width}px viewport overflows horizontally by {overflow}px"
 
-    for image in page.locator("img:visible").element_handles():
-        image.scroll_into_view_if_needed()
-    page.wait_for_function(
-        "Array.from(document.images).every(image => image.complete && image.naturalWidth > 0)",
-        timeout=10000,
-    )
+    for image in page.locator("img").all():
+        if image.is_visible():
+            image.scroll_into_view_if_needed()
+        expect(image).to_have_js_property("complete", True, timeout=10000)
     broken_images = page.locator("img").evaluate_all(
         "images => images.filter(image => !image.complete || image.naturalWidth === 0).map(image => image.src)"
     )
     assert not broken_images, f"{width}px has broken images: {broken_images}"
 
 
+def test_service_card_opens_matching_detail_page(page) -> None:
+    page.goto(f"{BASE_URL}/services", wait_until="networkidle")
+    page.get_by_role("link", name="Learn more about Hardware Support").click()
+    expect(page).to_have_url(re.compile(r"/services/hardware-support$"))
+    expect(page.get_by_role("heading", name="Hardware Support", exact=True)).to_be_visible()
+    expect(page.get_by_role("link", name="Services", exact=True).first).to_have_attribute("aria-current", "page")
+    expect(page.get_by_role("link", name="Request a quote for Hardware Support")).to_have_attribute(
+        "href", "/contact#request-quote"
+    )
+    expect(page.get_by_role("heading", name="Hardware Support", exact=True)).to_be_focused()
+    assert page.locator("main").evaluate(
+        "node => Math.abs(node.getBoundingClientRect().width - window.innerWidth) <= 1"
+    ), "Service detail main must fill the viewport"
+
+
+def test_mobile_service_detail_and_unknown_route(page) -> None:
+    page.goto(f"{BASE_URL}/services/website-development", wait_until="networkidle")
+    expect(page.get_by_role("heading", name="Website Development", exact=True)).to_be_visible()
+    expect(page.get_by_role("heading", name="What we can help with", exact=True)).to_be_visible()
+    expect(page.get_by_role("heading", name="Related services", exact=True)).to_be_visible()
+    expect(page.get_by_role("link", name="Request a quote for Website Development")).to_be_visible()
+    assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth")
+
+    page.goto(f"{BASE_URL}/services/unknown-service", wait_until="networkidle")
+    expect(page.get_by_role("heading", name="Service not found", exact=True)).to_be_visible()
+    expect(page.get_by_role("link", name="View all services", exact=True)).to_have_attribute("href", "/services")
+    expect(page.get_by_role("link", name="Contact our team", exact=True)).to_have_attribute(
+        "href", "/contact#request-quote"
+    )
+    assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth")
+
+
+def inspect_service_detail_pages(browser) -> None:
+    services = (
+        ("hardware-support", "Hardware Support"),
+        ("microsoft-365-support", "Microsoft 365 Support"),
+        ("website-development", "Website Development"),
+        ("unknown-service", "Service not found"),
+    )
+    for width, height in ((390, 844), (768, 1024), (1440, 900)):
+        context = browser.new_context(viewport={"width": width, "height": height}, reduced_motion="reduce")
+        page = context.new_page()
+        errors = []
+        page.on("pageerror", lambda error: errors.append(str(error)))
+        page.on("console", lambda message: errors.append(message.text) if message.type == "error" else None)
+        for slug, title in services:
+            response = page.goto(f"{BASE_URL}/services/{slug}", wait_until="networkidle")
+            assert response and response.ok, f"{slug} failed to load at {width}px"
+            response = page.reload(wait_until="networkidle")
+            assert response and response.ok, f"{slug} failed to refresh at {width}px"
+            heading = page.get_by_role("heading", level=1, name=title, exact=True)
+            expect(heading).to_be_visible()
+            expect(heading).to_be_focused()
+            expect(page.locator('#primary-navigation a[href="/services"]')).to_have_attribute("aria-current", "page")
+            assert heading.evaluate(
+                "node => { const box = node.getBoundingClientRect(); return box.left >= 0 && box.right <= window.innerWidth }"
+            ), f"{slug} heading clips at {width}px"
+            assert_page_health(page, width)
+            assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth")
+            page.evaluate("window.scrollTo(0, 0)")
+            page.screenshot(path=str(ARTIFACTS / f"service-detail-{slug}-{width}.png"), full_page=True)
+
+            if slug == "unknown-service":
+                first_action = page.get_by_role("link", name="View all services", exact=True)
+                quote = page.get_by_role("link", name="Contact our team", exact=True)
+            else:
+                hero_image = page.locator(".service-detail-hero__media img")
+                assert hero_image.evaluate("node => getComputedStyle(node).objectFit === 'cover'")
+                related = page.locator(".service-detail-related-card a")
+                expect(related).to_have_count(3)
+                first_action = related.first
+                quote = page.get_by_role("link", name=f"Request a quote for {title}", exact=True)
+                related_path = first_action.get_attribute("href")
+                related_title = first_action.locator("h3").inner_text()
+                first_action.click()
+                expect(page).to_have_url(f"{BASE_URL}{related_path}")
+                expect(page.get_by_role("heading", level=1, name=related_title, exact=True)).to_be_visible()
+                page.go_back(wait_until="networkidle")
+                expect(heading).to_be_focused()
+
+            # Route-heading focus must lead keyboard users to the first content action.
+            page.keyboard.press("Tab")
+            expect(first_action).to_be_focused()
+            assert first_action.evaluate(
+                "node => { const style = getComputedStyle(node); return style.outlineStyle === 'solid' && parseFloat(style.outlineWidth) >= 2 }"
+            ), f"{slug} keyboard focus ring missing at {width}px"
+            page.screenshot(path=str(ARTIFACTS / f"service-detail-{slug}-{width}-focus.png"))
+            if slug == "unknown-service":
+                page.keyboard.press("Enter")
+                expect(page).to_have_url(f"{BASE_URL}/services")
+                expect(page.get_by_role("heading", name="IT Services for Every Business Need.")).to_be_visible()
+                page.go_back(wait_until="networkidle")
+
+            expect(quote).to_have_attribute("href", "/contact#request-quote")
+            quote.click()
+            expect(page).to_have_url(f"{BASE_URL}/contact#request-quote")
+            expect(page.locator("#request-quote")).to_be_visible()
+            expect(page.get_by_role("heading", name="Request a Quote", exact=True)).to_be_visible()
+            assert page.locator("#request-quote").evaluate(
+                "node => Math.abs(node.getBoundingClientRect().top - 84) < 100"
+            ), f"{slug} quote destination sits behind the header at {width}px"
+        assert not errors, f"Service-detail browser errors at {width}px: {errors}"
+        context.close()
+
+
 with sync_playwright() as playwright:
     browser = playwright.chromium.launch(channel="msedge", headless=True)
+
+    detail_context = browser.new_context(viewport={"width": 1440, "height": 900}, reduced_motion="reduce")
+    detail_page = detail_context.new_page()
+    test_service_card_opens_matching_detail_page(detail_page)
+    detail_page.set_viewport_size({"width": 390, "height": 844})
+    test_mobile_service_detail_and_unknown_route(detail_page)
+    detail_context.close()
+    inspect_service_detail_pages(browser)
 
     for width in WIDTHS:
         context = browser.new_context(viewport={"width": width, "height": 900}, reduced_motion="reduce")
@@ -111,18 +225,20 @@ with sync_playwright() as playwright:
         assert primary.locator('a[href="/"]').get_attribute("href") == "/"
 
         expected_services = [
-            "Hardware Support",
-            "Software Solutions",
-            "Networking Services",
-            "PC & Desktop Support",
-            "Microsoft 365 Support",
-            "CCTV & Security",
-            "Printer Services",
-            "Website Development",
+            ("Hardware Support", "hardware-support"),
+            ("Software Solutions", "software-solutions"),
+            ("Networking Services", "networking-services"),
+            ("PC & Desktop Support", "pc-desktop-support"),
+            ("Microsoft 365 Support", "microsoft-365-support"),
+            ("CCTV & Security", "cctv-security"),
+            ("Printer Services", "printer-services"),
+            ("Website Development", "website-development"),
         ]
-        for service in expected_services:
+        for service, slug in expected_services:
             assert page.get_by_role("heading", name=service).is_visible()
-            assert page.get_by_role("link", name=f"Enquire about {service}").get_attribute("href") == "/contact#request-quote"
+            expect(page.get_by_role("link", name=f"Learn more about {service}")).to_have_attribute(
+                "href", f"/services/{slug}"
+            )
 
         assert page.get_by_role("link", name="Talk to Us").get_attribute("href") == "/contact#request-quote"
         assert page.locator('a[href="/services.html"]').count() == 0
@@ -264,4 +380,4 @@ with sync_playwright() as playwright:
 
     browser.close()
 
-print("Browser checks passed at 360, 390, 768, 1024, and 1440px")
+print("Browser checks passed at 360, 390, 768, 1024, and 1440px; service detail journeys passed at 390x844, 768x1024, and 1440x900")
