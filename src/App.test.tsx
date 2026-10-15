@@ -158,6 +158,52 @@ describe('Services route', () => {
   })
 })
 
+describe('Service detail routes', () => {
+  it('renders service-specific content and metadata for a valid slug', async () => {
+    await renderRoute('/services/networking-services')
+
+    expect(screen.getByRole('heading', { level: 1, name: 'Networking Services' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'What we can help with' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'What this means for your business' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'How we work with you' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Request a quote for Networking Services' })).toHaveAttribute(
+      'href',
+      '/contact#request-quote',
+    )
+    expect(document.title).toBe('Networking Services | Gauvis Technology Holdings')
+
+    const primaryNavigation = screen.getByRole('navigation', { name: 'Primary' })
+    expect(within(primaryNavigation).getByRole('link', { name: 'Services' })).toHaveAttribute('aria-current', 'page')
+  })
+
+  it.each([
+    ['hardware-support', 'Hardware Support'],
+    ['software-solutions', 'Software Solutions'],
+    ['networking-services', 'Networking Services'],
+    ['pc-desktop-support', 'PC & Desktop Support'],
+    ['microsoft-365-support', 'Microsoft 365 Support'],
+    ['cctv-security', 'CCTV & Security'],
+    ['printer-services', 'Printer Services'],
+    ['website-development', 'Website Development'],
+  ])('renders the title and current breadcrumb for %s', async (slug, title) => {
+    await renderRoute(`/services/${slug}`)
+
+    expect(screen.getByRole('heading', { level: 1, name: title })).toBeInTheDocument()
+    const breadcrumb = screen.getByRole('navigation', { name: 'Breadcrumb' })
+    expect(within(breadcrumb).getByText(title)).toHaveAttribute('aria-current', 'page')
+  })
+
+  it('shows a useful service-not-found state for an unknown slug', async () => {
+    await renderRoute('/services/unknown-service')
+
+    expect(screen.getByRole('heading', { level: 1, name: 'Service not found' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'View all services' })).toHaveAttribute('href', '/services')
+    expect(screen.getByRole('link', { name: 'Contact our team' })).toHaveAttribute('href', '/contact#request-quote')
+    expect(document.title).toBe('Service Not Found | Gauvis Technology Holdings')
+    expect(screen.queryByRole('heading', { name: /powering your digital future/i })).not.toBeInTheDocument()
+  })
+})
+
 describe('Solutions route', () => {
   it('renders the project-owned business-need solutions and marks Solutions active', async () => {
     await renderRoute('/solutions')
