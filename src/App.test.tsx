@@ -193,6 +193,16 @@ describe('Service detail routes', () => {
     expect(within(breadcrumb).getByText(title)).toHaveAttribute('aria-current', 'page')
   })
 
+  it.each([
+    '/services/networking-services/',
+    '/services/%6Eetworking-services',
+  ])('keeps service content and metadata consistent at %s', async (route) => {
+    await renderRoute(route)
+
+    expect(screen.getByRole('heading', { level: 1, name: 'Networking Services' })).toBeInTheDocument()
+    expect(document.title).toBe('Networking Services | Gauvis Technology Holdings')
+  })
+
   it('shows a useful service-not-found state for an unknown slug', async () => {
     await renderRoute('/services/unknown-service')
 

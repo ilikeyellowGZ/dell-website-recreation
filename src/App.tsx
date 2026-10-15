@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect } from 'react'
-import { Route, Routes, useLocation, type Location } from 'react-router-dom'
+import { Route, Routes, useLocation, useMatch, type Location } from 'react-router-dom'
 import { SiteFooter } from './components/SiteFooter'
 import { SiteHeader } from './components/SiteHeader'
 import { getServiceBySlug } from './services/serviceCatalogue'
@@ -38,7 +38,7 @@ const activePageByPath = {
 
 function RouteEffects() {
   const { pathname } = useLocation()
-  const serviceSlug = pathname.startsWith('/services/') ? pathname.slice('/services/'.length) : undefined
+  const serviceSlug = useMatch('/services/:serviceSlug')?.params.serviceSlug
   const service = getServiceBySlug(serviceSlug)
 
   useEffect(() => {
