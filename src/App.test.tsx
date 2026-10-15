@@ -2,6 +2,7 @@
 import { MemoryRouter } from 'react-router-dom'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { App } from './App'
+import { serviceCatalogue, serviceHref } from './services/serviceCatalogue'
 
 afterEach(() => {
   vi.unstubAllGlobals()
@@ -84,6 +85,18 @@ describe('About route', () => {
 })
 
 describe('Homepage route', () => {
+  it('links every homepage service card to its matching detail route', async () => {
+    await renderRoute('/')
+    const serviceSection = screen.getByRole('region', { name: /technology solutions for every business need/i })
+
+    for (const service of serviceCatalogue) {
+      expect(within(serviceSection).getByRole('link', { name: new RegExp(service.homeTitle, 'i') })).toHaveAttribute(
+        'href',
+        serviceHref(service.slug),
+      )
+    }
+  })
+
   it('moves focus to the destination heading after client-side navigation', async () => {
     await renderRoute('/')
 
@@ -123,7 +136,7 @@ describe('Removed routes', () => {
 })
 
 describe('Services route', () => {
-  it('renders the approved Services catalogue, links enquiries to Contact, and marks Services active', async () => {
+  it('renders the approved Services catalogue, links cards to their details, and marks Services active', async () => {
     await renderRoute('/services')
 
     expect(screen.getByRole('heading', { level: 1, name: /it services for every business need/i })).toBeInTheDocument()
@@ -142,9 +155,12 @@ describe('Services route', () => {
 
     for (const service of expectedServices) {
       expect(screen.getByRole('heading', { name: service })).toBeInTheDocument()
-      expect(screen.getByRole('link', { name: `Enquire about ${service}` })).toHaveAttribute(
+    }
+
+    for (const service of serviceCatalogue) {
+      expect(screen.getByRole('link', { name: `Learn more about ${service.title}` })).toHaveAttribute(
         'href',
-        '/contact#request-quote',
+        serviceHref(service.slug),
       )
     }
 

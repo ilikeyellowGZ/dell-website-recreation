@@ -6,6 +6,7 @@ import { assets } from '../assets'
 import { ButtonLink } from '../components/ButtonLink'
 import { ResponsiveImage } from '../components/ResponsiveImage'
 import { brandLogos, pageImages } from '../imageAssets'
+import { serviceCatalogue, serviceHref } from '../services/serviceCatalogue'
 import '../styles/home.css'
 
 const categories = [
@@ -15,17 +16,6 @@ const categories = [
   ['IT Support', assets.iconSupport],
   ['Security', assets.iconSecurity],
   ['Web Development', assets.iconWeb],
-] as const
-
-const services = [
-  ['Hardware OEM', pageImages.services.cards[0], 'A technician repairing computer hardware'],
-  ['Software Solutions', pageImages.services.cards[1], 'Software code displayed on a workstation'],
-  ['Network Services', pageImages.services.cards[2], 'Network switches with connected blue cables'],
-  ['PC & End User Support', pageImages.services.cards[3], 'Desktop computer workstations'],
-  ['Microsoft 365 Support', pageImages.services.cards[4], 'Microsoft 365 application icons'],
-  ['CCTV & Security', pageImages.services.cards[5], 'CCTV security camera'],
-  ['Printer Services', pageImages.services.cards[6], 'Office printer'],
-  ['Website Development', pageImages.services.cards[7], 'Business website displayed on a laptop'],
 ] as const
 
 const process = [
@@ -135,12 +125,12 @@ export function Home() {
             <a className="home-services__all" href="/services">View All Services <span aria-hidden="true">→</span></a>
           </m.div>
           <div className="services-grid">
-            {services.map(([title, image, alt], index) => (
+            {serviceCatalogue.map((service, index) => (
               <m.a
                 className="service-card"
-                href="/services"
+                href={serviceHref(service.slug)}
                 initial={shouldReduceMotion ? undefined : { opacity: 0, y: 16 }}
-                key={title}
+                key={service.slug}
                 transition={
                   shouldReduceMotion
                     ? undefined
@@ -150,10 +140,10 @@ export function Home() {
                 whileInView={shouldReduceMotion ? undefined : { opacity: 1, y: 0 }}
               >
                 <div className="service-card__image">
-                  <ResponsiveImage image={image} alt={alt} sizes="(max-width: 35rem) 100vw, (max-width: 64rem) 50vw, 25vw" />
+                  <ResponsiveImage image={pageImages.services.cards[service.imageIndex]} alt={service.alt} sizes="(max-width: 35rem) 100vw, (max-width: 64rem) 50vw, 25vw" />
                 </div>
                 <div className="service-card__body">
-                  <h3>{title}</h3>
+                  <h3>{service.homeTitle}</h3>
                   <span aria-hidden="true">→</span>
                 </div>
               </m.a>
