@@ -12,7 +12,7 @@ The approved visual references are:
 
 These pages are faithful screenshot recreations, not redesigns. The implementation uses React and TypeScript with shared site components.
 
-- Routes in scope: `/`, `/about`, `/services`, `/solutions`, `/contact`, and `/faq`
+- Routes in scope: `/`, `/about`, `/services`, `/services/:serviceSlug`, `/solutions`, `/contact`, and `/faq`
 - Audience: South African businesses seeking practical IT services
 - Character: credible, technical, compact, high-contrast
 - Dials: design variance 4, motion intensity 3 on About, visual density 6
@@ -113,7 +113,8 @@ The exact About photographs are present only inside the approved composite mocku
 - `Home`: the preserved homepage at `/`.
 - `About`: the approved About page at `/about`.
 - `Contact`: the approved Contact page at `/contact`, composed from `ContactDetails`, `QuoteForm`, field groups, submission state, and `NextSteps`.
-- `Services`: the approved Services catalogue at `/services`, using a reusable service-card data structure and routing enquiry links to `/contact#request-quote`.
+- `Services`: the approved Services catalogue at `/services`, with service cards linking to their matching detail routes.
+- `ServiceDetail`: a reusable page at `/services/:serviceSlug` driven by the typed service catalogue, with an explicit unknown-slug state.
 - `Solutions`: the project-owned Solutions page at `/solutions`, grouping confirmed services around six business situations from the original design bundle.
 - `FAQ`: the approved FAQ page at `/faq`, including static category/search filtering, accessible accordion controls, empty state, and the confirmed Thabang WhatsApp action.
 
@@ -133,7 +134,7 @@ The exact About photographs are present only inside the approved composite mocku
 - On SPA route changes, update the document title, scroll to the top, and focus the route heading.
 - Visible 2px focus ring, at least 24px WCAG 2.2 targets (44px for primary controls), descriptive image alternatives, and decorative imagery hidden from assistive technology.
 - About is marked with `aria-current="page"` on `/about`, Contact on `/contact`, and Home only on `/`.
-- Services is marked with `aria-current="page"` on `/services`.
+- Services is marked with `aria-current="page"` on `/services` and every service-detail route.
 - FAQ is marked with `aria-current="page"` on `/faq`.
 - Solutions is marked with `aria-current="page"` on `/solutions`.
 - Do not invent services, claims, certifications, statistics, testimonials, employees, projects, addresses, hours, or email addresses.
@@ -149,9 +150,19 @@ The exact About photographs are present only inside the approved composite mocku
 3. White service catalogue with eight image cards: three columns from 1600px upward, two columns from tablet through standard desktop widths, and one column at 768px and below. Each card has a fixed-ratio photograph, title, short description, orange vertical accent, and an enquiry link aligned to the trailing edge.
 4. Service cards use the exact order and copy from the approved mockup: Hardware Support, Software Solutions, Networking Services, PC & Desktop Support, Microsoft 365 Support, CCTV & Security, Printer Services, Website Development.
 5. Navy CTA band with the approved `Not sure where to start?` heading, support copy, orange `Talk to Us` button, city imagery, and diagonal orange treatment.
-6. Enquiry links and CTA controls go to `/contact#request-quote`; no service detail pages or automatic service selection are claimed.
+6. Card titles and enquiry actions route to the matching `/services/:serviceSlug` page. The catalogue's final CTA routes to `/contact#request-quote`.
 
-## 11. FAQ page reference geometry and states
+## 11. Service detail page geometry and states
+
+1. Each service route uses the shared header and footer, with Services active in the navigation and a breadcrumb reading `Home / Services / Service name`.
+2. A service-specific hero pairs the catalogue's matching image with the service title and a concise lead.
+3. An overview explains the business problem and Gauvis's support; a `What we can help with` section lists concrete capabilities.
+4. Benefits describe practical outcomes without guarantees. A three-step process presents `Assess`, `Deliver`, and `Support`.
+5. Related services link to their own valid detail routes. A final quote CTA links to `/contact#request-quote`.
+6. Split layouts stack into one column on narrow screens, with readable line lengths, wrapping headings, and tappable actions.
+7. An unknown service slug renders an explicit service-not-found state with links to `/services` and `/contact`.
+
+## 12. FAQ page reference geometry and states
 
 1. Shared utility bar and white navigation, with FAQ active.
 2. Navy split hero with breadcrumb, orange eyebrow `FREQUENTLY ASKED QUESTIONS`, the two-line heading `Clear Answers.` / `Confident Decisions.`, the approved supporting sentence, server imagery, and orange diagonal accent.
@@ -163,7 +174,7 @@ The exact About photographs are present only inside the approved composite mocku
 8. Assistance panel includes `Contact Us` routed to `/contact`; `WhatsApp Us` opens Thabang’s confirmed destination.
 9. Final CTA routes to `/contact#request-quote`.
 
-## 12. Solutions page geometry and states
+## 13. Solutions page geometry and states
 
 1. Shared utility bar and white navigation, with Solutions active.
 2. Navy split hero uses the original bundle’s `Technology Solutions` / `Built Around Your Business.` heading, supporting sentence, and approved South African business-district asset.
@@ -172,6 +183,6 @@ The exact About photographs are present only inside the approved composite mocku
 5. The final navy CTA routes to `/contact#request-quote` and the confirmed Thabang telephone number.
 6. Cards become one column below 768px and CTA controls become full width below 560px.
 
-## 13. Unresolved destinations
+## 14. Unresolved destinations
 
 - Privacy Policy and Terms & Conditions still require approved, legally reviewed content. Dead footer labels are omitted until valid routes exist.
