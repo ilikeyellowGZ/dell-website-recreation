@@ -4,7 +4,7 @@ DirectAdmin serves the static frontend. Render runs the Express API, which store
 
 ## 1. Prepare the release
 
-Use the reviewed commit and Node.js 22.12+ with `npm ci`. Confirm approved privacy/terms content is published before enabling public collection. The Blueprint sets `ENABLE_ENQUIRIES=true`; override it to `false` in Render while that prerequisite is pending and build with `VITE_ENABLE_ENQUIRIES=false`.
+Use the reviewed commit and Node.js 24 LTS with `npm ci`. Confirm approved privacy/terms content is published before enabling public collection. The Blueprint sets `ENABLE_ENQUIRIES=true`; override it to `false` in Render while that prerequisite is pending and build with `VITE_ENABLE_ENQUIRIES=false`.
 
 Choose the final HTTPS website origin, for example `https://example.com`. If both apex and `www` serve the site, allow both explicitly; redirecting to one canonical host reduces configuration. Obtain access to the authoritative DNS provider and an HTTPS-capable DirectAdmin account using Apache 2.4 with `.htaccess` overrides and `mod_rewrite`. Confirm `mod_headers` is enabled for cache/security headers. A host using Nginx without Apache compatibility needs equivalent host-managed routing and headers before launch.
 
@@ -26,7 +26,7 @@ Create an application-specific key with **Sending access**, restricted to that v
 
 ## 4. Deploy the API with the Render Blueprint
 
-Connect the repository to Render, select **New > Blueprint**, choose the reviewed branch and root `render.yaml`, and review the service settings and plan. The Blueprint uses `buildCommand: npm ci`, `startCommand: npm start`, and `healthCheckPath: /api/health`. Render supplies `PORT`; do not hardcode it. Set the service's Node version to 22.12+ if its default is older. The API does not require a frontend build. See [Render Blueprints](https://render.com/docs/infrastructure-as-code) and [Blueprint settings](https://render.com/docs/blueprint-spec).
+Connect the repository to Render, select **New > Blueprint**, choose the reviewed branch and root `render.yaml`, and review the service settings and plan. The Blueprint uses `buildCommand: npm ci`, `startCommand: npm start`, and `healthCheckPath: /api/health`. Render supplies `PORT`; do not hardcode it. Use Node.js 24 LTS. The API does not require or serve a frontend build in production. See [Render Blueprints](https://render.com/docs/infrastructure-as-code) and [Blueprint settings](https://render.com/docs/blueprint-spec).
 
 Enter **every** `sync: false` value below at creation. Later rotations belong in the service's Environment settings, followed by a deploy/restart.
 
@@ -34,6 +34,7 @@ Enter **every** `sync: false` value below at creation. Later rotations belong in
 | --- | --- |
 | `NODE_ENV` | Blueprint: `production` |
 | `ENABLE_ENQUIRIES` | Blueprint: `true`; hold at `false` until legal approval |
+| `SERVE_FRONTEND` | Blueprint: `false`; keeps Render API-only even if a cached `dist` folder exists |
 | `TRUST_PROXY` | Blueprint: `1` trusted Render proxy hop |
 | `FRONTEND_ORIGIN` | `https://example.com` or comma-separated exact HTTPS origins including `www` if used |
 | `MONGODB_URI` | Private Atlas connection URI |
@@ -46,7 +47,7 @@ Enter **every** `sync: false` value below at creation. Later rotations belong in
 | `ADMIN_PASSWORD_HASH` | Generated `scrypt$...` hash; paste whole value without shell expansion |
 | `JWT_SECRET_KEY` | Blueprint-generated secret; keep stable across normal deploys |
 
-`FRONTEND_ORIGIN` accepts no wildcard, credentials, non-root path, query, fragment, or HTTP origin in production; invalid/missing values stop startup. `VITE_*` values are unnecessary on Render. Complete the Atlas outbound allowlist from step 2, deploy, then open `https://<actual-service-host>/api/health`. Expect only `{"status":"ok"}`. This proves HTTP responsiveness, **not** storage or email delivery.
+`FRONTEND_ORIGIN` accepts no wildcard, credentials, non-root path, query, fragment, or HTTP origin in production; invalid/missing values stop startup. `VITE_*` values are unnecessary on Render. Complete the Atlas outbound allowlist from step 2, deploy, then open `https://<actual-service-host>/api/health`. Expect only `{"status":"ok"}`. Opening the Render host root (`/`) should return `404`; that is intentional because DirectAdmin serves the website. This proves HTTP responsiveness, **not** storage or email delivery.
 
 Review startup logs for missing storage, notification, or admin configuration. Email failure logs contain only `Enquiry notification failed after storage.` and a category. Do not enable request-body, credential, cookie, or provider-error logging. Missing notification configuration permits storage but requires the dashboard as the recovery path.
 

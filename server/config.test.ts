@@ -48,6 +48,21 @@ describe('parseTrustProxy', () => {
 })
 
 describe('getRuntimeConfig', () => {
+  it('keeps production API-only even when a frontend build exists', () => {
+    expect(getRuntimeConfig({ NODE_ENV: 'production', FRONTEND_ORIGIN: 'https://gauvis.co.za' }).serveFrontend).toBe(false)
+    expect(getRuntimeConfig({
+      NODE_ENV: 'production',
+      FRONTEND_ORIGIN: 'https://gauvis.co.za',
+      SERVE_FRONTEND: 'true',
+    }).serveFrontend).toBe(true)
+  })
+
+  it('serves the frontend by default for local preview workflows', () => {
+    expect(getRuntimeConfig({ NODE_ENV: 'development' }).serveFrontend).toBe(true)
+    expect(getRuntimeConfig({ NODE_ENV: 'test', SERVE_FRONTEND: 'false' }).serveFrontend).toBe(false)
+    expect(() => getRuntimeConfig({ NODE_ENV: 'development', SERVE_FRONTEND: 'yes' })).toThrow(/SERVE_FRONTEND/)
+  })
+
   it('keeps production enquiries disabled unless explicitly enabled', () => {
     expect(getRuntimeConfig({ NODE_ENV: 'production', FRONTEND_ORIGIN: 'https://gauvis.co.za' }).enquiriesEnabled).toBe(false)
     expect(getRuntimeConfig({ NODE_ENV: 'production', FRONTEND_ORIGIN: 'https://gauvis.co.za', ENABLE_ENQUIRIES: 'true' }).enquiriesEnabled).toBe(true)

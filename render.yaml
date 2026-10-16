@@ -10,6 +10,8 @@ services:
         value: production
       - key: ENABLE_ENQUIRIES
         value: "true"
+      - key: SERVE_FRONTEND
+        value: "false"
       - key: TRUST_PROXY
         value: "1"
       - key: JWT_SECRET_KEY

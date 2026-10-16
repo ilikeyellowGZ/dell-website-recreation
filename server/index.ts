@@ -31,7 +31,8 @@ const app = createApp({
   enquiriesEnabled: runtimeConfig.enquiriesEnabled,
   enquiryNotifier,
   enquiryRepository,
-  staticDirectory: existsSync(join(distDirectory, 'index.html')) ? distDirectory : undefined,
+  staticDirectory:
+    runtimeConfig.serveFrontend && existsSync(join(distDirectory, 'index.html')) ? distDirectory : undefined,
   trustProxy: runtimeConfig.trustProxy,
 })
 

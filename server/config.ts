@@ -4,7 +4,16 @@ export type RuntimeConfig = {
   enquiriesEnabled: boolean
   frontendOrigins: ReadonlySet<string>
   isProduction: boolean
+  serveFrontend: boolean
   trustProxy: TrustProxySetting
+}
+
+function parseBooleanSetting(name: string, value: string | undefined, fallback: boolean): boolean {
+  const normalized = value?.trim().toLowerCase()
+  if (!normalized) return fallback
+  if (normalized === 'true') return true
+  if (normalized === 'false') return false
+  throw new Error(`${name} must be either true or false.`)
 }
 
 export function parseFrontendOrigins(value: string | undefined, isProduction: boolean): ReadonlySet<string> {
@@ -50,12 +59,12 @@ export function parseTrustProxy(value?: string): TrustProxySetting {
 
 export function getRuntimeConfig(environment: NodeJS.ProcessEnv = process.env): RuntimeConfig {
   const isProduction = environment.NODE_ENV === 'production'
-  const configuredEnquiryState = environment.ENABLE_ENQUIRIES?.trim().toLowerCase()
 
   return {
-    enquiriesEnabled: configuredEnquiryState ? configuredEnquiryState === 'true' : !isProduction,
+    enquiriesEnabled: parseBooleanSetting('ENABLE_ENQUIRIES', environment.ENABLE_ENQUIRIES, !isProduction),
     frontendOrigins: parseFrontendOrigins(environment.FRONTEND_ORIGIN, isProduction),
     isProduction,
+    serveFrontend: parseBooleanSetting('SERVE_FRONTEND', environment.SERVE_FRONTEND, !isProduction),
     trustProxy: parseTrustProxy(environment.TRUST_PROXY),
   }
 }
