@@ -19,6 +19,6 @@ Follow [DEPLOYMENT.md](DEPLOYMENT.md) for the complete Render API, MongoDB Atlas
 
 Production builds require an HTTPS `VITE_API_BASE_URL`. `npm run package:directadmin` builds and creates `release/directadmin`; upload its contents, including `.htaccess`, to the domain's `public_html`.
 
-The production API origin is `https://guavis.onrender.com`. Set `VITE_API_BASE_URL` to that exact origin when packaging. Each frontend page load sends a background request to `/api/health` to wake Render; browsing does not wait for it. After signing in at `/admin/login`, `/admin/enquiries` shows a searchable, sortable dashboard with service/location grouping and full record details. The dashboard covers the latest 100 enquiries returned by the API, not an all-time total.
+The production API origin is `https://guavis.onrender.com`. Set `VITE_API_BASE_URL` to that exact origin when packaging. Each production website load sends a background request to `/api/health` to wake Render; browsing does not wait for it. After signing in at `/admin/login`, `/admin/enquiries` shows a searchable, sortable dashboard with service/location grouping and full record details. The dashboard covers the latest 100 enquiries returned by the API, not an all-time total.
 
 The original design prototypes remain in `project/` as reference material.
