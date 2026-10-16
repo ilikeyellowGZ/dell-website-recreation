@@ -19,6 +19,8 @@ export function resolveApiUrl(
 
   if (
     configuredOrigin.includes('*') ||
+    origin.hostname.includes('*') ||
+    origin.origin.includes('*') ||
     (origin.protocol !== 'https:' && (production || origin.protocol !== 'http:')) ||
     origin.username ||
     origin.password ||

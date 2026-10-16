@@ -39,6 +39,9 @@ describe('API URL resolution', () => {
     'https://*.example.com',
     'https://api.*.example.com',
     'https://api*.example.com/',
+    'https://%2A.example.com',
+    'https://%2a.example.com',
+    'https://api%2A.example.com/',
   ])('rejects wildcard origin %s in production and development', (origin) => {
     expect(() => resolveApiUrl('/api/enquiries', origin, true)).toThrow(/VITE_API_BASE_URL/)
     expect(() => resolveApiUrl('/api/enquiries', origin, false)).toThrow(/VITE_API_BASE_URL/)
