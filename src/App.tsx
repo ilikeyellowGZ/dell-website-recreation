@@ -24,7 +24,7 @@ const routeTitles: Record<string, string> = {
   '/faq': 'FAQ | Gauvis Technology Holdings',
   '/contact': 'Contact Gauvis | Request an IT Quote',
   '/admin/login': 'Admin Sign In | Gauvis Technology Holdings',
-  '/admin/enquiries': 'Website Enquiries | Gauvis Technology Holdings',
+  '/admin/enquiries': 'Enquiries Dashboard | Gauvis Technology Holdings',
 }
 
 const activePageByPath = {
@@ -100,7 +100,9 @@ export function App() {
   const { pathname } = useLocation()
   const activePage = pathname.startsWith('/services/')
     ? 'services'
-    : activePageByPath[pathname as keyof typeof activePageByPath] ?? 'home'
+    : pathname.startsWith('/admin/')
+      ? null
+      : activePageByPath[pathname as keyof typeof activePageByPath] ?? 'home'
 
   return (
     <>

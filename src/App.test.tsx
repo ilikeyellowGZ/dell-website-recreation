@@ -503,5 +503,7 @@ describe('Admin routes', () => {
     expect(screen.getByRole('heading', { level: 1, name: /admin sign in/i })).toBeInTheDocument()
     expect(screen.getByLabelText(/username/i)).toBeInTheDocument()
     expect(screen.getByLabelText(/password/i)).toBeInTheDocument()
+    expect(within(screen.getByRole('navigation', { name: 'Primary' })).queryByRole('link', { current: 'page' }))
+      .not.toBeInTheDocument()
   })
 })

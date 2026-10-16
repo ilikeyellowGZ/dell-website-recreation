@@ -37,3 +37,11 @@ export function resolveApiUrl(
 export function apiUrl(path: ApiPath): string {
   return resolveApiUrl(path, import.meta.env.VITE_API_BASE_URL)
 }
+
+export async function wakeBackend(): Promise<void> {
+  try {
+    await fetch(apiUrl('/api/health'), { credentials: 'omit', mode: 'no-cors' })
+  } catch {
+    // Render may still be starting; user-facing API calls handle their own errors.
+  }
+}

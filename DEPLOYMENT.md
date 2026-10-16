@@ -28,7 +28,9 @@ Create an application-specific key with **Sending access**, restricted to that v
 
 Connect the repository to Render, select **New > Blueprint**, choose the reviewed branch and root `render.yaml`, and review the service settings and plan. The Blueprint uses `buildCommand: npm ci`, `startCommand: npm start`, and `healthCheckPath: /api/health`. Render supplies `PORT`; do not hardcode it. Use Node.js 24 LTS. The API does not require or serve a frontend build in production. See [Render Blueprints](https://render.com/docs/infrastructure-as-code) and [Blueprint settings](https://render.com/docs/blueprint-spec).
 
-Enter **every** `sync: false` value below at creation. Later rotations belong in the service's Environment settings, followed by a deploy/restart.
+For the existing **Guavis** service at `https://guavis.onrender.com`, update that service directly instead of creating a second Blueprint service: select the branch containing these changes, use `npm ci` as the build command and `npm start` as the start command, and set `FRONTEND_ORIGIN=https://gauvistech.com`, `NODE_ENV=production`, `SERVE_FRONTEND=false`, and `TRUST_PROXY=1` in its Environment settings. Deploy the latest commit from that branch. The current live `/api/health` must return JSON, not the frontend HTML.
+
+Enter **every** `sync: false` value below at creation. The Blueprint sets `FRONTEND_ORIGIN=https://gauvistech.com`; if you created the Render service manually, enter that exact value in its Environment settings. Later rotations belong in the service's Environment settings, followed by a deploy/restart.
 
 | Render runtime variable | Value or source |
 | --- | --- |
@@ -36,7 +38,7 @@ Enter **every** `sync: false` value below at creation. Later rotations belong in
 | `ENABLE_ENQUIRIES` | Blueprint: `true`; hold at `false` until legal approval |
 | `SERVE_FRONTEND` | Blueprint: `false`; keeps Render API-only even if a cached `dist` folder exists |
 | `TRUST_PROXY` | Blueprint: `1` trusted Render proxy hop |
-| `FRONTEND_ORIGIN` | `https://example.com` or comma-separated exact HTTPS origins including `www` if used |
+| `FRONTEND_ORIGIN` | Blueprint: `https://gauvistech.com`; add `https://www.gauvistech.com` only if the live website actually uses it |
 | `MONGODB_URI` | Private Atlas connection URI |
 | `MONGODB_DB_NAME` | `gauvistech` |
 | `MONGODB_COLLECTION` | `enquiries` |
@@ -47,7 +49,7 @@ Enter **every** `sync: false` value below at creation. Later rotations belong in
 | `ADMIN_PASSWORD_HASH` | Generated `scrypt$...` hash; paste whole value without shell expansion |
 | `JWT_SECRET_KEY` | Blueprint-generated secret; keep stable across normal deploys |
 
-`FRONTEND_ORIGIN` accepts no wildcard, credentials, non-root path, query, fragment, or HTTP origin in production; invalid/missing values stop startup. `VITE_*` values are unnecessary on Render. Complete the Atlas outbound allowlist from step 2, deploy, then open `https://<actual-service-host>/api/health`. Expect only `{"status":"ok"}`. Opening the Render host root (`/`) should return `404`; that is intentional because DirectAdmin serves the website. This proves HTTP responsiveness, **not** storage or email delivery.
+`FRONTEND_ORIGIN` accepts no wildcard, credentials, non-root path, query, fragment, or HTTP origin in production; invalid/missing values stop startup. `VITE_*` values are unnecessary on Render. Complete the Atlas outbound allowlist from step 2, deploy, then open `https://guavis.onrender.com/api/health`. Confirm the response has JSON content and is exactly `{"status":"ok"}`; an HTML page with HTTP 200 means the wrong deployment is running. Opening the Render host root (`/`) should return `404`; that is intentional because DirectAdmin serves the website. This proves HTTP responsiveness, **not** storage or email delivery.
 
 Review startup logs for missing storage, notification, or admin configuration. Email failure logs contain only `Enquiry notification failed after storage.` and a category. Do not enable request-body, credential, cookie, or provider-error logging. Missing notification configuration permits storage but requires the dashboard as the recovery path.
 
@@ -63,7 +65,7 @@ Use the actual Render HTTPS origin with no `/api` suffix or other path. Both val
 PowerShell:
 
 ```powershell
-$env:VITE_API_BASE_URL = 'https://gauvis-api.onrender.com' # replace with actual host
+$env:VITE_API_BASE_URL = 'https://guavis.onrender.com'
 $env:VITE_ENABLE_ENQUIRIES = 'true'
 npm run package:directadmin
 Get-ChildItem -Force -Recurse release/directadmin
@@ -72,7 +74,7 @@ Get-ChildItem -Force -Recurse release/directadmin
 POSIX shell:
 
 ```sh
-VITE_API_BASE_URL=https://gauvis-api.onrender.com VITE_ENABLE_ENQUIRIES=true npm run package:directadmin
+VITE_API_BASE_URL=https://guavis.onrender.com VITE_ENABLE_ENQUIRIES=true npm run package:directadmin
 find release/directadmin -type f
 ```
 
@@ -85,7 +87,7 @@ Enable the domain's HTTPS certificate in DirectAdmin and redirect HTTP to HTTPS.
 The full local gate uses a representative HTTPS API URL and disabled form for the existing baseline browser checks. In PowerShell:
 
 ```powershell
-$env:VITE_API_BASE_URL = 'https://gauvis-api.onrender.com'
+$env:VITE_API_BASE_URL = 'https://guavis.onrender.com'
 $env:VITE_ENABLE_ENQUIRIES = 'false'
 npm test
 npm run typecheck
@@ -98,6 +100,7 @@ Install Python Playwright with `python -m pip install playwright` and use Micros
 
 ```powershell
 python tests/site.browser.py
+python tests/dashboard.browser.py
 ```
 
 `BASE_URL` overrides the baseline preview origin (`http://127.0.0.1:4173`). The harness preserves the disabled-form/responsive journeys and starts isolated loopback Vite/API servers with enabled enquiries, an in-memory repository, and a recording notifier. It exercises allowed contact POST/preflight and rejected origins without MongoDB or Resend. `SPLIT_API_BASE_URL=http://127.0.0.1:<unused-port>` optionally selects the fixture's local API port; it never targets a deployed API. The local split uses HTTP and does not prove production HTTPS cookies or third-party-cookie browser policy. Rebuild/package with `VITE_ENABLE_ENQUIRIES=true` before uploading the production release.
@@ -110,8 +113,8 @@ After upload, complete all launch checks:
 4. Test preflight and direct state-changing rejection (replace the example host):
 
    ```sh
-   curl -i -X OPTIONS https://gauvis-api.onrender.com/api/enquiries -H 'Origin: https://unapproved.example' -H 'Access-Control-Request-Method: POST' -H 'Access-Control-Request-Headers: content-type'
-   curl -i -X POST https://gauvis-api.onrender.com/api/enquiries -H 'Origin: https://unapproved.example' -H 'Content-Type: application/json' --data '{}'
+   curl -i -X OPTIONS https://guavis.onrender.com/api/enquiries -H 'Origin: https://unapproved.example' -H 'Access-Control-Request-Method: POST' -H 'Access-Control-Request-Headers: content-type'
+   curl -i -X POST https://guavis.onrender.com/api/enquiries -H 'Origin: https://unapproved.example' -H 'Content-Type: application/json' --data '{}'
    ```
 
    Both return 403 without `Access-Control-Allow-Origin`; an absent-Origin production POST must also return 403. There must be no insert/email. Non-browser callers can forge Origin headers; existing rate limits still apply.

@@ -4,7 +4,7 @@ React frontend with an Express enquiry API, MongoDB storage, Resend team notific
 
 ## Local development
 
-1. Install Node.js 22.12+ and run `npm ci`.
+1. Install Node.js 24 LTS and run `npm ci`.
 2. Copy `.env.example` to `.env`. Set `MONGODB_URI` for a development database; keep secrets out of version control.
 3. Run `npm run db:setup` to create the validated collection and indexes. The runtime user also needs schema-management privileges because the API checks the schema on first access.
 4. For local admin access, run `npm run admin:credentials` and save the one-time password in a password manager. This updates `.env` and resets both enquiry flags to `false`.
@@ -18,5 +18,7 @@ Notifications are optional locally: without all three `RESEND_*` values, accepte
 Follow [DEPLOYMENT.md](DEPLOYMENT.md) for the complete Render API, MongoDB Atlas, Resend, and DirectAdmin procedure, environment matrix, quality gate, browser tests, rollback, and credential rotation.
 
 Production builds require an HTTPS `VITE_API_BASE_URL`. `npm run package:directadmin` builds and creates `release/directadmin`; upload its contents, including `.htaccess`, to the domain's `public_html`.
+
+The production API origin is `https://guavis.onrender.com`. Set `VITE_API_BASE_URL` to that exact origin when packaging. Each production website load sends a background request to `/api/health` to wake Render; browsing does not wait for it. After signing in at `/admin/login`, `/admin/enquiries` shows a searchable, sortable dashboard with service/location grouping and full record details. The dashboard covers the latest 100 enquiries returned by the API, not an all-time total.
 
 The original design prototypes remain in `project/` as reference material.

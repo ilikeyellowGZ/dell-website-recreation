@@ -18,7 +18,12 @@ function parseBooleanSetting(name: string, value: string | undefined, fallback: 
 
 export function parseFrontendOrigins(value: string | undefined, isProduction: boolean): ReadonlySet<string> {
   const normalized = value?.trim()
-  if (!normalized && !isProduction) return new Set()
+  if (!normalized && !isProduction) {
+    return new Set([
+      'http://localhost:5173',
+      'http://127.0.0.1:5173',
+    ])
+  }
 
   const invalidOrigin = () => new Error(
     'FRONTEND_ORIGIN must contain one or more absolute HTTPS origins without wildcards, credentials, paths, queries, or fragments.',
