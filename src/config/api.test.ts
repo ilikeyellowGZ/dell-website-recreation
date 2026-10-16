@@ -34,6 +34,16 @@ describe('API URL resolution', () => {
     expect(() => resolveApiUrl('/api/enquiries', origin, true)).toThrow(/VITE_API_BASE_URL/)
   })
 
+  it.each([
+    'https://*',
+    'https://*.example.com',
+    'https://api.*.example.com',
+    'https://api*.example.com/',
+  ])('rejects wildcard origin %s in production and development', (origin) => {
+    expect(() => resolveApiUrl('/api/enquiries', origin, true)).toThrow(/VITE_API_BASE_URL/)
+    expect(() => resolveApiUrl('/api/enquiries', origin, false)).toThrow(/VITE_API_BASE_URL/)
+  })
+
   it('permits an HTTP API origin during local development', () => {
     expect(resolveApiUrl('/api/enquiries', 'http://localhost:3001/', false)).toBe(
       'http://localhost:3001/api/enquiries',
