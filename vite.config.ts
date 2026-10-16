@@ -1,57 +1,64 @@
 import { defineConfig } from 'vitest/config'
+import { loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
+import { validateFrontendEnvironment } from './scripts/package-directadmin.mjs'
 
-export default defineConfig(({ mode }) => ({
-  plugins: [react()],
-  define:
-    mode === 'test'
-      ? { 'import.meta.env.VITE_ENABLE_ENQUIRIES': JSON.stringify('true') }
-      : undefined,
-  build: {
-    assetsInlineLimit: 0,
-    rolldownOptions: {
-      output: {
-        codeSplitting: {
-          groups: [
-            {
-              name: 'react-vendor',
-              test: /node_modules[\\/](react|react-dom|react-router|react-router-dom)[\\/]/,
-              priority: 30,
-            },
-            {
-              name: 'motion-vendor',
-              test: /node_modules[\\/](motion|framer-motion|@motionone)[\\/]/,
-              priority: 25,
-            },
-            {
-              name: 'icons-vendor',
-              test: /node_modules[\\/]@phosphor-icons[\\/]/,
-              priority: 25,
-            },
-            {
-              name: 'gsap-vendor',
-              test: /node_modules[\\/]gsap[\\/]/,
-              priority: 25,
-            },
-            {
-              name: 'vendor',
-              test: /node_modules[\\/]/,
-              maxSize: 250_000,
-              priority: 1,
-            },
-          ],
+export default defineConfig(({ command, mode }) => {
+  if (command === 'build') {
+    validateFrontendEnvironment(loadEnv(mode, process.cwd(), 'VITE_'))
+  }
+  return {
+    plugins: [react()],
+    define:
+      mode === 'test'
+        ? { 'import.meta.env.VITE_ENABLE_ENQUIRIES': JSON.stringify('true') }
+        : undefined,
+    build: {
+      assetsInlineLimit: 0,
+      rolldownOptions: {
+        output: {
+          codeSplitting: {
+            groups: [
+              {
+                name: 'react-vendor',
+                test: /node_modules[\\/](react|react-dom|react-router|react-router-dom)[\\/]/,
+                priority: 30,
+              },
+              {
+                name: 'motion-vendor',
+                test: /node_modules[\\/](motion|framer-motion|@motionone)[\\/]/,
+                priority: 25,
+              },
+              {
+                name: 'icons-vendor',
+                test: /node_modules[\\/]@phosphor-icons[\\/]/,
+                priority: 25,
+              },
+              {
+                name: 'gsap-vendor',
+                test: /node_modules[\\/]gsap[\\/]/,
+                priority: 25,
+              },
+              {
+                name: 'vendor',
+                test: /node_modules[\\/]/,
+                maxSize: 250_000,
+                priority: 1,
+              },
+            ],
+          },
         },
       },
     },
-  },
-  server: {
-    proxy: {
-      '/api': 'http://127.0.0.1:3001',
+    server: {
+      proxy: {
+        '/api': 'http://127.0.0.1:3001',
+      },
     },
-  },
-  test: {
-    environment: 'jsdom',
-    setupFiles: './src/test/setup.ts',
-    css: true,
-  },
-}))
+    test: {
+      environment: 'jsdom',
+      setupFiles: './src/test/setup.ts',
+      css: true,
+    },
+  }
+})

@@ -5,6 +5,7 @@ import { dirname, join } from 'node:path'
 import { createApp } from './app'
 import { getRuntimeConfig } from './config'
 import { createConfiguredMongoEnquiryRepository } from './enquiryRepository'
+import { createConfiguredResendNotifier } from './enquiryNotifier'
 
 const currentDirectory = dirname(fileURLToPath(import.meta.url))
 const distDirectory = join(currentDirectory, '..', 'dist')
@@ -12,6 +13,7 @@ const portArgumentIndex = process.argv.indexOf('--port')
 const requestedPort = portArgumentIndex >= 0 ? Number(process.argv[portArgumentIndex + 1]) : Number(process.env.PORT)
 const port = Number.isInteger(requestedPort) && requestedPort > 0 ? requestedPort : 3001
 const enquiryRepository = createConfiguredMongoEnquiryRepository()
+const enquiryNotifier = createConfiguredResendNotifier()
 const runtimeConfig = getRuntimeConfig()
 const admin =
   process.env.ADMIN_USERNAME?.trim() && process.env.ADMIN_PASSWORD_HASH?.trim() && process.env.JWT_SECRET_KEY?.trim()
@@ -25,9 +27,12 @@ const admin =
 
 const app = createApp({
   admin,
+  allowedOrigins: runtimeConfig.frontendOrigins,
   enquiriesEnabled: runtimeConfig.enquiriesEnabled,
+  enquiryNotifier,
   enquiryRepository,
-  staticDirectory: existsSync(join(distDirectory, 'index.html')) ? distDirectory : undefined,
+  staticDirectory:
+    runtimeConfig.serveFrontend && existsSync(join(distDirectory, 'index.html')) ? distDirectory : undefined,
   trustProxy: runtimeConfig.trustProxy,
 })
 
@@ -35,6 +40,9 @@ const server = app.listen(port, () => {
   console.info(`Gauvis Tech server listening on http://127.0.0.1:${port}`)
   if (!enquiryRepository) {
     console.warn('MongoDB enquiry storage is unavailable until MONGODB_URI and MONGODB_DB_NAME are configured.')
+  }
+  if (!enquiryNotifier) {
+    console.warn('Enquiry email notifications are unavailable until RESEND_API_KEY, RESEND_FROM_EMAIL, and RESEND_TO_EMAIL are configured.')
   }
   if (!runtimeConfig.enquiriesEnabled) {
     console.warn('Public enquiry collection is disabled. Set ENABLE_ENQUIRIES=true only after legal content is approved.')

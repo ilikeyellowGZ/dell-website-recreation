@@ -1,10 +1,17 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { getEnquiries, getSession, login, logout } from './adminApi'
 
-afterEach(() => vi.unstubAllGlobals())
+afterEach(() => {
+  vi.unstubAllGlobals()
+  vi.unstubAllEnvs()
+})
 
-describe('admin API client', () => {
-  it('uses same-origin credentials for sign in and session requests', async () => {
+describe.each([
+  { configuredOrigin: undefined, expectedOrigin: '' },
+  { configuredOrigin: 'https://gauvis-api.onrender.com/', expectedOrigin: 'https://gauvis-api.onrender.com' },
+])('admin API client with origin $configuredOrigin', ({ configuredOrigin, expectedOrigin }) => {
+  it('uses resolved URLs and includes credentials for sign in and session requests', async () => {
+    vi.stubEnv('VITE_API_BASE_URL', configuredOrigin)
     const fetchMock = vi
       .fn()
       .mockResolvedValueOnce({ ok: true, json: async () => ({ authenticated: true }) })
@@ -15,13 +22,19 @@ describe('admin API client', () => {
     await expect(getSession()).resolves.toBe(true)
     expect(fetchMock).toHaveBeenNthCalledWith(
       1,
-      '/api/admin/login',
-      expect.objectContaining({ credentials: 'same-origin', method: 'POST' }),
+      `${expectedOrigin}/api/admin/login`,
+      {
+        body: JSON.stringify({ username: 'admin', password: 'secret' }),
+        credentials: 'include',
+        headers: { 'content-type': 'application/json' },
+        method: 'POST',
+      },
     )
-    expect(fetchMock).toHaveBeenNthCalledWith(2, '/api/admin/session', { credentials: 'same-origin' })
+    expect(fetchMock).toHaveBeenNthCalledWith(2, `${expectedOrigin}/api/admin/session`, { credentials: 'include' })
   })
 
   it('returns typed enquiry records and signs out with a POST', async () => {
+    vi.stubEnv('VITE_API_BASE_URL', configuredOrigin)
     const enquiry = {
       businessName: 'Ndlovu Trading',
       createdAt: '2026-10-10T08:00:00.000Z',
@@ -41,8 +54,11 @@ describe('admin API client', () => {
 
     await expect(getEnquiries()).resolves.toEqual([enquiry])
     await logout()
-    expect(fetchMock).toHaveBeenLastCalledWith('/api/admin/logout', {
-      credentials: 'same-origin',
+    expect(fetchMock).toHaveBeenNthCalledWith(1, `${expectedOrigin}/api/admin/enquiries`, {
+      credentials: 'include',
+    })
+    expect(fetchMock).toHaveBeenLastCalledWith(`${expectedOrigin}/api/admin/logout`, {
+      credentials: 'include',
       method: 'POST',
     })
   })

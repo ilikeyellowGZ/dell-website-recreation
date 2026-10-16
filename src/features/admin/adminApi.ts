@@ -1,3 +1,5 @@
+import { apiUrl } from '../../config/api'
+
 export type AdminEnquiry = {
   businessName: string
   createdAt: string
@@ -21,9 +23,9 @@ type LoginResult = {
 }
 
 export async function login(input: LoginInput): Promise<LoginResult> {
-  const response = await fetch('/api/admin/login', {
+  const response = await fetch(apiUrl('/api/admin/login'), {
     body: JSON.stringify(input),
-    credentials: 'same-origin',
+    credentials: 'include',
     headers: { 'content-type': 'application/json' },
     method: 'POST',
   })
@@ -33,12 +35,12 @@ export async function login(input: LoginInput): Promise<LoginResult> {
 }
 
 export async function getSession(): Promise<boolean> {
-  const response = await fetch('/api/admin/session', { credentials: 'same-origin' })
+  const response = await fetch(apiUrl('/api/admin/session'), { credentials: 'include' })
   return response.ok
 }
 
 export async function getEnquiries(): Promise<AdminEnquiry[]> {
-  const response = await fetch('/api/admin/enquiries', { credentials: 'same-origin' })
+  const response = await fetch(apiUrl('/api/admin/enquiries'), { credentials: 'include' })
   if (response.status === 401) throw new Error('AUTHENTICATION_REQUIRED')
   if (!response.ok) throw new Error('Enquiry records are temporarily unavailable.')
   const result = (await response.json()) as { enquiries?: AdminEnquiry[] }
@@ -46,5 +48,5 @@ export async function getEnquiries(): Promise<AdminEnquiry[]> {
 }
 
 export async function logout(): Promise<void> {
-  await fetch('/api/admin/logout', { credentials: 'same-origin', method: 'POST' })
+  await fetch(apiUrl('/api/admin/logout'), { credentials: 'include', method: 'POST' })
 }

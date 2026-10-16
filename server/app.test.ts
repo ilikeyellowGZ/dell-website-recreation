@@ -4,7 +4,7 @@ import type { Server } from 'node:http'
 import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { generateJwtSecret, hashPassword } from './adminAuth'
 import { createApp } from './app'
 import type { Enquiry, EnquiryRepository } from './enquiryRepository'
@@ -25,6 +25,7 @@ const servers: Server[] = []
 const temporaryDirectories: string[] = []
 
 afterEach(async () => {
+  vi.restoreAllMocks()
   await Promise.all(
     servers.splice(0).map(
       (server) =>
@@ -36,14 +37,147 @@ afterEach(async () => {
   await Promise.all(temporaryDirectories.splice(0).map((directory) => rm(directory, { force: true, recursive: true })))
 })
 
-async function start(repository: EnquiryRepository | null, staticDirectory?: string) {
-  const server = createApp({ enquiryRepository: repository, staticDirectory }).listen(0)
+async function start(
+  repository: EnquiryRepository | null,
+  staticDirectory?: string,
+  options: Omit<Parameters<typeof createApp>[0], 'enquiryRepository' | 'staticDirectory'> = {},
+) {
+  const server = createApp({ ...options, enquiryRepository: repository, staticDirectory }).listen(0)
   servers.push(server)
   await new Promise<void>((resolve) => server.once('listening', resolve))
   const address = server.address()
   if (!address || typeof address === 'string') throw new Error('Expected a TCP server address')
   return `http://127.0.0.1:${address.port}`
 }
+
+describe('split-origin API security', () => {
+  const frontendOrigin = 'https://gauvis.example'
+
+  async function startSplitApp(repository: EnquiryRepository | null = null, withAdmin = false) {
+    const server = createApp({
+      allowedOrigins: new Set([frontendOrigin]),
+      enquiryRepository: repository,
+      admin: withAdmin ? {
+        isProduction: true,
+        jwtSecret: generateJwtSecret(),
+        passwordHash: await hashPassword('correct horse battery staple'),
+        username: 'admin',
+      } : null,
+    }).listen(0)
+    servers.push(server)
+    await new Promise<void>((resolve) => server.once('listening', resolve))
+    const address = server.address()
+    if (!address || typeof address === 'string') throw new Error('Expected a TCP server address')
+    return `http://127.0.0.1:${address.port}`
+  }
+
+  function expectCredentialedCors(response: Response) {
+    expect(response.headers.get('access-control-allow-origin')).toBe(frontendOrigin)
+    expect(response.headers.get('access-control-allow-credentials')).toBe('true')
+    expect(response.headers.get('vary')?.split(/,\s*/)).toContain('Origin')
+  }
+
+  it('permits exact credentialed API preflight with the minimum methods and headers', async () => {
+    const baseUrl = await startSplitApp()
+    const response = await fetch(`${baseUrl}/api/enquiries`, {
+      method: 'OPTIONS',
+      headers: { origin: frontendOrigin, 'access-control-request-method': 'POST', 'access-control-request-headers': 'content-type' },
+    })
+
+    expect(response.status).toBe(204)
+    expectCredentialedCors(response)
+    expect(response.headers.get('access-control-allow-methods')).toBe('GET,POST,OPTIONS')
+    expect(response.headers.get('access-control-allow-headers')).toBe('Content-Type')
+    expect(await response.text()).toBe('')
+  })
+
+  it('provides no CORS permission for an unapproved preflight or non-API route', async () => {
+    const baseUrl = await startSplitApp()
+    for (const [path, origin] of [['/api/enquiries', 'https://evil.example'], ['/contact', frontendOrigin]]) {
+      const response = await fetch(`${baseUrl}${path}`, { method: 'OPTIONS', headers: { origin } })
+      expect(response.headers.get('access-control-allow-origin')).toBeNull()
+      expect(response.headers.get('access-control-allow-credentials')).toBeNull()
+      if (path.startsWith('/api/')) expect(response.status).toBe(403)
+    }
+  })
+
+  it('rejects absent and non-exact origins before storage, while accepting the configured frontend', async () => {
+    const stored: Enquiry[] = []
+    const baseUrl = await startSplitApp({ async insert(enquiry) { stored.push(enquiry) } })
+    for (const origin of [undefined, 'null', 'https://evil.example', 'https://gauvis.example.evil', 'http://gauvis.example', `${frontendOrigin}/path`, baseUrl]) {
+      const response = await fetch(`${baseUrl}/api/enquiries`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', ...(origin ? { origin } : {}) },
+        body: JSON.stringify(validPayload),
+      })
+      expect(response.status, `origin ${origin}`).toBe(403)
+      expect(response.headers.get('access-control-allow-origin')).toBeNull()
+      expect(stored).toHaveLength(0)
+    }
+
+    const accepted = await fetch(`${baseUrl}/api/enquiries`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', origin: frontendOrigin },
+      body: JSON.stringify(validPayload),
+    })
+    expect(accepted.status).toBe(201)
+    expectCredentialedCors(accepted)
+    expect(stored).toHaveLength(1)
+  })
+
+  it('supports production login, authenticated reads, and logout from the configured frontend', async () => {
+    const baseUrl = await startSplitApp({ async insert() {}, async listRecent() { return [] } }, true)
+    const login = await fetch(`${baseUrl}/api/admin/login`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', origin: frontendOrigin },
+      body: JSON.stringify({ username: 'admin', password: 'correct horse battery staple' }),
+    })
+    expect(login.status).toBe(200)
+    expectCredentialedCors(login)
+    expect(login.headers.get('set-cookie')).toContain('Path=/api/admin; HttpOnly; SameSite=None; Max-Age=900; Secure')
+    const cookie = login.headers.get('set-cookie')!.split(';')[0]
+
+    for (const path of ['/api/admin/session', '/api/admin/enquiries']) {
+      const response = await fetch(`${baseUrl}${path}`, { headers: { origin: frontendOrigin, cookie } })
+      expect(response.status).toBe(200)
+      expectCredentialedCors(response)
+      expect(response.headers.get('cache-control')).toBe('no-store')
+      expect(await response.json()).toEqual(path.endsWith('/session') ? { authenticated: true } : { enquiries: [] })
+    }
+
+    const unapprovedRead = await fetch(`${baseUrl}/api/admin/session`, { headers: { origin: 'https://evil.example', cookie } })
+    expect(unapprovedRead.headers.get('access-control-allow-origin')).toBeNull()
+    expect(unapprovedRead.headers.get('access-control-allow-credentials')).toBeNull()
+
+    const logout = await fetch(`${baseUrl}/api/admin/logout`, { method: 'POST', headers: { origin: frontendOrigin, cookie } })
+    expect(logout.status).toBe(204)
+    expectCredentialedCors(logout)
+    expect(logout.headers.get('set-cookie')).toBe('gauvis_admin_session=; Path=/api/admin; HttpOnly; SameSite=None; Max-Age=0; Secure')
+  })
+
+  it('rejects login and logout from absent, foreign, and API-host origins without setting cookies', async () => {
+    const baseUrl = await startSplitApp(null, true)
+    for (const path of ['/api/admin/login', '/api/admin/logout']) {
+      for (const origin of [undefined, 'https://evil.example', baseUrl]) {
+        const response = await fetch(`${baseUrl}${path}`, {
+          method: 'POST',
+          headers: { 'content-type': 'application/json', ...(origin ? { origin } : {}) },
+          body: JSON.stringify({ username: 'admin', password: 'correct horse battery staple' }),
+        })
+        expect(response.status).toBe(403)
+        expect(response.headers.get('set-cookie')).toBeNull()
+        expect(response.headers.get('access-control-allow-origin')).toBeNull()
+      }
+    }
+  })
+
+  it('exposes only process responsiveness through the public health check', async () => {
+    const baseUrl = await startSplitApp()
+    const response = await fetch(`${baseUrl}/api/health`)
+    expect(response.status).toBe(200)
+    expect(await response.json()).toEqual({ status: 'ok' })
+  })
+})
 
 describe('Production static assets', () => {
   it('compresses text assets and gives hashed assets an immutable cache policy', async () => {
@@ -227,6 +361,119 @@ describe('POST /api/enquiries', () => {
       code: 'PAYLOAD_TOO_LARGE',
       message: 'The enquiry is too large to submit.',
     })
+  })
+})
+
+describe('stored enquiry notifications', () => {
+  const postEnquiry = (baseUrl: string, payload = validPayload) => fetch(`${baseUrl}/api/enquiries`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify(payload),
+  })
+
+  it('stores exactly once before notifying with the normalized stored enquiry', async () => {
+    const events: string[] = []
+    const stored: Enquiry[] = []
+    const notifications: Enquiry[] = []
+    const baseUrl = await start({
+      async insert(enquiry) {
+        await Promise.resolve()
+        stored.push(enquiry)
+        events.push('stored')
+      },
+    }, undefined, {
+      enquiryNotifier: {
+        async notify(enquiry) {
+          notifications.push(enquiry)
+          events.push('emailed')
+        },
+      },
+    })
+
+    const response = await postEnquiry(baseUrl)
+
+    expect(response.status).toBe(201)
+    expect(await response.json()).toEqual({ accepted: true })
+    expect(events).toEqual(['stored', 'emailed'])
+    expect(stored).toHaveLength(1)
+    expect(notifications).toHaveLength(1)
+    expect(notifications[0]).toBe(stored[0])
+    expect(notifications[0]).toMatchObject({
+      fullName: 'Thandi Ndlovu', email: 'thandi@example.com', source: 'website', status: 'new',
+    })
+    expect(notifications[0]).not.toHaveProperty('website')
+  })
+
+  it('still accepts one stored enquiry after notification rejection and logs no sensitive values', async () => {
+    const logged = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const stored: Enquiry[] = []
+    const notifications: Enquiry[] = []
+    const baseUrl = await start({ async insert(enquiry) { stored.push(enquiry) } }, undefined, {
+      enquiryNotifier: {
+        async notify(enquiry) {
+          notifications.push(enquiry)
+          const error = new Error(`re_sensitive_test_key ${enquiry.email} ${enquiry.phone} ${enquiry.message}`)
+          error.name = enquiry.message
+          throw error
+        },
+      },
+    })
+
+    const response = await postEnquiry(baseUrl)
+
+    expect(response.status).toBe(201)
+    expect(await response.json()).toEqual({ accepted: true })
+    expect(stored).toHaveLength(1)
+    expect(notifications).toHaveLength(1)
+    expect(logged).toHaveBeenCalledTimes(1)
+    expect(logged.mock.calls[0][0]).toBe('Enquiry notification failed after storage.')
+    const logText = JSON.stringify(logged.mock.calls)
+    for (const sensitive of [
+      're_sensitive_test_key', 'thandi@example.com', validPayload.phone, validPayload.message,
+    ]) expect(logText).not.toContain(sensitive)
+  })
+
+  it.each([
+    { name: 'validation rejection', payload: { ...validPayload, email: 'invalid' }, status: 422 },
+    { name: 'honeypot', payload: { ...validPayload, website: 'spam' }, status: 201 },
+    { name: 'disabled enquiries', enabled: false, status: 503 },
+    { name: 'missing repository', missingRepository: true, status: 503 },
+    { name: 'failed storage', storageFailure: true, status: 503 },
+    { name: 'rejected origin', originRestricted: true, status: 403 },
+    { name: 'oversized payload', payload: { ...validPayload, message: 'x'.repeat(34 * 1024) }, status: 413 },
+  ])('does not notify after $name', async (scenario) => {
+    const notifications: Enquiry[] = []
+    const stored: Enquiry[] = []
+    const baseUrl = await start(scenario.missingRepository ? null : {
+      async insert(enquiry) {
+        if (scenario.storageFailure) throw new Error('database failure')
+        stored.push(enquiry)
+      },
+    }, undefined, {
+      enquiriesEnabled: scenario.enabled ?? true,
+      allowedOrigins: new Set(scenario.originRestricted ? ['https://gauvis.example'] : []),
+      enquiryNotifier: { async notify(enquiry) { notifications.push(enquiry) } },
+    })
+
+    const response = await postEnquiry(baseUrl, scenario.payload ?? validPayload)
+
+    expect(response.status).toBe(scenario.status)
+    expect(stored).toHaveLength(0)
+    expect(notifications).toHaveLength(0)
+  })
+
+  it('does not store or notify when the existing enquiry rate limit is reached', async () => {
+    const events: string[] = []
+    const baseUrl = await start({ async insert() { events.push('stored') } }, undefined, {
+      enquiryNotifier: { async notify() { events.push('emailed') } },
+    })
+    for (let index = 0; index < 5; index++) {
+      expect((await postEnquiry(baseUrl)).status).toBe(201)
+    }
+    const limited = await postEnquiry(baseUrl)
+    expect(limited.status).toBe(429)
+    expect(await limited.json()).toMatchObject({ accepted: false, code: 'RATE_LIMITED' })
+    expect(events).toEqual(Array.from({ length: 5 }, () => ['stored', 'emailed']).flat())
   })
 })
 

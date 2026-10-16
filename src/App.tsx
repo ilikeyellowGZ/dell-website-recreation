@@ -1,11 +1,13 @@
 import { lazy, Suspense, useEffect } from 'react'
-import { Route, Routes, useLocation, type Location } from 'react-router-dom'
+import { Route, Routes, useLocation, useMatch, type Location } from 'react-router-dom'
 import { SiteFooter } from './components/SiteFooter'
 import { SiteHeader } from './components/SiteHeader'
+import { getServiceBySlug } from './services/serviceCatalogue'
 
 const Home = lazy(() => import('./pages/Home').then((module) => ({ default: module.Home })))
 const About = lazy(() => import('./pages/About').then((module) => ({ default: module.About })))
 const Services = lazy(() => import('./pages/Services').then((module) => ({ default: module.Services })))
+const ServiceDetail = lazy(() => import('./pages/ServiceDetail').then((module) => ({ default: module.ServiceDetail })))
 const Solutions = lazy(() => import('./pages/Solutions').then((module) => ({ default: module.Solutions })))
 const FAQ = lazy(() => import('./pages/FAQ').then((module) => ({ default: module.FAQ })))
 const Contact = lazy(() => import('./pages/Contact').then((module) => ({ default: module.Contact })))
@@ -36,10 +38,13 @@ const activePageByPath = {
 
 function RouteEffects() {
   const { pathname } = useLocation()
+  const serviceSlug = useMatch('/services/:serviceSlug')?.params.serviceSlug
+  const service = getServiceBySlug(serviceSlug)
 
   useEffect(() => {
-    document.title = routeTitles[pathname] ?? routeTitles['/']
-  }, [pathname])
+    document.title = service?.metaTitle
+      ?? (serviceSlug ? 'Service Not Found | Gauvis Technology Holdings' : routeTitles[pathname] ?? routeTitles['/'])
+  }, [pathname, service, serviceSlug])
 
   return null
 }
@@ -78,6 +83,7 @@ function LazyRoutes() {
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />
           <Route path="/services" element={<Services />} />
+          <Route path="/services/:serviceSlug" element={<ServiceDetail />} />
           <Route path="/solutions" element={<Solutions />} />
           <Route path="/faq" element={<FAQ />} />
           <Route path="/contact" element={<Contact />} />
@@ -92,7 +98,9 @@ function LazyRoutes() {
 
 export function App() {
   const { pathname } = useLocation()
-  const activePage = activePageByPath[pathname as keyof typeof activePageByPath] ?? 'home'
+  const activePage = pathname.startsWith('/services/')
+    ? 'services'
+    : activePageByPath[pathname as keyof typeof activePageByPath] ?? 'home'
 
   return (
     <>

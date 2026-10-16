@@ -2,9 +2,11 @@
 import { MemoryRouter } from 'react-router-dom'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { App } from './App'
+import { serviceCatalogue, serviceHref } from './services/serviceCatalogue'
 
 afterEach(() => {
   vi.unstubAllGlobals()
+  vi.unstubAllEnvs()
 })
 
 async function renderRoute(route: string) {
@@ -84,6 +86,18 @@ describe('About route', () => {
 })
 
 describe('Homepage route', () => {
+  it('links every homepage service card to its matching detail route', async () => {
+    await renderRoute('/')
+    const serviceSection = screen.getByRole('region', { name: /technology solutions for every business need/i })
+
+    for (const service of serviceCatalogue) {
+      expect(within(serviceSection).getByRole('link', { name: new RegExp(service.homeTitle, 'i') })).toHaveAttribute(
+        'href',
+        serviceHref(service.slug),
+      )
+    }
+  })
+
   it('moves focus to the destination heading after client-side navigation', async () => {
     await renderRoute('/')
 
@@ -123,7 +137,7 @@ describe('Removed routes', () => {
 })
 
 describe('Services route', () => {
-  it('renders the approved Services catalogue, links enquiries to Contact, and marks Services active', async () => {
+  it('renders the approved Services catalogue, links cards to their details, and marks Services active', async () => {
     await renderRoute('/services')
 
     expect(screen.getByRole('heading', { level: 1, name: /it services for every business need/i })).toBeInTheDocument()
@@ -142,10 +156,12 @@ describe('Services route', () => {
 
     for (const service of expectedServices) {
       expect(screen.getByRole('heading', { name: service })).toBeInTheDocument()
-      expect(screen.getByRole('link', { name: `Enquire about ${service}` })).toHaveAttribute(
-        'href',
-        '/contact#request-quote',
-      )
+    }
+
+    for (const service of serviceCatalogue) {
+      const action = screen.getByRole('link', { name: `Explore ${service.title}` })
+      expect(action).toHaveTextContent(`Explore ${service.title}`)
+      expect(action).toHaveAttribute('href', serviceHref(service.slug))
     }
 
     expect(screen.getByRole('link', { name: 'Talk to Us' })).toHaveAttribute('href', '/contact#request-quote')
@@ -155,6 +171,62 @@ describe('Services route', () => {
       'page',
     )
     expect(within(primaryNavigation).getByRole('link', { name: 'Home' })).toHaveAttribute('href', '/')
+  })
+})
+
+describe('Service detail routes', () => {
+  it('renders service-specific content and metadata for a valid slug', async () => {
+    await renderRoute('/services/networking-services')
+
+    expect(screen.getByRole('heading', { level: 1, name: 'Networking Services' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'What we can help with' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'What this means for your business' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'How we work with you' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Request a quote for Networking Services' })).toHaveAttribute(
+      'href',
+      '/contact#request-quote',
+    )
+    expect(document.title).toBe('Networking Services | Gauvis Technology Holdings')
+
+    const primaryNavigation = screen.getByRole('navigation', { name: 'Primary' })
+    expect(within(primaryNavigation).getByRole('link', { name: 'Services' })).toHaveAttribute('aria-current', 'page')
+  })
+
+  it.each([
+    ['hardware-support', 'Hardware Support'],
+    ['software-solutions', 'Software Solutions'],
+    ['networking-services', 'Networking Services'],
+    ['pc-desktop-support', 'PC & Desktop Support'],
+    ['microsoft-365-support', 'Microsoft 365 Support'],
+    ['cctv-security', 'CCTV & Security'],
+    ['printer-services', 'Printer Services'],
+    ['website-development', 'Website Development'],
+  ])('renders the title and current breadcrumb for %s', async (slug, title) => {
+    await renderRoute(`/services/${slug}`)
+
+    expect(screen.getByRole('heading', { level: 1, name: title })).toBeInTheDocument()
+    const breadcrumb = screen.getByRole('navigation', { name: 'Breadcrumb' })
+    expect(within(breadcrumb).getByText(title)).toHaveAttribute('aria-current', 'page')
+  })
+
+  it.each([
+    '/services/networking-services/',
+    '/services/%6Eetworking-services',
+  ])('keeps service content and metadata consistent at %s', async (route) => {
+    await renderRoute(route)
+
+    expect(screen.getByRole('heading', { level: 1, name: 'Networking Services' })).toBeInTheDocument()
+    expect(document.title).toBe('Networking Services | Gauvis Technology Holdings')
+  })
+
+  it('shows a useful service-not-found state for an unknown slug', async () => {
+    await renderRoute('/services/unknown-service')
+
+    expect(screen.getByRole('heading', { level: 1, name: 'Service not found' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'View all services' })).toHaveAttribute('href', '/services')
+    expect(screen.getByRole('link', { name: 'Contact our team' })).toHaveAttribute('href', '/contact#request-quote')
+    expect(document.title).toBe('Service Not Found | Gauvis Technology Holdings')
+    expect(screen.queryByRole('heading', { name: /powering your digital future/i })).not.toBeInTheDocument()
   })
 })
 
@@ -314,11 +386,13 @@ describe('Contact route', () => {
   })
 
   it('shows a pending state and only announces success after the API accepts the enquiry', async () => {
+    vi.stubEnv('VITE_API_BASE_URL', 'https://gauvis-api.onrender.com/')
     let acceptRequest: ((value: unknown) => void) | undefined
     const fetchPromise = new Promise((resolve) => {
       acceptRequest = resolve
     })
-    vi.stubGlobal('fetch', vi.fn(() => fetchPromise))
+    const fetchMock = vi.fn(() => fetchPromise)
+    vi.stubGlobal('fetch', fetchMock)
     await renderRoute('/contact')
 
     fireEvent.change(screen.getByLabelText(/full name/i), { target: { value: 'Thandi Ndlovu' } })
@@ -335,6 +409,12 @@ describe('Contact route', () => {
 
     expect(screen.getByRole('button', { name: /sending enquiry/i })).toBeDisabled()
     expect(screen.getByRole('status')).toHaveTextContent(/sending your enquiry/i)
+    expect(fetchMock).toHaveBeenCalledWith('https://gauvis-api.onrender.com/api/enquiries', {
+      body: expect.any(String),
+      credentials: 'include',
+      headers: { 'content-type': 'application/json' },
+      method: 'POST',
+    })
 
     await act(async () => {
       acceptRequest?.({

@@ -1,4 +1,5 @@
 import { useRef, useState, type FormEvent } from 'react'
+import { apiUrl } from '../../config/api'
 import { readEnquiryPayload, validateEnquiryPayload, type EnquiryPayload, type FieldName, type FormErrors } from './contactForm'
 
 type ApiResponse = {
@@ -38,8 +39,9 @@ function readApiErrors(fieldErrors: ApiResponse['fieldErrors']): FormErrors {
 
 async function submitEnquiry(payload: EnquiryPayload): Promise<SubmissionResult> {
   try {
-    const response = await fetch('/api/enquiries', {
+    const response = await fetch(apiUrl('/api/enquiries'), {
       method: 'POST',
+      credentials: 'include',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify(payload),
     })

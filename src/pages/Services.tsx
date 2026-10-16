@@ -2,68 +2,24 @@ import { ArrowRight } from '@phosphor-icons/react'
 import { Link } from 'react-router-dom'
 import { ButtonLink } from '../components/ButtonLink'
 import { ResponsiveImage } from '../components/ResponsiveImage'
-import { pageImages, type ResponsiveImageAsset } from '../imageAssets'
+import { pageImages } from '../imageAssets'
+import { serviceCatalogue, serviceHref, type ServiceRecord } from '../services/serviceCatalogue'
 import '../styles/services.css'
 
-const services = [
-  {
-    title: 'Hardware Support',
-    description: 'Repairs, maintenance and upgrades.',
-    alt: 'A technician repairing computer hardware inside a server rack',
-  },
-  {
-    title: 'Software Solutions',
-    description: 'Development, testing and business applications.',
-    alt: 'Code displayed on a development workstation',
-  },
-  {
-    title: 'Networking Services',
-    description: 'Reliable business networks and connectivity.',
-    alt: 'Network rack with connected blue cables',
-  },
-  {
-    title: 'PC & Desktop Support',
-    description: 'Setup, troubleshooting and ongoing assistance.',
-    alt: 'Desktop computers in an office workstation setup',
-  },
-  {
-    title: 'Microsoft 365 Support',
-    description: 'Accounts, email and productivity tools.',
-    alt: 'Microsoft 365 productivity application icons',
-  },
-  {
-    title: 'CCTV & Security',
-    description: 'Camera installation and security system setup.',
-    alt: 'CCTV security camera mounted indoors',
-  },
-  {
-    title: 'Printer Services',
-    description: 'Installation, troubleshooting and repairs.',
-    alt: 'Office printer in a business workspace',
-  },
-  {
-    title: 'Website Development',
-    description: 'Responsive websites for your business.',
-    alt: 'Monitor displaying a Gauvis Tech business website',
-  },
-] as const
-
-type ServiceCatalogueCardProps = (typeof services)[number] & { image: ResponsiveImageAsset }
-
-function ServiceCatalogueCard({ title, description, image, alt }: ServiceCatalogueCardProps) {
+function ServiceCatalogueCard({ service }: { service: ServiceRecord }) {
   return (
     <article className="service-catalogue-card">
       <div className="service-catalogue-card__image">
-        <ResponsiveImage alt={alt} image={image} sizes="(max-width: 48rem) 100vw, (max-width: 100rem) 50vw, 33vw" />
+        <ResponsiveImage alt={service.alt} image={pageImages.services.cards[service.imageIndex]} sizes="(max-width: 48rem) 100vw, (max-width: 100rem) 50vw, 33vw" />
       </div>
       <div className="service-catalogue-card__body">
         <span className="service-catalogue-card__accent" aria-hidden="true" />
         <div className="service-catalogue-card__copy">
-          <h2>{title}</h2>
-          <p>{description}</p>
+          <h2>{service.title}</h2>
+          <p>{service.summary}</p>
         </div>
-        <Link className="service-catalogue-card__link" to="/contact#request-quote" aria-label={`Enquire about ${title}`}>
-          <span>Enquire about this service</span>
+        <Link className="service-catalogue-card__link" to={serviceHref(service.slug)}>
+          <span>Explore {service.title}</span>
           <ArrowRight aria-hidden="true" size={15} weight="bold" />
         </Link>
       </div>
@@ -101,8 +57,8 @@ export function Services() {
 
       <section className="service-catalogue" aria-label="IT service catalogue">
         <div className="site-shell service-catalogue__grid">
-          {services.map((service, index) => (
-            <ServiceCatalogueCard image={pageImages.services.cards[index]} key={service.title} {...service} />
+          {serviceCatalogue.map((service) => (
+            <ServiceCatalogueCard key={service.slug} service={service} />
           ))}
         </div>
       </section>

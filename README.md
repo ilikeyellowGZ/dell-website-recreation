@@ -1,34 +1,22 @@
-# CODING AGENTS: READ THIS FIRST
+# Gauvis Tech website
 
-This is a **handoff bundle** from Claude Design (claude.ai/design).
+React frontend with an Express enquiry API, MongoDB storage, Resend team notifications, and an authenticated enquiry dashboard.
 
-A user mocked up designs in HTML/CSS/JS using an AI design tool, then exported this bundle so a coding agent can implement the designs for real.
+## Local development
 
-## What you should do — IMPORTANT
+1. Install Node.js 22.12+ and run `npm ci`.
+2. Copy `.env.example` to `.env`. Set `MONGODB_URI` for a development database; keep secrets out of version control.
+3. Run `npm run db:setup` to create the validated collection and indexes. The runtime user also needs schema-management privileges because the API checks the schema on first access.
+4. For local admin access, run `npm run admin:credentials` and save the one-time password in a password manager. This updates `.env` and resets both enquiry flags to `false`.
+5. Once approved legal content is published, set `ENABLE_ENQUIRIES=true` and `VITE_ENABLE_ENQUIRIES=true` to test submissions. Otherwise leave collection disabled.
+6. Run `npm run dev` and open `http://localhost:5173`. Leave `VITE_API_BASE_URL` empty to use Vite's `/api` proxy to port 3001. Leave `FRONTEND_ORIGIN` empty for local same-origin development.
 
-**Read `dell-website-recreation/project/Gauvis Tech Website.dc.html` in full.** The user had this file open when they triggered the handoff, so it's almost certainly the primary design they want built. Read it top to bottom — don't skim. Then **follow its imports**: open every file it pulls in (shared components, CSS, scripts) so you understand how the pieces fit together before you start implementing.
+Notifications are optional locally: without all three `RESEND_*` values, accepted enquiries are stored without email. Database failure never produces a successful delivery response.
 
-**If anything is ambiguous, ask the user to confirm before you start implementing.** It's much cheaper to clarify scope up front than to build the wrong thing.
+## Production and verification
 
-## About the design files
+Follow [DEPLOYMENT.md](DEPLOYMENT.md) for the complete Render API, MongoDB Atlas, Resend, and DirectAdmin procedure, environment matrix, quality gate, browser tests, rollback, and credential rotation.
 
-The design medium is **HTML/CSS/JS** — these are prototypes, not production code. Your job is to **recreate them pixel-perfectly** in whatever technology makes sense for the target codebase (React, Vue, native, whatever fits). Match the visual output; don't copy the prototype's internal structure unless it happens to fit.
+Production builds require an HTTPS `VITE_API_BASE_URL`. `npm run package:directadmin` builds and creates `release/directadmin`; upload its contents, including `.htaccess`, to the domain's `public_html`.
 
-**Don't render these files in a browser or take screenshots unless the user asks you to.** Everything you need — dimensions, colors, layout rules — is spelled out in the source. Read the HTML and CSS directly; a screenshot won't tell you anything they don't.
-
-## Bundle contents
-
-- `dell-website-recreation/README.md` — this file
-- `dell-website-recreation/project/` — the `Dell website recreation` project files (HTML prototypes, assets, components)
-
-## Run the React website
-
-1. Install packages with `npm install`.
-2. Copy `.env.example` to `.env` and set `MONGODB_URI`. The database defaults to `gauvistech` and the collection defaults to `enquiries`.
-3. Run `npm run db:setup` once to create the validated enquiry collection and indexes.
-4. Run `npm run dev` to start the React client and enquiry API together.
-5. Open `http://localhost:5173`.
-
-For a production-style local preview, run `npm run build` followed by `npm run preview`, then open `http://localhost:4173`.
-
-The contact form never treats an unconfigured or unavailable database as a successful delivery. MongoDB credentials are loaded only by the server and must not use the `VITE_` prefix.
+The original design prototypes remain in `project/` as reference material.
