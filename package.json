@@ -33,6 +33,7 @@
     "react": "19.3.0",
     "react-dom": "19.3.0",
     "react-router-dom": "7.18.4",
+    "resend": "6.13.0",
     "zod": "4.1.13"
   },
   "devDependencies": {

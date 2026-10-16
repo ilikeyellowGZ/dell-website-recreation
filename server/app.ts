@@ -12,13 +12,15 @@ import {
   verifyAdminToken,
   verifyPassword,
 } from './adminAuth'
-import type { EnquiryRepository } from './enquiryRepository'
+import type { EnquiryNotifier } from './enquiryNotifier'
+import type { Enquiry, EnquiryRepository } from './enquiryRepository'
 import { enquiryInputSchema, getFieldErrors } from './enquirySchema'
 
 type CreateAppOptions = {
   admin?: AdminAccessConfig | null
   allowedOrigins?: ReadonlySet<string>
   enquiriesEnabled?: boolean
+  enquiryNotifier?: EnquiryNotifier | null
   enquiryRepository: EnquiryRepository | null
   staticDirectory?: string
   trustProxy?: false | number
@@ -46,6 +48,7 @@ export function createApp({
   admin = null,
   allowedOrigins = new Set(),
   enquiriesEnabled = true,
+  enquiryNotifier = null,
   enquiryRepository,
   staticDirectory,
   trustProxy = false,
@@ -239,20 +242,27 @@ export function createApp({
 
     const { businessName, consent, email, fullName, location, message, phone, service } = parsed.data
 
+    const enquiry: Enquiry = {
+      businessName,
+      consent,
+      createdAt: new Date(),
+      email,
+      fullName,
+      location,
+      message,
+      phone,
+      service,
+      source: 'website',
+      status: 'new',
+    }
+
     try {
-      await enquiryRepository.insert({
-        businessName,
-        consent,
-        createdAt: new Date(),
-        email,
-        fullName,
-        location,
-        message,
-        phone,
-        service,
-        source: 'website',
-        status: 'new',
-      })
+      await enquiryRepository.insert(enquiry)
+      try {
+        await enquiryNotifier?.notify(enquiry)
+      } catch {
+        console.error('Enquiry notification failed after storage.', { category: 'notification_error' })
+      }
       response.status(201).json({ accepted: true })
     } catch {
       response.status(503).json(unavailableResponse)

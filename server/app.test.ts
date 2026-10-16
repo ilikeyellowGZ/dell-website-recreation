@@ -4,7 +4,7 @@ import type { Server } from 'node:http'
 import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { generateJwtSecret, hashPassword } from './adminAuth'
 import { createApp } from './app'
 import type { Enquiry, EnquiryRepository } from './enquiryRepository'
@@ -25,6 +25,7 @@ const servers: Server[] = []
 const temporaryDirectories: string[] = []
 
 afterEach(async () => {
+  vi.restoreAllMocks()
   await Promise.all(
     servers.splice(0).map(
       (server) =>
@@ -36,8 +37,12 @@ afterEach(async () => {
   await Promise.all(temporaryDirectories.splice(0).map((directory) => rm(directory, { force: true, recursive: true })))
 })
 
-async function start(repository: EnquiryRepository | null, staticDirectory?: string) {
-  const server = createApp({ enquiryRepository: repository, staticDirectory }).listen(0)
+async function start(
+  repository: EnquiryRepository | null,
+  staticDirectory?: string,
+  options: Omit<Parameters<typeof createApp>[0], 'enquiryRepository' | 'staticDirectory'> = {},
+) {
+  const server = createApp({ ...options, enquiryRepository: repository, staticDirectory }).listen(0)
   servers.push(server)
   await new Promise<void>((resolve) => server.once('listening', resolve))
   const address = server.address()
@@ -356,6 +361,119 @@ describe('POST /api/enquiries', () => {
       code: 'PAYLOAD_TOO_LARGE',
       message: 'The enquiry is too large to submit.',
     })
+  })
+})
+
+describe('stored enquiry notifications', () => {
+  const postEnquiry = (baseUrl: string, payload = validPayload) => fetch(`${baseUrl}/api/enquiries`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify(payload),
+  })
+
+  it('stores exactly once before notifying with the normalized stored enquiry', async () => {
+    const events: string[] = []
+    const stored: Enquiry[] = []
+    const notifications: Enquiry[] = []
+    const baseUrl = await start({
+      async insert(enquiry) {
+        await Promise.resolve()
+        stored.push(enquiry)
+        events.push('stored')
+      },
+    }, undefined, {
+      enquiryNotifier: {
+        async notify(enquiry) {
+          notifications.push(enquiry)
+          events.push('emailed')
+        },
+      },
+    })
+
+    const response = await postEnquiry(baseUrl)
+
+    expect(response.status).toBe(201)
+    expect(await response.json()).toEqual({ accepted: true })
+    expect(events).toEqual(['stored', 'emailed'])
+    expect(stored).toHaveLength(1)
+    expect(notifications).toHaveLength(1)
+    expect(notifications[0]).toBe(stored[0])
+    expect(notifications[0]).toMatchObject({
+      fullName: 'Thandi Ndlovu', email: 'thandi@example.com', source: 'website', status: 'new',
+    })
+    expect(notifications[0]).not.toHaveProperty('website')
+  })
+
+  it('still accepts one stored enquiry after notification rejection and logs no sensitive values', async () => {
+    const logged = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const stored: Enquiry[] = []
+    const notifications: Enquiry[] = []
+    const baseUrl = await start({ async insert(enquiry) { stored.push(enquiry) } }, undefined, {
+      enquiryNotifier: {
+        async notify(enquiry) {
+          notifications.push(enquiry)
+          const error = new Error(`re_sensitive_test_key ${enquiry.email} ${enquiry.phone} ${enquiry.message}`)
+          error.name = enquiry.message
+          throw error
+        },
+      },
+    })
+
+    const response = await postEnquiry(baseUrl)
+
+    expect(response.status).toBe(201)
+    expect(await response.json()).toEqual({ accepted: true })
+    expect(stored).toHaveLength(1)
+    expect(notifications).toHaveLength(1)
+    expect(logged).toHaveBeenCalledTimes(1)
+    expect(logged.mock.calls[0][0]).toBe('Enquiry notification failed after storage.')
+    const logText = JSON.stringify(logged.mock.calls)
+    for (const sensitive of [
+      're_sensitive_test_key', 'thandi@example.com', validPayload.phone, validPayload.message,
+    ]) expect(logText).not.toContain(sensitive)
+  })
+
+  it.each([
+    { name: 'validation rejection', payload: { ...validPayload, email: 'invalid' }, status: 422 },
+    { name: 'honeypot', payload: { ...validPayload, website: 'spam' }, status: 201 },
+    { name: 'disabled enquiries', enabled: false, status: 503 },
+    { name: 'missing repository', missingRepository: true, status: 503 },
+    { name: 'failed storage', storageFailure: true, status: 503 },
+    { name: 'rejected origin', originRestricted: true, status: 403 },
+    { name: 'oversized payload', payload: { ...validPayload, message: 'x'.repeat(34 * 1024) }, status: 413 },
+  ])('does not notify after $name', async (scenario) => {
+    const notifications: Enquiry[] = []
+    const stored: Enquiry[] = []
+    const baseUrl = await start(scenario.missingRepository ? null : {
+      async insert(enquiry) {
+        if (scenario.storageFailure) throw new Error('database failure')
+        stored.push(enquiry)
+      },
+    }, undefined, {
+      enquiriesEnabled: scenario.enabled ?? true,
+      allowedOrigins: new Set(scenario.originRestricted ? ['https://gauvis.example'] : []),
+      enquiryNotifier: { async notify(enquiry) { notifications.push(enquiry) } },
+    })
+
+    const response = await postEnquiry(baseUrl, scenario.payload ?? validPayload)
+
+    expect(response.status).toBe(scenario.status)
+    expect(stored).toHaveLength(0)
+    expect(notifications).toHaveLength(0)
+  })
+
+  it('does not store or notify when the existing enquiry rate limit is reached', async () => {
+    const events: string[] = []
+    const baseUrl = await start({ async insert() { events.push('stored') } }, undefined, {
+      enquiryNotifier: { async notify() { events.push('emailed') } },
+    })
+    for (let index = 0; index < 5; index++) {
+      expect((await postEnquiry(baseUrl)).status).toBe(201)
+    }
+    const limited = await postEnquiry(baseUrl)
+    expect(limited.status).toBe(429)
+    expect(await limited.json()).toMatchObject({ accepted: false, code: 'RATE_LIMITED' })
+    expect(events).toEqual(Array.from({ length: 5 }, () => ['stored', 'emailed']).flat())
   })
 })
 
