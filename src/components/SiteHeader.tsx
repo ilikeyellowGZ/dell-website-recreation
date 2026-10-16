@@ -7,7 +7,7 @@ import { ButtonLink } from './ButtonLink'
 type ActivePage = 'home' | 'about' | 'services' | 'solutions' | 'faq' | 'contact'
 
 type SiteHeaderProps = {
-  activePage: ActivePage
+  activePage: ActivePage | null
 }
 
 const navItems: Array<{ label: string; page: ActivePage; to: string }> = [

@@ -186,3 +186,12 @@ The exact About photographs are present only inside the approved composite mocku
 ## 14. Unresolved destinations
 
 - Privacy Policy and Terms & Conditions still require approved, legally reviewed content. Dead footer labels are omitted until valid routes exist.
+
+## 15. Administration dashboard
+
+- The authenticated `/admin/enquiries` route is an operational surface. It retains the existing Barlow typography, navy headings, orange action accent, pale background, and compact bordered white panels.
+- Public navigation stays available on admin routes without marking Home as the current page.
+- The page has a title and actions, a four-card snapshot, a service breakdown, a labelled filter toolbar, a dense semantic table, and an enquiry detail panel. Cards and controls use the existing border, radius, focus, hover, disabled, loading, empty, and error conventions.
+- Snapshot counts, filters, and grouping apply to the latest 100 records returned by the secured API. The interface labels this limit explicitly; it does not claim all-time totals.
+- Search matches name, business, email, phone, service, location, and message. Service filtering and received/name sorting are reversible. Grouping creates separate labelled tables by service or location. The record detail panel shows the full message and contact actions.
+- The table scrolls within its own container on narrow screens without making the page scroll horizontally. Native labels, table headers, button names, and a live result count make keyboard and screen-reader use clear.

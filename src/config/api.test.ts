@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { apiUrl, resolveApiUrl } from './api'
+import { apiUrl, resolveApiUrl, wakeBackend } from './api'
 
 afterEach(() => vi.unstubAllEnvs())
 
@@ -56,5 +56,18 @@ describe('API URL resolution', () => {
   it('uses the frontend environment configuration for application requests', () => {
     vi.stubEnv('VITE_API_BASE_URL', 'https://gauvis-api.onrender.com/')
     expect(apiUrl('/api/admin/login')).toBe('https://gauvis-api.onrender.com/api/admin/login')
+  })
+
+  it('wakes the configured backend without sending credentials or blocking on failure', async () => {
+    vi.stubEnv('VITE_API_BASE_URL', 'https://guavis.onrender.com')
+    const fetchMock = vi.fn().mockRejectedValue(new Error('Service starting'))
+    vi.stubGlobal('fetch', fetchMock)
+
+    await expect(wakeBackend()).resolves.toBeUndefined()
+    expect(fetchMock).toHaveBeenCalledWith('https://guavis.onrender.com/api/health', {
+      credentials: 'omit',
+      mode: 'no-cors',
+    })
+    vi.unstubAllGlobals()
   })
 })
