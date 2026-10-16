@@ -18,8 +18,8 @@ function ServiceCatalogueCard({ service }: { service: ServiceRecord }) {
           <h2>{service.title}</h2>
           <p>{service.summary}</p>
         </div>
-        <Link className="service-catalogue-card__link" to={serviceHref(service.slug)} aria-label={`Learn more about ${service.title}`}>
-          <span>Explore this service</span>
+        <Link className="service-catalogue-card__link" to={serviceHref(service.slug)}>
+          <span>Explore {service.title}</span>
           <ArrowRight aria-hidden="true" size={15} weight="bold" />
         </Link>
       </div>

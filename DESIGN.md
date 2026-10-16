@@ -150,7 +150,7 @@ The exact About photographs are present only inside the approved composite mocku
 3. White service catalogue with eight image cards: three columns from 1600px upward, two columns from tablet through standard desktop widths, and one column at 768px and below. Each card has a fixed-ratio photograph, title, short description, orange vertical accent, and an enquiry link aligned to the trailing edge.
 4. Service cards use the exact order and copy from the approved mockup: Hardware Support, Software Solutions, Networking Services, PC & Desktop Support, Microsoft 365 Support, CCTV & Security, Printer Services, Website Development.
 5. Navy CTA band with the approved `Not sure where to start?` heading, support copy, orange `Talk to Us` button, city imagery, and diagonal orange treatment.
-6. Card titles and enquiry actions route to the matching `/services/:serviceSlug` page. The catalogue's final CTA routes to `/contact#request-quote`.
+6. Each card's `Explore <Service title>` action uses its visible text as its accessible name and routes to the matching `/services/:serviceSlug` page; card titles remain headings. The catalogue's final CTA routes to `/contact#request-quote`.
 
 ## 11. Service detail page geometry and states
 

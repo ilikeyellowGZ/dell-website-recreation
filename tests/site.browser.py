@@ -30,7 +30,7 @@ def assert_page_health(page, width: int) -> None:
 
 def test_service_card_opens_matching_detail_page(page) -> None:
     page.goto(f"{BASE_URL}/services", wait_until="networkidle")
-    page.get_by_role("link", name="Learn more about Hardware Support").click()
+    page.get_by_role("link", name="Explore Hardware Support", exact=True).click()
     expect(page).to_have_url(re.compile(r"/services/hardware-support$"))
     expect(page.get_by_role("heading", name="Hardware Support", exact=True)).to_be_visible()
     expect(page.get_by_role("link", name="Services", exact=True).first).to_have_attribute("aria-current", "page")
@@ -256,9 +256,9 @@ with sync_playwright() as playwright:
         ]
         for service, slug in expected_services:
             assert page.get_by_role("heading", name=service).is_visible()
-            expect(page.get_by_role("link", name=f"Learn more about {service}")).to_have_attribute(
-                "href", f"/services/{slug}"
-            )
+            action = page.get_by_role("link", name=f"Explore {service}", exact=True)
+            expect(action).to_have_text(f"Explore {service}")
+            expect(action).to_have_attribute("href", f"/services/{slug}")
 
         assert page.get_by_role("link", name="Talk to Us").get_attribute("href") == "/contact#request-quote"
         assert page.locator('a[href="/services.html"]').count() == 0

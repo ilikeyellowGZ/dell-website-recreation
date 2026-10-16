@@ -158,10 +158,9 @@ describe('Services route', () => {
     }
 
     for (const service of serviceCatalogue) {
-      expect(screen.getByRole('link', { name: `Learn more about ${service.title}` })).toHaveAttribute(
-        'href',
-        serviceHref(service.slug),
-      )
+      const action = screen.getByRole('link', { name: `Explore ${service.title}` })
+      expect(action).toHaveTextContent(`Explore ${service.title}`)
+      expect(action).toHaveAttribute('href', serviceHref(service.slug))
     }
 
     expect(screen.getByRole('link', { name: 'Talk to Us' })).toHaveAttribute('href', '/contact#request-quote')
