@@ -30,7 +30,7 @@ afterEach(() => {
 })
 
 describe('Resend enquiry notifications', () => {
-  it('uses the official SDK to send a structured request with no customer recipients', async () => {
+  it('uses the official SDK to notify the team and confirm receipt to the customer', async () => {
     const requests: { url: string; options: RequestInit }[] = []
     vi.stubGlobal('fetch', async (url: string, options: RequestInit) => {
       requests.push({ url, options })
@@ -39,17 +39,27 @@ describe('Resend enquiry notifications', () => {
 
     await createConfiguredResendNotifier(environment)!.notify(enquiry)
 
-    expect(requests).toHaveLength(1)
+    expect(requests).toHaveLength(2)
     expect(requests[0].url).toBe('https://api.resend.com/emails')
     expect(requests[0].options.method).toBe('POST')
-    const body = JSON.parse(String(requests[0].options.body))
-    expect(body).toMatchObject({
+    const teamBody = JSON.parse(String(requests[0].options.body))
+    const customerBody = JSON.parse(String(requests[1].options.body))
+    expect(teamBody).toMatchObject({
       from: 'Gauvis <enquiries@notifications.example.com>',
       to: 'team@example.com',
       reply_to: 'thandi@example.com',
     })
-    expect(body).not.toHaveProperty('cc')
-    expect(body).not.toHaveProperty('bcc')
+    expect(customerBody).toMatchObject({
+      from: 'Gauvis <enquiries@notifications.example.com>',
+      to: 'thandi@example.com',
+      reply_to: 'team@example.com',
+    })
+    expect(customerBody.text).toContain('Hardware Support')
+    expect(customerBody.text).not.toContain(enquiry.message)
+    for (const body of [teamBody, customerBody]) {
+      expect(body).not.toHaveProperty('cc')
+      expect(body).not.toHaveProperty('bcc')
+    }
   })
 
   it('does not let the SDK log raw provider errors outside production', async () => {
@@ -78,7 +88,7 @@ describe('Resend enquiry notifications', () => {
     },
   )
 
-  it('sends both message variants to the configured team with the submitter only as replyTo', async () => {
+  it('sends both message variants to the team and a separate customer receipt', async () => {
     const sent: NotificationEmail[] = []
     const keys: string[] = []
     const notifier = createConfiguredResendNotifier(environment, (key) => {
@@ -89,7 +99,7 @@ describe('Resend enquiry notifications', () => {
     await notifier!.notify(enquiry)
 
     expect(keys).toEqual(['re_test_notification_key'])
-    expect(sent).toHaveLength(1)
+    expect(sent).toHaveLength(2)
     expect(sent[0]).toMatchObject({
       from: 'Gauvis <enquiries@notifications.example.com>',
       to: 'team@example.com',
@@ -106,6 +116,13 @@ describe('Resend enquiry notifications', () => {
       expect(sent[0].html).toContain(value)
     }
     expect(JSON.stringify(sent)).not.toContain(environment.RESEND_API_KEY)
+    expect(sent[1]).toMatchObject({
+      from: 'Gauvis <enquiries@notifications.example.com>',
+      to: 'thandi@example.com',
+      replyTo: 'team@example.com',
+    })
+    expect(sent[1].text).toContain('Thandi Ndlovu')
+    expect(sent[1].text).not.toContain(enquiry.message)
   })
 
   it('escapes all user text in HTML, including script tags, ampersands, and both quote types', async () => {
@@ -129,6 +146,9 @@ describe('Resend enquiry notifications', () => {
     expect(sent[0].html).toContain('It&#39;s &lt;urgent&gt; &amp; &quot;important&quot;.')
     expect(sent[0].html).not.toMatch(/<script|<img|<town>|<urgent>/)
     expect(sent[0].text).toContain('<script>alert("name")</script>')
+    expect(sent[1].html).toContain('&lt;script&gt;alert(&quot;name&quot;)&lt;/script&gt;')
+    expect(sent[1].html).not.toContain('<script>')
+    expect(sent[1].html).not.toContain(enquiry.message)
   })
 
   it('keeps the subject on one line when a contact name contains line breaks', async () => {
@@ -138,6 +158,43 @@ describe('Resend enquiry notifications', () => {
     }))
     await notifier!.notify({ ...enquiry, fullName: 'Thandi\r\nBcc: other@example.com' })
     expect(sent[0].subject).not.toMatch(/[\r\n]/)
+  })
+
+  it('attempts the customer receipt even if the team email fails', async () => {
+    const sent: NotificationEmail[] = []
+    const notifier = createConfiguredResendNotifier(environment, () => ({
+      async send(input) {
+        sent.push(input)
+        return { error: input.to === 'team@example.com' ? { message: 'provider failure' } : null }
+      },
+    }))
+
+    await expect(notifier!.notify(enquiry)).rejects.toThrow('Enquiry notification could not be delivered.')
+    expect(sent.map((email) => email.to)).toEqual(['team@example.com', 'thandi@example.com'])
+  })
+
+  it('alerts only the configured team about a successful admin sign-in without credentials', async () => {
+    const sent: NotificationEmail[] = []
+    const notifier = createConfiguredResendNotifier(environment, () => ({
+      async send(input) { sent.push(input); return { error: null } },
+    }))
+
+    await notifier!.notifyAdminLogin(new Date('2026-10-17T08:00:00.000Z'))
+
+    expect(sent).toHaveLength(1)
+    expect(sent[0].to).toBe('team@example.com')
+    expect(sent[0].text).toContain('2026-10-17T08:00:00.000Z')
+    expect(JSON.stringify(sent[0])).not.toMatch(/correct horse|scrypt\$|JWT_SECRET_KEY|re_test_notification_key/)
+  })
+
+  it('does not expose provider details if the admin sign-in alert fails', async () => {
+    const notifier = createConfiguredResendNotifier(environment, () => ({
+      async send() { throw new Error(`${environment.RESEND_API_KEY} secret`) },
+    }))
+
+    await expect(notifier!.notifyAdminLogin(new Date('2026-10-17T08:00:00.000Z'))).rejects.toMatchObject({
+      message: 'Admin sign-in notification could not be delivered.',
+    })
   })
 
   it.each(['provider response', 'thrown exception'])(

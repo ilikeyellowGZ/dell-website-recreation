@@ -12,12 +12,13 @@ import {
   verifyAdminToken,
   verifyPassword,
 } from './adminAuth'
-import type { EnquiryNotifier } from './enquiryNotifier'
+import type { AdminLoginNotifier, EnquiryNotifier } from './enquiryNotifier'
 import type { Enquiry, EnquiryRepository } from './enquiryRepository'
 import { enquiryInputSchema, getFieldErrors } from './enquirySchema'
 
 type CreateAppOptions = {
   admin?: AdminAccessConfig | null
+  adminLoginNotifier?: AdminLoginNotifier | null
   allowedOrigins?: ReadonlySet<string>
   enquiriesEnabled?: boolean
   enquiryNotifier?: EnquiryNotifier | null
@@ -46,6 +47,7 @@ const unavailableResponse = {
 
 export function createApp({
   admin = null,
+  adminLoginNotifier = null,
   allowedOrigins = new Set(),
   enquiriesEnabled = true,
   enquiryNotifier = null,
@@ -180,6 +182,11 @@ export function createApp({
     }
 
     const token = await createAdminToken(admin.username, admin.jwtSecret)
+    try {
+      await adminLoginNotifier?.notifyAdminLogin(new Date())
+    } catch {
+      console.error('Admin sign-in notification failed.', { category: 'notification_error' })
+    }
     response.setHeader('Set-Cookie', getSessionCookie(token, admin.isProduction))
     response.json({ authenticated: true })
   })

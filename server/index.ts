@@ -27,6 +27,7 @@ const admin =
 
 const app = createApp({
   admin,
+  adminLoginNotifier: enquiryNotifier,
   allowedOrigins: runtimeConfig.frontendOrigins,
   enquiriesEnabled: runtimeConfig.enquiriesEnabled,
   enquiryNotifier,
@@ -42,7 +43,7 @@ const server = app.listen(port, () => {
     console.warn('MongoDB enquiry storage is unavailable until MONGODB_URI and MONGODB_DB_NAME are configured.')
   }
   if (!enquiryNotifier) {
-    console.warn('Enquiry email notifications are unavailable until RESEND_API_KEY, RESEND_FROM_EMAIL, and RESEND_TO_EMAIL are configured.')
+    console.warn('Email notifications are unavailable until RESEND_API_KEY, RESEND_FROM_EMAIL, and RESEND_TO_EMAIL are configured.')
   }
   if (!runtimeConfig.enquiriesEnabled) {
     console.warn('Public enquiry collection is disabled. Set ENABLE_ENQUIRIES=true only after legal content is approved.')

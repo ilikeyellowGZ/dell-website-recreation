@@ -155,6 +155,41 @@ describe('split-origin API security', () => {
     expect(logout.headers.get('set-cookie')).toBe('gauvis_admin_session=; Path=/api/admin; HttpOnly; SameSite=None; Max-Age=0; Secure')
   })
 
+  it('alerts the team only after a successful admin sign-in and keeps login working if email fails', async () => {
+    const alerts: Date[] = []
+    const logged = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const baseUrl = await start(null, undefined, {
+      admin: {
+        isProduction: false,
+        jwtSecret: generateJwtSecret(),
+        passwordHash: await hashPassword('correct horse battery staple'),
+        username: 'admin',
+      },
+      adminLoginNotifier: {
+        async notifyAdminLogin(at) {
+          alerts.push(at)
+          throw new Error('re_secret customer@example.com')
+        },
+      },
+    })
+
+    const signIn = (password: string) => fetch(`${baseUrl}/api/admin/login`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', origin: baseUrl },
+      body: JSON.stringify({ username: 'admin', password }),
+    })
+
+    expect((await signIn('wrong password')).status).toBe(401)
+    expect(alerts).toHaveLength(0)
+    const accepted = await signIn('correct horse battery staple')
+    expect(accepted.status).toBe(200)
+    expect(accepted.headers.get('set-cookie')).toContain('gauvis_admin_session=')
+    expect(alerts).toHaveLength(1)
+    expect(alerts[0]).toBeInstanceOf(Date)
+    expect(JSON.stringify(logged.mock.calls)).not.toContain('re_secret')
+    expect(JSON.stringify(logged.mock.calls)).not.toContain('customer@example.com')
+  })
+
   it('rejects login and logout from absent, foreign, and API-host origins without setting cookies', async () => {
     const baseUrl = await startSplitApp(null, true)
     for (const path of ['/api/admin/login', '/api/admin/logout']) {
