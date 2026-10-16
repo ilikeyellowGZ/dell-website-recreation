@@ -10,9 +10,15 @@ describe('parseFrontendOrigins', () => {
     expect([...parseFrontendOrigins('https://gauvis.co.za:8443', true)]).toEqual(['https://gauvis.co.za:8443'])
   })
 
-  it('allows absent configuration outside production', () => {
-    expect([...parseFrontendOrigins(undefined, false)]).toEqual([])
-    expect([...parseFrontendOrigins('  ', false)]).toEqual([])
+  it('allows the local Vite client when configuration is absent outside production', () => {
+    expect([...parseFrontendOrigins(undefined, false)]).toEqual([
+      'http://localhost:5173',
+      'http://127.0.0.1:5173',
+    ])
+    expect([...parseFrontendOrigins('  ', false)]).toEqual([
+      'http://localhost:5173',
+      'http://127.0.0.1:5173',
+    ])
   })
 
   it.each([
