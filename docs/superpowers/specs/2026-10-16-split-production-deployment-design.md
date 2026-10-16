@@ -107,7 +107,7 @@ A root `render.yaml` defines one Node web service with:
 - `/api/health` as `healthCheckPath`;
 - `NODE_ENV=production`;
 - non-secret operational values;
-- `sync: false` placeholders for credentials and provider secrets;
+- `sync: false` declarations for credentials and provider secrets;
 - an automatically generated JWT secret when supported by the Blueprint.
 
 The service binds to Render's `PORT`. Render secrets are entered through the dashboard or Blueprint creation flow and are never committed.
@@ -167,7 +167,7 @@ Automated tests cover:
 - No email attempt when validation or MongoDB storage fails.
 - Existing rate limit, schema, admin, and enquiry behavior.
 - DirectAdmin SPA fallback and cache/security configuration through static inspection.
-- `render.yaml` required commands, health check, and secret placeholders.
+- `render.yaml` required commands, health check, and non-committed secret declarations.
 
 Final verification runs the full unit/integration suite, typecheck, lint, production frontend build with a representative Render URL, React Doctor, and browser tests against the split-origin configuration.
 
