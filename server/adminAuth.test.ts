@@ -41,10 +41,15 @@ describe('admin JWT session', () => {
 
     expect(cookie).toContain('gauvis_admin_session=')
     expect(cookie).toContain('HttpOnly')
-    expect(cookie).toContain('SameSite=Strict')
+    expect(cookie).toContain('Path=/api/admin; HttpOnly; SameSite=None; Max-Age=900; Secure')
     expect(cookie).toContain('Secure')
     expect(cookie).toContain('Max-Age=900')
-    expect(clearSessionCookie(true)).toContain('Max-Age=0')
+    expect(clearSessionCookie(true)).toBe('gauvis_admin_session=; Path=/api/admin; HttpOnly; SameSite=None; Max-Age=0; Secure')
+  })
+
+  it('keeps local HTTP sessions strict and clears the same cookie scope', () => {
+    expect(getSessionCookie('local-token', false)).toBe('gauvis_admin_session=local-token; Path=/api/admin; HttpOnly; SameSite=Strict; Max-Age=900')
+    expect(clearSessionCookie(false)).toBe('gauvis_admin_session=; Path=/api/admin; HttpOnly; SameSite=Strict; Max-Age=0')
   })
 })
 

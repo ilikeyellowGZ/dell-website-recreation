@@ -67,12 +67,14 @@ export async function verifyAdminToken(token: string, secret: string): Promise<J
 
 export function getSessionCookie(token: string, isProduction: boolean): string {
   const secure = isProduction ? '; Secure' : ''
-  return `${cookieName}=${token}; Path=/; HttpOnly; SameSite=Strict; Max-Age=${sessionLifetimeSeconds}${secure}`
+  const sameSite = isProduction ? 'None' : 'Strict'
+  return `${cookieName}=${token}; Path=/api/admin; HttpOnly; SameSite=${sameSite}; Max-Age=${sessionLifetimeSeconds}${secure}`
 }
 
 export function clearSessionCookie(isProduction: boolean): string {
   const secure = isProduction ? '; Secure' : ''
-  return `${cookieName}=; Path=/; HttpOnly; SameSite=Strict; Max-Age=0${secure}`
+  const sameSite = isProduction ? 'None' : 'Strict'
+  return `${cookieName}=; Path=/api/admin; HttpOnly; SameSite=${sameSite}; Max-Age=0${secure}`
 }
 
 export function readSessionCookie(cookieHeader?: string): string | null {

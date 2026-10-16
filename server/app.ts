@@ -17,6 +17,7 @@ import { enquiryInputSchema, getFieldErrors } from './enquirySchema'
 
 type CreateAppOptions = {
   admin?: AdminAccessConfig | null
+  allowedOrigins?: ReadonlySet<string>
   enquiriesEnabled?: boolean
   enquiryRepository: EnquiryRepository | null
   staticDirectory?: string
@@ -43,6 +44,7 @@ const unavailableResponse = {
 
 export function createApp({
   admin = null,
+  allowedOrigins = new Set(),
   enquiriesEnabled = true,
   enquiryRepository,
   staticDirectory,
@@ -66,7 +68,36 @@ export function createApp({
       },
     }),
   )
+  app.use('/api/admin', (_request, response, next) => {
+    response.setHeader('Cache-Control', 'no-store')
+    next()
+  })
+  app.use('/api', (request, response, next) => {
+    const origin = request.get('origin')
+    const originAllowed = Boolean(origin && allowedOrigins.has(origin))
+    response.vary('Origin')
+    if (originAllowed) {
+      response.setHeader('Access-Control-Allow-Origin', origin!)
+      response.setHeader('Access-Control-Allow-Credentials', 'true')
+      response.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS')
+      response.setHeader('Access-Control-Allow-Headers', 'Content-Type')
+    }
+
+    if (request.method === 'OPTIONS') {
+      response.status(allowedOrigins.size > 0 && !originAllowed ? 403 : 204).end()
+      return
+    }
+    if (allowedOrigins.size > 0 && !['GET', 'HEAD'].includes(request.method) && !originAllowed) {
+      response.status(403).json({ message: 'Origin is not allowed.' })
+      return
+    }
+    next()
+  })
   app.use(express.json({ limit: '32kb', strict: true }))
+
+  app.get('/api/health', (_request, response) => {
+    response.json({ status: 'ok' })
+  })
 
   const enquiryLimiter = rateLimit({
     windowMs: 15 * 60 * 1_000,
@@ -92,14 +123,10 @@ export function createApp({
     },
   })
 
-  const setAdminNoStore = (_request: express.Request, response: express.Response, next: express.NextFunction) => {
-    response.setHeader('Cache-Control', 'no-store')
-    next()
-  }
-
-  const hasSameOrigin = (request: express.Request) => {
+  const hasAllowedOrigin = (request: express.Request) => {
     const origin = request.get('origin')
     if (!origin) return false
+    if (allowedOrigins.size > 0) return allowedOrigins.has(origin)
     try {
       return new URL(origin).host === request.get('host')
     } catch {
@@ -127,10 +154,8 @@ export function createApp({
     }
   }
 
-  app.use('/api/admin', setAdminNoStore)
-
   app.post('/api/admin/login', adminLoginLimiter, async (request, response) => {
-    if (!hasSameOrigin(request)) {
+    if (!hasAllowedOrigin(request)) {
       response.status(403).json({ authenticated: false, message: 'Sign-in failed.' })
       return
     }
@@ -173,7 +198,7 @@ export function createApp({
   })
 
   app.post('/api/admin/logout', (request, response) => {
-    if (!hasSameOrigin(request)) {
+    if (!hasAllowedOrigin(request)) {
       response.status(403).json({ authenticated: false })
       return
     }

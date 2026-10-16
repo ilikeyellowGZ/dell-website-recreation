@@ -25,6 +25,7 @@ const admin =
 
 const app = createApp({
   admin,
+  allowedOrigins: runtimeConfig.frontendOrigins,
   enquiriesEnabled: runtimeConfig.enquiriesEnabled,
   enquiryRepository,
   staticDirectory: existsSync(join(distDirectory, 'index.html')) ? distDirectory : undefined,

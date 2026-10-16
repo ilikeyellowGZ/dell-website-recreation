@@ -45,6 +45,135 @@ async function start(repository: EnquiryRepository | null, staticDirectory?: str
   return `http://127.0.0.1:${address.port}`
 }
 
+describe('split-origin API security', () => {
+  const frontendOrigin = 'https://gauvis.example'
+
+  async function startSplitApp(repository: EnquiryRepository | null = null, withAdmin = false) {
+    const server = createApp({
+      allowedOrigins: new Set([frontendOrigin]),
+      enquiryRepository: repository,
+      admin: withAdmin ? {
+        isProduction: true,
+        jwtSecret: generateJwtSecret(),
+        passwordHash: await hashPassword('correct horse battery staple'),
+        username: 'admin',
+      } : null,
+    }).listen(0)
+    servers.push(server)
+    await new Promise<void>((resolve) => server.once('listening', resolve))
+    const address = server.address()
+    if (!address || typeof address === 'string') throw new Error('Expected a TCP server address')
+    return `http://127.0.0.1:${address.port}`
+  }
+
+  function expectCredentialedCors(response: Response) {
+    expect(response.headers.get('access-control-allow-origin')).toBe(frontendOrigin)
+    expect(response.headers.get('access-control-allow-credentials')).toBe('true')
+    expect(response.headers.get('vary')?.split(/,\s*/)).toContain('Origin')
+  }
+
+  it('permits exact credentialed API preflight with the minimum methods and headers', async () => {
+    const baseUrl = await startSplitApp()
+    const response = await fetch(`${baseUrl}/api/enquiries`, {
+      method: 'OPTIONS',
+      headers: { origin: frontendOrigin, 'access-control-request-method': 'POST', 'access-control-request-headers': 'content-type' },
+    })
+
+    expect(response.status).toBe(204)
+    expectCredentialedCors(response)
+    expect(response.headers.get('access-control-allow-methods')).toBe('GET,POST,OPTIONS')
+    expect(response.headers.get('access-control-allow-headers')).toBe('Content-Type')
+    expect(await response.text()).toBe('')
+  })
+
+  it('provides no CORS permission for an unapproved preflight or non-API route', async () => {
+    const baseUrl = await startSplitApp()
+    for (const [path, origin] of [['/api/enquiries', 'https://evil.example'], ['/contact', frontendOrigin]]) {
+      const response = await fetch(`${baseUrl}${path}`, { method: 'OPTIONS', headers: { origin } })
+      expect(response.headers.get('access-control-allow-origin')).toBeNull()
+      expect(response.headers.get('access-control-allow-credentials')).toBeNull()
+      if (path.startsWith('/api/')) expect(response.status).toBe(403)
+    }
+  })
+
+  it('rejects absent and non-exact origins before storage, while accepting the configured frontend', async () => {
+    const stored: Enquiry[] = []
+    const baseUrl = await startSplitApp({ async insert(enquiry) { stored.push(enquiry) } })
+    for (const origin of [undefined, 'null', 'https://evil.example', 'https://gauvis.example.evil', 'http://gauvis.example', `${frontendOrigin}/path`, baseUrl]) {
+      const response = await fetch(`${baseUrl}/api/enquiries`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', ...(origin ? { origin } : {}) },
+        body: JSON.stringify(validPayload),
+      })
+      expect(response.status, `origin ${origin}`).toBe(403)
+      expect(response.headers.get('access-control-allow-origin')).toBeNull()
+      expect(stored).toHaveLength(0)
+    }
+
+    const accepted = await fetch(`${baseUrl}/api/enquiries`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', origin: frontendOrigin },
+      body: JSON.stringify(validPayload),
+    })
+    expect(accepted.status).toBe(201)
+    expectCredentialedCors(accepted)
+    expect(stored).toHaveLength(1)
+  })
+
+  it('supports production login, authenticated reads, and logout from the configured frontend', async () => {
+    const baseUrl = await startSplitApp({ async insert() {}, async listRecent() { return [] } }, true)
+    const login = await fetch(`${baseUrl}/api/admin/login`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', origin: frontendOrigin },
+      body: JSON.stringify({ username: 'admin', password: 'correct horse battery staple' }),
+    })
+    expect(login.status).toBe(200)
+    expectCredentialedCors(login)
+    expect(login.headers.get('set-cookie')).toContain('Path=/api/admin; HttpOnly; SameSite=None; Max-Age=900; Secure')
+    const cookie = login.headers.get('set-cookie')!.split(';')[0]
+
+    for (const path of ['/api/admin/session', '/api/admin/enquiries']) {
+      const response = await fetch(`${baseUrl}${path}`, { headers: { origin: frontendOrigin, cookie } })
+      expect(response.status).toBe(200)
+      expectCredentialedCors(response)
+      expect(response.headers.get('cache-control')).toBe('no-store')
+      expect(await response.json()).toEqual(path.endsWith('/session') ? { authenticated: true } : { enquiries: [] })
+    }
+
+    const unapprovedRead = await fetch(`${baseUrl}/api/admin/session`, { headers: { origin: 'https://evil.example', cookie } })
+    expect(unapprovedRead.headers.get('access-control-allow-origin')).toBeNull()
+    expect(unapprovedRead.headers.get('access-control-allow-credentials')).toBeNull()
+
+    const logout = await fetch(`${baseUrl}/api/admin/logout`, { method: 'POST', headers: { origin: frontendOrigin, cookie } })
+    expect(logout.status).toBe(204)
+    expectCredentialedCors(logout)
+    expect(logout.headers.get('set-cookie')).toBe('gauvis_admin_session=; Path=/api/admin; HttpOnly; SameSite=None; Max-Age=0; Secure')
+  })
+
+  it('rejects login and logout from absent, foreign, and API-host origins without setting cookies', async () => {
+    const baseUrl = await startSplitApp(null, true)
+    for (const path of ['/api/admin/login', '/api/admin/logout']) {
+      for (const origin of [undefined, 'https://evil.example', baseUrl]) {
+        const response = await fetch(`${baseUrl}${path}`, {
+          method: 'POST',
+          headers: { 'content-type': 'application/json', ...(origin ? { origin } : {}) },
+          body: JSON.stringify({ username: 'admin', password: 'correct horse battery staple' }),
+        })
+        expect(response.status).toBe(403)
+        expect(response.headers.get('set-cookie')).toBeNull()
+        expect(response.headers.get('access-control-allow-origin')).toBeNull()
+      }
+    }
+  })
+
+  it('exposes only process responsiveness through the public health check', async () => {
+    const baseUrl = await startSplitApp()
+    const response = await fetch(`${baseUrl}/api/health`)
+    expect(response.status).toBe(200)
+    expect(await response.json()).toEqual({ status: 'ok' })
+  })
+})
+
 describe('Production static assets', () => {
   it('compresses text assets and gives hashed assets an immutable cache policy', async () => {
     const staticDirectory = await mkdtemp(join(tmpdir(), 'gauvis-static-'))
