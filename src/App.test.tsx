@@ -6,6 +6,7 @@ import { serviceCatalogue, serviceHref } from './services/serviceCatalogue'
 
 afterEach(() => {
   vi.unstubAllGlobals()
+  vi.unstubAllEnvs()
 })
 
 async function renderRoute(route: string) {
@@ -385,11 +386,13 @@ describe('Contact route', () => {
   })
 
   it('shows a pending state and only announces success after the API accepts the enquiry', async () => {
+    vi.stubEnv('VITE_API_BASE_URL', 'https://gauvis-api.onrender.com/')
     let acceptRequest: ((value: unknown) => void) | undefined
     const fetchPromise = new Promise((resolve) => {
       acceptRequest = resolve
     })
-    vi.stubGlobal('fetch', vi.fn(() => fetchPromise))
+    const fetchMock = vi.fn(() => fetchPromise)
+    vi.stubGlobal('fetch', fetchMock)
     await renderRoute('/contact')
 
     fireEvent.change(screen.getByLabelText(/full name/i), { target: { value: 'Thandi Ndlovu' } })
@@ -406,6 +409,12 @@ describe('Contact route', () => {
 
     expect(screen.getByRole('button', { name: /sending enquiry/i })).toBeDisabled()
     expect(screen.getByRole('status')).toHaveTextContent(/sending your enquiry/i)
+    expect(fetchMock).toHaveBeenCalledWith('https://gauvis-api.onrender.com/api/enquiries', {
+      body: expect.any(String),
+      credentials: 'include',
+      headers: { 'content-type': 'application/json' },
+      method: 'POST',
+    })
 
     await act(async () => {
       acceptRequest?.({
