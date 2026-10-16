@@ -1,9 +1,22 @@
-"""Run `python tests/site.browser.py` against `npm run preview` (default port 4173)."""
+"""Run against a disabled-enquiry preview on port 4173, plus isolated split-origin fixtures.
+
+BASE_URL overrides the preview; SPLIT_API_BASE_URL optionally chooses an unused
+http://127.0.0.1:<port> for the local API fixture. No external services are used.
+BROWSER_CHANNEL defaults to msedge; use chromium for bundled Chromium.
+"""
 
 import os
 import re
+import socket
+import subprocess
+import tempfile
+from contextlib import contextmanager
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
-from time import monotonic
+from threading import Thread
+from time import monotonic, sleep
+from urllib.parse import urlsplit
+from urllib.request import urlopen
 
 from playwright.sync_api import expect, sync_playwright
 
@@ -12,6 +25,182 @@ BASE_URL = os.getenv("BASE_URL", "http://127.0.0.1:4173")
 WIDTHS = (360, 390, 768, 1024, 1440)
 ARTIFACTS = Path("artifacts")
 ARTIFACTS.mkdir(exist_ok=True)
+ROOT = Path(__file__).resolve().parents[1]
+
+
+def unused_port() -> int:
+    with socket.socket() as listener:
+        listener.bind(("127.0.0.1", 0))
+        return listener.getsockname()[1]
+
+
+@contextmanager
+def local_process(command, environment, ready_url):
+    # Separate environments and dynamic ports need custom lifecycle management.
+    # Capture fixture output; the production API bootstrap is never run here.
+    with tempfile.TemporaryFile(mode="w+", encoding="utf-8") as output:
+        process = subprocess.Popen(
+            command, cwd=ROOT, env=environment, stdout=output, stderr=subprocess.STDOUT,
+        )
+        try:
+            deadline = monotonic() + 30
+            while True:
+                if process.poll() is not None:
+                    output.seek(0)
+                    raise AssertionError(f"Local fixture exited: {output.read()}")
+                try:
+                    with urlopen(ready_url, timeout=1) as response:
+                        if response.status == 200:
+                            break
+                except OSError:
+                    pass
+                if monotonic() >= deadline:
+                    output.seek(0)
+                    raise AssertionError(f"Local fixture did not become ready: {output.read()}")
+                sleep(0.1)
+            yield
+        finally:
+            process.terminate()
+            try:
+                process.wait(timeout=10)
+            except subprocess.TimeoutExpired:
+                process.kill()
+                process.wait(timeout=5)
+
+
+class UnapprovedOriginPage(BaseHTTPRequestHandler):
+    def do_GET(self):
+        body = b"<!doctype html><title>Unapproved local origin</title>"
+        self.send_response(200)
+        self.send_header("Content-Type", "text/html; charset=utf-8")
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
+
+    def log_message(self, *_args):
+        pass
+
+
+def test_split_origin_enquiry(browser) -> None:
+    api_base = os.getenv("SPLIT_API_BASE_URL") or f"http://127.0.0.1:{unused_port()}"
+    api = urlsplit(api_base)
+    assert (
+        api.scheme == "http" and api.hostname == "127.0.0.1" and api.port
+        and not api.username and not api.password and not api.path
+        and not api.query and not api.fragment
+    ), "SPLIT_API_BASE_URL must be http://127.0.0.1:<unused-port> for an isolated fixture"
+    frontend_port = unused_port()
+    while frontend_port == api.port:
+        frontend_port = unused_port()
+    frontend_origin = f"http://127.0.0.1:{frontend_port}"
+    endpoint = f"{api_base}/api/enquiries"
+    environment = {
+        key: value for key, value in os.environ.items()
+        if not key.startswith(("MONGODB_", "RESEND_", "ADMIN_", "VITE_"))
+        and key not in {"JWT_SECRET_KEY", "NODE_ENV", "FRONTEND_ORIGIN", "ENABLE_ENQUIRIES"}
+    }
+    environment.update({
+        "NODE_ENV": "development", "FIXTURE_PORT": str(api.port),
+        "FIXTURE_FRONTEND_ORIGIN": frontend_origin,
+        "VITE_API_BASE_URL": api_base, "VITE_ENABLE_ENQUIRIES": "true",
+        "VITE_DISABLE_REACT_DEVTOOLS": "1",
+    })
+    # The actual API middleware is used. Only persistence and notification are fakes.
+    # This inline-only diagnostics route is never added to the production server.
+    fixture = """
+        import { createApp } from './server/app.ts';
+        const records = [], notifications = [], requests = [];
+        const app = createApp({
+            allowedOrigins: new Set([process.env.FIXTURE_FRONTEND_ORIGIN]),
+            enquiriesEnabled: true,
+            enquiryRepository: { insert: async enquiry => { records.push(enquiry); } },
+            enquiryNotifier: { notify: async enquiry => { notifications.push(enquiry); } },
+        });
+        app.get('/__test/state', (_request, response) => response.json({ records, notifications, requests }));
+        const server = app.listen(Number(process.env.FIXTURE_PORT), '127.0.0.1');
+        server.prependListener('request', (request, response) => {
+            if (request.url !== '/api/enquiries') return;
+            response.on('finish', () => requests.push({
+                method: request.method, origin: request.headers.origin,
+                status: response.statusCode, allowedOrigin: response.getHeader('Access-Control-Allow-Origin'),
+            }));
+        });
+    """
+    with local_process(
+        ["node", "--import", "tsx", "--input-type=module", "-e", fixture],
+        environment, f"{api_base}/api/health",
+    ), local_process(
+        ["node", "node_modules/vite/bin/vite.js", "--host", "127.0.0.1", "--port", str(frontend_port), "--strictPort"],
+        environment, frontend_origin,
+    ):
+        context = browser.new_context(viewport={"width": 390, "height": 844}, reduced_motion="reduce")
+        try:
+            # Observe without interception: routing can bypass browser preflights.
+            requested_urls = []
+            context.on("request", lambda request: requested_urls.append(request.url))
+            page = context.new_page()
+            errors = []
+            page.on("pageerror", lambda error: errors.append(str(error)))
+            page.goto(f"{frontend_origin}/contact#request-quote", wait_until="networkidle")
+            page.get_by_role("textbox", name="Full name", exact=True).fill("Split Origin Browser Test")
+            page.get_by_role("textbox", name="Email address", exact=True).fill("split-test@example.com")
+            page.get_by_role("textbox", name="Phone number", exact=True).fill("084 035 6925")
+            page.get_by_role("combobox", name="Service required", exact=True).select_option("Hardware Support")
+            page.get_by_role("textbox", name="Tell us what you need", exact=True).fill("Isolated split-origin regression enquiry.")
+            page.get_by_role("checkbox", name="I agree to be contacted about my enquiry.").check()
+            with page.expect_response(lambda response: response.url == endpoint and response.request.method == "POST") as pending:
+                page.get_by_role("button", name="Send Enquiry", exact=True).click()
+            response = pending.value
+            assert response.status == 201 and response.json() == {"accepted": True}
+            assert response.request.all_headers()["origin"] == frontend_origin
+            headers = response.all_headers()
+            assert headers["access-control-allow-origin"] == frontend_origin
+            assert headers["access-control-allow-credentials"] == "true"
+            assert "origin" in headers["vary"].lower()
+            expect(page.get_by_role("status")).to_contain_text("Your enquiry has been received.")
+            state = context.request.get(f"{api_base}/__test/state").json()
+            assert len(state["records"]) == len(state["notifications"]) == 1
+            assert state["records"][0]["email"] == "split-test@example.com"
+            assert {"method": "OPTIONS", "origin": frontend_origin, "status": 204,
+                    "allowedOrigin": frontend_origin} in state["requests"], state["requests"]
+            assert not errors, f"Allowed split-origin page errors: {errors}"
+
+            unapproved_server = ThreadingHTTPServer(("127.0.0.1", 0), UnapprovedOriginPage)
+            unapproved_thread = Thread(target=unapproved_server.serve_forever, daemon=True)
+            unapproved_thread.start()
+            try:
+                unapproved_origin = f"http://127.0.0.1:{unapproved_server.server_port}"
+                page.goto(unapproved_origin, wait_until="networkidle")
+                # JSON exercises browser preflight rejection; text/plain proves the
+                # server also rejects a POST that does not require a preflight.
+                for content_type in ("application/json", "text/plain"):
+                    result = page.evaluate("""async ({ endpoint, contentType }) => {
+                        try {
+                            await fetch(endpoint, { method: 'POST', credentials: 'include',
+                                headers: { 'content-type': contentType }, body: '{}' });
+                            return 'unexpected success';
+                        } catch { return 'blocked'; }
+                    }""", {"endpoint": endpoint, "contentType": content_type})
+                    assert result == "blocked", "Browser must not receive CORS permission for an unapproved origin"
+                state = context.request.get(f"{api_base}/__test/state").json()
+                rejected = [item for item in state["requests"] if item["origin"] == unapproved_origin]
+                assert {item["method"] for item in rejected} == {"OPTIONS", "POST"}
+                assert all(item["status"] == 403 and "allowedOrigin" not in item for item in rejected)
+                assert len(state["records"]) == len(state["notifications"]) == 1, "Rejected origins must not store or notify"
+                assert all(urlsplit(url).hostname == "127.0.0.1" for url in requested_urls), requested_urls
+            finally:
+                unapproved_server.shutdown()
+                unapproved_server.server_close()
+                unapproved_thread.join(timeout=5)
+        except Exception as error:
+            page.screenshot(path=str(ARTIFACTS / "split-origin-failure.png"), full_page=True)
+            raise AssertionError(
+                f"Split-origin failure at {page.url}; labels={page.locator('label').all_text_contents()}; "
+                f"page errors={errors}"
+            ) from error
+        finally:
+            context.close()
+    print("Split-origin browser checks passed: configured API, exact Origin/CORS, one insert/notification, rejected preflight and POST")
 
 
 def assert_page_health(page, width: int) -> None:
@@ -153,7 +342,9 @@ def inspect_service_detail_pages(browser) -> None:
 
 
 with sync_playwright() as playwright:
-    browser = playwright.chromium.launch(channel="msedge", headless=True)
+    browser_channel = os.getenv("BROWSER_CHANNEL", "msedge")
+    browser = playwright.chromium.launch(channel=None if browser_channel in ("", "chromium") else browser_channel, headless=True)
+    test_split_origin_enquiry(browser)
 
     detail_context = browser.new_context(viewport={"width": 1440, "height": 900}, reduced_motion="reduce")
     detail_page = detail_context.new_page()
