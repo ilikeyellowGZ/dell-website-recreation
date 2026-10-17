@@ -1,0 +1,40 @@
+# Rollback-only configuration retained during Cloudflare cutover.
+# Do not delete the live Render service until Cloudflare production checks pass and the owner explicitly approves shutdown.
+services:
+  - type: web
+    name: gauvis-api
+    runtime: node
+    buildCommand: npm ci
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: ENABLE_ENQUIRIES
+        value: "true"
+      - key: SERVE_FRONTEND
+        value: "false"
+      - key: TRUST_PROXY
+        value: "1"
+      - key: JWT_SECRET_KEY
+        generateValue: true
+      - key: FRONTEND_ORIGIN
+        value: https://gauvistech.com
+      - key: MONGODB_URI
+        sync: false
+      - key: MONGODB_DB_NAME
+        sync: false
+      - key: MONGODB_COLLECTION
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: RESEND_FROM_EMAIL
+        sync: false
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_LOGIN_NOTIFICATION_COOLDOWN_SECONDS
+        value: "900"
+      - key: ADMIN_USERNAME
+        sync: false
+      - key: ADMIN_PASSWORD_HASH
+        sync: false

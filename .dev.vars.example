@@ -1,0 +1,15 @@
+# Copy this file to .dev.vars for `npm run dev:worker`; it is ignored by Git.
+# Values here are local-only placeholders. Never commit production credentials.
+ENABLE_ENQUIRIES=false
+MONGODB_DB_NAME=gauvistech
+MONGODB_COLLECTION=enquiries
+# Required to enable POST /api/enquiries or POST /api/admin/login in the Worker.
+RATE_LIMIT_KEY_SECRET=
+MONGODB_URI=
+RESEND_API_KEY=
+RESEND_FROM_EMAIL=enquiries@notifications.example.com
+ADMIN_EMAIL=team@example.com
+ADMIN_LOGIN_NOTIFICATION_COOLDOWN_SECONDS=900
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD_HASH=
+JWT_SECRET_KEY=

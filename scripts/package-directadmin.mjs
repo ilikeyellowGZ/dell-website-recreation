@@ -5,10 +5,12 @@ import { pathToFileURL, URL } from 'node:url'
 
 export function validateFrontendEnvironment(environment, production = true) {
   const configuredOrigin = environment.VITE_API_BASE_URL
-  if (!configuredOrigin && !production) return undefined
+  // An omitted URL is the secure default for a combined Cloudflare deployment:
+  // the browser uses same-origin /api. An explicit URL is still fully validated.
+  if (!configuredOrigin?.trim()) return undefined
 
   const configurationError = new Error(
-    'VITE_API_BASE_URL must be an absolute API origin without credentials, a path, query, or fragment; HTTPS is required in production. Set it before building the frontend.',
+    'VITE_API_BASE_URL must be an absolute API origin without credentials, a path, query, or fragment; HTTPS is required in production.',
   )
   let origin
   try {

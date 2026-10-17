@@ -7,6 +7,7 @@
     "dev": "concurrently -k \"npm:dev:client\" \"npm:dev:server\"",
     "dev:client": "vite",
     "dev:server": "tsx watch server/index.ts",
+    "dev:worker": "npm run build && wrangler dev --local --port 8787",
     "build": "npm run images:generate && tsc -b && vite build",
     "package:directadmin": "npm run build && node scripts/package-directadmin.mjs",
     "db:setup": "tsx server/setupDatabase.ts",
@@ -14,9 +15,12 @@
     "start": "tsx server/index.ts",
     "test": "vitest run",
     "test:watch": "vitest",
-    "typecheck": "tsc -b --pretty false",
+    "typecheck": "tsc -b --pretty false && npm run typecheck:worker",
+    "typecheck:worker": "wrangler types && tsc -p tsconfig.worker.json --pretty false",
     "lint": "eslint .",
     "doctor": "react-doctor src --no-score --blocking warning",
+    "check:worker": "npm run build && wrangler deploy --dry-run",
+    "deploy:cloudflare": "npm run build && wrangler deploy",
     "images:generate": "node scripts/generate-responsive-images.mjs",
     "admin:credentials": "tsx server/generateAdminCredentials.ts"
   },
@@ -59,6 +63,7 @@
     "typescript": "6.0.2",
     "typescript-eslint": "8.71.0",
     "vite": "8.3.2",
-    "vitest": "5.0.3"
+    "vitest": "5.0.3",
+    "wrangler": "^4.151.1"
   }
 }

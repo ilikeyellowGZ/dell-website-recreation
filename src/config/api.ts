@@ -40,8 +40,8 @@ export function apiUrl(path: ApiPath): string {
 
 export async function wakeBackend(): Promise<void> {
   try {
-    await fetch(apiUrl('/api/health'), { credentials: 'omit', mode: 'cors' })
+    await fetch(apiUrl('/api/health'), { credentials: 'omit' })
   } catch {
-    // Render may still be starting; user-facing API calls handle their own errors.
+    // User-facing API calls handle their own errors if the API is temporarily unavailable.
   }
 }

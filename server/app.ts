@@ -25,11 +25,14 @@ type CreateAppOptions = {
   enquiryNotifier?: EnquiryNotifier | null
   enquiryRepository: EnquiryRepository | null
   staticDirectory?: string
+  sameOriginOnly?: boolean
+  workerManagedRateLimits?: boolean
   trustProxy?: false | number
   clock?: () => Date
 }
 
 export type AdminAccessConfig = {
+  cookieSameSite?: 'None' | 'Strict'
   isProduction: boolean
   jwtSecret: string
   passwordHash: string
@@ -56,6 +59,8 @@ export function createApp({
   enquiryNotifier = null,
   enquiryRepository,
   staticDirectory,
+  sameOriginOnly = false,
+  workerManagedRateLimits = false,
   trustProxy = false,
   clock = () => new Date(),
 }: CreateAppOptions) {
@@ -82,22 +87,40 @@ export function createApp({
     response.setHeader('Cache-Control', 'no-store')
     next()
   })
+  const requestOriginMatchesHost = (request: express.Request) => {
+    const origin = request.get('origin')
+    if (!origin) return false
+    try {
+      return new URL(origin).host === request.get('host')
+    } catch {
+      return false
+    }
+  }
+
   app.use('/api', (request, response, next) => {
     const origin = request.get('origin')
     const originAllowed = Boolean(origin && allowedOrigins.has(origin))
-    response.vary('Origin')
-    if (originAllowed) {
-      response.setHeader('Access-Control-Allow-Origin', origin!)
-      response.setHeader('Access-Control-Allow-Credentials', 'true')
-      response.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS')
-      response.setHeader('Access-Control-Allow-Headers', 'Content-Type')
+    const stateChanging = !['GET', 'HEAD'].includes(request.method)
+
+    if (!sameOriginOnly) {
+      response.vary('Origin')
+      if (originAllowed) {
+        response.setHeader('Access-Control-Allow-Origin', origin!)
+        response.setHeader('Access-Control-Allow-Credentials', 'true')
+        response.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS')
+        response.setHeader('Access-Control-Allow-Headers', 'Content-Type')
+      }
     }
 
     if (request.method === 'OPTIONS') {
-      response.status(allowedOrigins.size > 0 && !originAllowed ? 403 : 204).end()
+      response.status(sameOriginOnly || (allowedOrigins.size > 0 && !originAllowed) ? 403 : 204).end()
       return
     }
-    if (allowedOrigins.size > 0 && !['GET', 'HEAD'].includes(request.method) && !originAllowed) {
+    if (sameOriginOnly && stateChanging && !requestOriginMatchesHost(request)) {
+      response.status(403).json({ message: 'Origin is not allowed.' })
+      return
+    }
+    if (!sameOriginOnly && allowedOrigins.size > 0 && stateChanging && !originAllowed) {
       response.status(403).json({ message: 'Origin is not allowed.' })
       return
     }
@@ -109,7 +132,8 @@ export function createApp({
     response.json({ status: 'ok' })
   })
 
-  const enquiryLimiter = rateLimit({
+  const passRateLimiter: express.RequestHandler = (_request, _response, next) => next()
+  const enquiryLimiter = workerManagedRateLimits ? passRateLimiter : rateLimit({
     windowMs: 15 * 60 * 1_000,
     limit: 5,
     standardHeaders: 'draft-8',
@@ -123,7 +147,7 @@ export function createApp({
     },
   })
 
-  const adminLoginLimiter = rateLimit({
+  const adminLoginLimiter = workerManagedRateLimits ? passRateLimiter : rateLimit({
     windowMs: 15 * 60 * 1_000,
     limit: 5,
     standardHeaders: 'draft-8',
@@ -160,11 +184,11 @@ export function createApp({
       response.locals.adminSession = await verifyAdminToken(token, admin.jwtSecret)
       next()
     } catch {
-      response.status(401).setHeader('Set-Cookie', clearSessionCookie(admin.isProduction)).json({ authenticated: false })
+      response.status(401).setHeader('Set-Cookie', clearSessionCookie(admin.isProduction, admin.cookieSameSite)).json({ authenticated: false })
     }
   }
 
-  app.post('/api/admin/login', adminLoginLimiter, async (request, response) => {
+  app.post(['/api/admin/login', '/api/auth/login'], adminLoginLimiter, async (request, response) => {
     if (!hasAllowedOrigin(request)) {
       response.status(403).json({ authenticated: false, message: 'Sign-in failed.' })
       return
@@ -196,7 +220,7 @@ export function createApp({
         console.error('Admin sign-in notification failed.', { category: 'notification_error' })
       }
     }
-    response.setHeader('Set-Cookie', getSessionCookie(token, admin.isProduction))
+    response.setHeader('Set-Cookie', getSessionCookie(token, admin.isProduction, admin.cookieSameSite))
     response.json({ authenticated: true })
   })
 
@@ -221,7 +245,7 @@ export function createApp({
       response.status(403).json({ authenticated: false })
       return
     }
-    response.setHeader('Set-Cookie', clearSessionCookie(Boolean(admin?.isProduction)))
+    response.setHeader('Set-Cookie', clearSessionCookie(Boolean(admin?.isProduction), admin?.cookieSameSite))
     response.status(204).end()
   })
 

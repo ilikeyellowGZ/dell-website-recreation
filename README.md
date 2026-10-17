@@ -17,8 +17,8 @@ Notifications are optional locally: without `RESEND_API_KEY`, `RESEND_FROM_EMAIL
 
 Follow [DEPLOYMENT.md](DEPLOYMENT.md) for the existing API, MongoDB Atlas, Resend, and Cloudflare deployment procedure, environment matrix, quality gate, browser tests, rollback, and credential rotation.
 
-Production builds use the HTTPS API origin in `.env.production`; Cloudflare builds may override it with `VITE_API_BASE_URL`. The Wrangler configuration serves `dist/` as a single-page application on `gauvistech.com`.
+Cloudflare now serves both the frontend and API from the same Worker origin. Keep `VITE_API_BASE_URL` empty for the normal deployment so browser calls use `/api`; this removes the old Render CORS dependency. See [DEPLOYMENT.md](DEPLOYMENT.md) and [Cloudflare migration notes](docs/cloudflare-migration.md) for the secrets, deploy commands, cutover, and rollback procedure.
 
-The existing production API origin is `https://guavis.onrender.com`. Each production website load sends a background request to `/api/health`; browsing does not wait for it. After signing in at `/admin/login`, `/admin/enquiries` shows a searchable, sortable dashboard with service/location grouping and full record details. The dashboard covers the latest 100 enquiries returned by the API, not an all-time total.
+Each production website load sends a background request to `/api/health`; browsing does not wait for it. After signing in at `/admin/login`, `/admin/enquiries` shows a searchable, sortable dashboard with service/location grouping and full record details. The dashboard covers the latest 100 enquiries returned by the API, not an all-time total.
 
 The original design prototypes remain in `project/` as reference material.
