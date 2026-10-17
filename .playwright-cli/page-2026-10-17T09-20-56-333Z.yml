@@ -1,0 +1,19 @@
+- generic [active] [ref=f2e1]:
+  - heading "New website enquiry" [level=1] [ref=f2e2]
+  - generic [ref=f2e3]:
+    - term [ref=f2e4]: Contact name
+    - definition [ref=f2e5]: Thandi Ndlovu
+    - term [ref=f2e6]: Business name
+    - definition [ref=f2e7]: Ndlovu Trading
+    - term [ref=f2e8]: Email
+    - definition [ref=f2e9]: thandi@example.com
+    - term [ref=f2e10]: Phone
+    - definition [ref=f2e11]: +27 84 123 4567
+    - term [ref=f2e12]: Requested service
+    - definition [ref=f2e13]: Hardware Support
+    - term [ref=f2e14]: Location
+    - definition [ref=f2e15]: Cape Town
+    - term [ref=f2e16]: Message
+    - definition [ref=f2e17]: We need help replacing three office computers and setting them up for our team.
+    - term [ref=f2e18]: Submitted at (UTC)
+    - definition [ref=f2e19]: 2026-10-17T08:00:00.000Z

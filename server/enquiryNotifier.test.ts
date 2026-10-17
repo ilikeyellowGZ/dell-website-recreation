@@ -56,6 +56,14 @@ describe('Resend enquiry notifications', () => {
     })
     expect(customerBody.text).toContain('Hardware Support')
     expect(customerBody.text).not.toContain(enquiry.message)
+    expect(teamBody).not.toHaveProperty('attachments')
+    expect(customerBody.html).toContain('Your request is with our team.')
+    expect(customerBody.html).toContain('cid:gauvis-tech-logo')
+    expect(customerBody.attachments[0]).toMatchObject({
+      filename: 'gauvis-email-logo.png',
+      content_id: 'gauvis-tech-logo',
+      content_type: 'image/png',
+    })
     for (const body of [teamBody, customerBody]) {
       expect(body).not.toHaveProperty('cc')
       expect(body).not.toHaveProperty('bcc')
@@ -123,6 +131,9 @@ describe('Resend enquiry notifications', () => {
     })
     expect(sent[1].text).toContain('Thandi Ndlovu')
     expect(sent[1].text).not.toContain(enquiry.message)
+    expect(sent[0].attachments).toBeUndefined()
+    expect(sent[1].html).toContain('Your request is with our team.')
+    expect(sent[1].attachments?.[0].contentId).toBe('gauvis-tech-logo')
   })
 
   it('escapes all user text in HTML, including script tags, ampersands, and both quote types', async () => {
@@ -184,6 +195,8 @@ describe('Resend enquiry notifications', () => {
     expect(sent).toHaveLength(1)
     expect(sent[0].to).toBe('team@example.com')
     expect(sent[0].text).toContain('2026-10-17T08:00:00.000Z')
+    expect(sent[0].html).toContain('A sign-in to your dashboard.')
+    expect(sent[0].attachments?.[0].contentType).toBe('image/png')
     expect(JSON.stringify(sent[0])).not.toMatch(/correct horse|scrypt\$|JWT_SECRET_KEY|re_test_notification_key/)
   })
 

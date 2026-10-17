@@ -1,5 +1,6 @@
 import { Resend } from 'resend'
 import type { Enquiry } from './enquiryRepository'
+import { renderAdminLoginAlert, renderCustomerReceipt, type BrandedEmailContent } from './emailTemplates'
 
 export type EnquiryNotifier = { notify(enquiry: Enquiry): Promise<void> }
 export type AdminLoginNotifier = { notifyAdminLogin(at: Date): Promise<void> }
@@ -11,6 +12,7 @@ export type NotificationEmail = {
   subject: string
   text: string
   html: string
+  attachments?: BrandedEmailContent['attachments']
 }
 
 type EmailTransport = { send(input: NotificationEmail): Promise<{ error?: unknown }> }
@@ -62,9 +64,7 @@ export function createConfiguredResendNotifier(
         from,
         to: enquiry.email,
         replyTo: to,
-        subject: 'We received your Gauvis Tech enquiry',
-        text: `Hello ${enquiry.fullName},\n\nThank you for contacting Gauvis Tech. We received your enquiry about ${enquiry.service}. Our team will review it and contact you using the details you provided.\n\nIf you did not send this enquiry, you can ignore this message.\n\nGauvis Tech`,
-        html: `<p>Hello ${escapeHtml(enquiry.fullName)},</p><p>Thank you for contacting Gauvis Tech. We received your enquiry about ${escapeHtml(enquiry.service)}. Our team will review it and contact you using the details you provided.</p><p>If you did not send this enquiry, you can ignore this message.</p><p>Gauvis Tech</p>`,
+        ...renderCustomerReceipt(enquiry),
       }
       const send = async (email: NotificationEmail) => {
         const result = await transport.send(email)
@@ -82,9 +82,7 @@ export function createConfiguredResendNotifier(
           from,
           to,
           replyTo: to,
-          subject: 'Gauvis Tech admin sign-in',
-          text: `A successful admin sign-in occurred at ${at.toISOString()}. If this was not you, change the admin credentials immediately.`,
-          html: `<p>A successful admin sign-in occurred at ${at.toISOString()}.</p><p>If this was not you, change the admin credentials immediately.</p>`,
+          ...renderAdminLoginAlert(at),
         })
         if (result.error) throw new Error('Provider rejected the notification.')
       } catch {

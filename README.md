@@ -11,7 +11,7 @@ React frontend with an Express enquiry API, MongoDB storage, Resend team notific
 5. Once approved legal content is published, set `ENABLE_ENQUIRIES=true` and `VITE_ENABLE_ENQUIRIES=true` to test submissions. Otherwise leave collection disabled.
 6. Run `npm run dev` and open `http://localhost:5173`. Leave `VITE_API_BASE_URL` empty to use Vite's `/api` proxy to port 3001. Leave `FRONTEND_ORIGIN` empty for local same-origin development.
 
-Notifications are optional locally: without all three `RESEND_*` values, accepted enquiries are stored without email and admin sign-ins still work without alerts. After successful storage, Resend sends a team notification to `RESEND_TO_EMAIL` and a brief receipt to the customer's address. Successful admin sign-ins also alert `RESEND_TO_EMAIL`; failed sign-ins do not. `team@example.com` in `.env.example` is only a placeholder. Database failure never produces a successful delivery response.
+Notifications are optional locally: without all three `RESEND_*` values, accepted enquiries are stored without email and admin sign-ins still work without alerts. After successful storage, Resend sends a detailed team notification to `RESEND_TO_EMAIL` and a branded receipt to the customer's address. Successful admin sign-ins also send a branded security alert to `RESEND_TO_EMAIL`; failed sign-ins do not. The receipt and login alert include the existing Gauvis Tech logo as an embedded image, with text-only alternatives. Configure `RESEND_FROM_EMAIL` at a verified sending domain; `team@example.com` in `.env.example` is only a recipient placeholder. Database failure never produces a successful delivery response.
 
 ## Production and verification
 
