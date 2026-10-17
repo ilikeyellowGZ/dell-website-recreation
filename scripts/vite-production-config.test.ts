@@ -10,12 +10,17 @@ function configure(command: 'serve' | 'build', mode: string) {
 }
 
 describe('Vite production build gate', () => {
-  it.each([undefined, '', 'http://api.example.com', 'https://api.example.com/api', 'https://%2A.example.com'])(
+  it.each(['', 'http://api.example.com', 'https://api.example.com/api', 'https://%2A.example.com'])(
     'fails the production build configuration for API origin %s', (origin) => {
       vi.stubEnv('VITE_API_BASE_URL', origin)
       expect(() => configure('build', 'production')).toThrow(/VITE_API_BASE_URL/)
     },
   )
+
+  it('uses the production API origin when no environment override is set', () => {
+    vi.stubEnv('VITE_API_BASE_URL', undefined)
+    expect(() => configure('build', 'production')).not.toThrow()
+  })
 
   it('allows an HTTPS API origin for production builds', () => {
     vi.stubEnv('VITE_API_BASE_URL', 'https://gauvis-api.onrender.com/')
