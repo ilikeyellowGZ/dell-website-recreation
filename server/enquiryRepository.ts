@@ -19,6 +19,9 @@ export interface EnquiryRepository {
 type MongoRepositoryOptions = {
   collectionName?: string
   dbName: string
+  maxIdleTimeMS?: number
+  maxPoolSize?: number
+  minPoolSize?: number
   uri: string
 }
 
@@ -122,11 +125,16 @@ async function ensureEnquiryCollection(db: Db, definition: EnquiryCollectionDefi
 export function createMongoEnquiryRepository({
   collectionName = 'enquiries',
   dbName,
+  maxIdleTimeMS,
+  maxPoolSize = 5,
+  minPoolSize,
   uri,
 }: MongoRepositoryOptions): EnquiryRepository {
   const definition = getEnquiryCollectionDefinition({ collectionName, dbName })
   const client = new MongoClient(uri, {
-    maxPoolSize: 5,
+    maxPoolSize,
+    ...(minPoolSize === undefined ? {} : { minPoolSize }),
+    ...(maxIdleTimeMS === undefined ? {} : { maxIdleTimeMS }),
     serverSelectionTimeoutMS: 5_000,
   })
   let collectionPromise: Promise<Collection<Enquiry>> | undefined

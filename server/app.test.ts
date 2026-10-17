@@ -245,6 +245,70 @@ describe('split-origin API security', () => {
   })
 })
 
+describe('same-origin Worker API security', () => {
+  it('leaves login throttling to the Worker limiter instead of the bridged Express request', async () => {
+    const baseUrl = await start(null, undefined, {
+      admin: {
+        isProduction: true,
+        cookieSameSite: 'Strict',
+        jwtSecret: generateJwtSecret(),
+        passwordHash: await hashPassword('correct horse battery staple'),
+        username: 'admin',
+      },
+      sameOriginOnly: true,
+      workerManagedRateLimits: true,
+    })
+
+    for (let attempt = 0; attempt < 6; attempt += 1) {
+      const response = await fetch(`${baseUrl}/api/admin/login`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', origin: baseUrl },
+        body: JSON.stringify({}),
+      })
+      expect(response.status).toBe(401)
+    }
+  })
+
+  it('rejects cross-site writes while issuing a strict secure cookie for the combined deployment', async () => {
+    const stored: Enquiry[] = []
+    const baseUrl = await start({ async insert(enquiry) { stored.push(enquiry) } }, undefined, {
+      admin: {
+        isProduction: true,
+        cookieSameSite: 'Strict',
+        jwtSecret: generateJwtSecret(),
+        passwordHash: await hashPassword('correct horse battery staple'),
+        username: 'admin',
+      },
+      sameOriginOnly: true,
+    })
+
+    const foreignEnquiry = await fetch(`${baseUrl}/api/enquiries`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', origin: 'https://evil.example' },
+      body: JSON.stringify(validPayload),
+    })
+    expect(foreignEnquiry.status).toBe(403)
+    expect(stored).toHaveLength(0)
+    expect(foreignEnquiry.headers.get('access-control-allow-origin')).toBeNull()
+
+    const login = await fetch(`${baseUrl}/api/admin/login`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', origin: baseUrl },
+      body: JSON.stringify({ username: 'admin', password: 'correct horse battery staple' }),
+    })
+    expect(login.status).toBe(200)
+    expect(login.headers.get('set-cookie')).toContain('SameSite=Strict; Max-Age=900; Secure')
+
+    const authAlias = await fetch(`${baseUrl}/api/auth/login`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', origin: baseUrl },
+      body: JSON.stringify({ username: 'admin', password: 'correct horse battery staple' }),
+    })
+    expect(authAlias.status).toBe(200)
+    expect(authAlias.headers.get('set-cookie')).toContain('SameSite=Strict; Max-Age=900; Secure')
+  })
+})
+
 describe('Production static assets', () => {
   it('compresses text assets and gives hashed assets an immutable cache policy', async () => {
     const staticDirectory = await mkdtemp(join(tmpdir(), 'gauvis-static-'))

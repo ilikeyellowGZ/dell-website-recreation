@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs'
 import type { Enquiry } from './enquiryRepository'
 
-const logo = readFileSync(new URL('./assets/gauvis-email-logo.png', import.meta.url))
+const logo = readFileSync(new URL('./assets/gauvis-email-logo.png', import.meta.url) as Parameters<typeof readFileSync>[0])
 const logoContentId = 'gauvis-tech-logo'
 
 export type BrandedEmailContent = {

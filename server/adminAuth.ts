@@ -65,16 +65,21 @@ export async function verifyAdminToken(token: string, secret: string): Promise<J
   return payload
 }
 
-export function getSessionCookie(token: string, isProduction: boolean): string {
+export type CookieSameSite = 'None' | 'Strict'
+
+function getCookieSettings(isProduction: boolean, sameSite?: CookieSameSite) {
   const secure = isProduction ? '; Secure' : ''
-  const sameSite = isProduction ? 'None' : 'Strict'
-  return `${cookieName}=${token}; Path=/api/admin; HttpOnly; SameSite=${sameSite}; Max-Age=${sessionLifetimeSeconds}${secure}`
+  return { sameSite: sameSite ?? (isProduction ? 'None' : 'Strict'), secure }
 }
 
-export function clearSessionCookie(isProduction: boolean): string {
-  const secure = isProduction ? '; Secure' : ''
-  const sameSite = isProduction ? 'None' : 'Strict'
-  return `${cookieName}=; Path=/api/admin; HttpOnly; SameSite=${sameSite}; Max-Age=0${secure}`
+export function getSessionCookie(token: string, isProduction: boolean, sameSite?: CookieSameSite): string {
+  const settings = getCookieSettings(isProduction, sameSite)
+  return `${cookieName}=${token}; Path=/api/admin; HttpOnly; SameSite=${settings.sameSite}; Max-Age=${sessionLifetimeSeconds}${settings.secure}`
+}
+
+export function clearSessionCookie(isProduction: boolean, sameSite?: CookieSameSite): string {
+  const settings = getCookieSettings(isProduction, sameSite)
+  return `${cookieName}=; Path=/api/admin; HttpOnly; SameSite=${settings.sameSite}; Max-Age=0${settings.secure}`
 }
 
 export function readSessionCookie(cookieHeader?: string): string | null {

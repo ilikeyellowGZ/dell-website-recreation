@@ -24,7 +24,7 @@ async function fixture() {
 
 describe('production frontend environment validation', () => {
   it.each([
-    undefined, '', ' ', '*', 'not-a-url', '//api.example.com',
+    '*', 'not-a-url', '//api.example.com',
     'http://api.example.com', 'ftp://api.example.com',
     'https://api.example.com/path', 'https://user:password@api.example.com',
     'https://api.example.com?query=value', 'https://api.example.com?',
@@ -32,8 +32,12 @@ describe('production frontend environment validation', () => {
     'https://*', 'https://*.example.com', 'https://api.*.example.com',
     'https://api*.example.com/', 'https://%2A.example.com',
     'https://%2a.example.com', 'https://api%2A.example.com/',
-  ])('rejects missing or invalid API origin %s', (origin) => {
+  ])('rejects an invalid explicit API origin %s', (origin) => {
     expect(() => validateFrontendEnvironment({ VITE_API_BASE_URL: origin })).toThrow(/VITE_API_BASE_URL/)
+  })
+
+  it.each([undefined, '', ' '])('uses same-origin API calls when the origin is omitted (%s)', (origin) => {
+    expect(validateFrontendEnvironment({ VITE_API_BASE_URL: origin })).toBeUndefined()
   })
 
   it('accepts and normalizes an HTTPS API origin', () => {

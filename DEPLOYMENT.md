@@ -1,123 +1,70 @@
-# Production deployment
+# Cloudflare production deployment
 
-Cloudflare serves the static frontend at `https://gauvistech.com`. The existing API at `https://guavis.onrender.com` stores enquiries in MongoDB Atlas before asking Resend to notify the team. Keep backend secrets in a password manager and the API host's environment settings; never expose them to the frontend build.
+Gauvis now deploys as one Cloudflare Worker: Static Assets serve the Vite React application and the Worker handles the existing `/api/*` Express routes on the same origin. MongoDB Atlas and Resend remain external services. The old `render.yaml` is retained only as a rollback reference; do not shut down the live Render service until the Cloudflare checks below pass and the owner explicitly approves it.
 
-## 1. Prepare the release
+## Before deployment
 
-Use the reviewed commit and Node.js 24 LTS with `npm ci`. Confirm approved privacy/terms content is published before enabling public collection. Keep `ENABLE_ENQUIRIES=false` on the existing API service until that prerequisite is met, and build with `VITE_ENABLE_ENQUIRIES=false` meanwhile.
+1. Use Node 24 LTS and run `npm ci`.
+2. Run `npm test`, `npm run typecheck`, `npm run lint`, and `npm run check:worker`.
+3. In Cloudflare, create the Worker through the dashboard or authenticate Wrangler using `npx wrangler login`.
+4. Configure the Worker secrets. Never enter these as `VITE_*` variables or commit them:
 
-Use `https://gauvistech.com` as the canonical website origin. If `www.gauvistech.com` also serves the site, allow it explicitly in the API's `FRONTEND_ORIGIN`; redirecting to one canonical host reduces configuration. Configure `gauvistech.com` as the Cloudflare Worker custom domain and ensure HTTPS is enabled.
-
-Run `npm run admin:credentials` on a trusted local machine. It writes `ADMIN_USERNAME`, `ADMIN_PASSWORD_HASH`, and `JWT_SECRET_KEY` into local `.env`, prints a one-time password, and resets both local enquiry flags to `false`. Save the password privately. Copy the username/hash to Render privately; keep Render's generated JWT secret for production. Never paste these credentials into tickets, repository files, or frontend variables.
-
-## 2. Configure MongoDB Atlas
-
-Create the production cluster and a dedicated password-authenticated database user restricted to that cluster and database `gauvistech`. This code creates/checks the collection, runs `collMod`, and creates indexes on first access, so a read/write-only user is insufficient. Give this application user `readWrite` plus `dbAdmin`, scoped to `gauvistech`, or a custom role containing the required schema/index operations. Do not grant cluster-wide administrator privileges. See [Atlas database users](https://www.mongodb.com/docs/atlas/security-add-mongodb-users/).
-
-Copy Atlas's application connection URI, URL-encode its username/password components, and privately set `MONGODB_URI`. Use `MONGODB_DB_NAME=gauvistech` and `MONGODB_COLLECTION=enquiries` consistently. Allow the operator's temporary public IP for setup. Run `npm run db:setup` with these values in local `.env`; verify the `createdAt_desc` and `status_createdAt_desc` indexes. Remove the temporary IP when finished.
-
-Copy **every outbound CIDR** under the existing Render service's **Connect > Outbound** tab into Atlas Network Access before testing storage. Use its actual region/ranges, rather than the inbound address; avoid a blanket `0.0.0.0/0` rule. [Render outbound IP guidance](https://render.com/docs/outbound-ip-addresses) explains shared ranges and dedicated outbound IPs.
-
-## 3. Verify Resend DNS and restrict the key
-
-In Resend, add a dedicated sending subdomain such as `notifications.example.com`. Copy the exact DNS record types, names, priorities, and values Resend supplies into the **authoritative DNS provider**. Watch for panels that append the zone name automatically. Preserve existing mailbox MX/SPF records; publish sending records at Resend's requested names and do not enable inbound receiving for this workflow. Wait for propagation and Resend's verified status before sending. See [Resend domain verification](https://resend.com/docs/dashboard/domains/introduction).
-
-Create an application-specific key with **Sending access**, restricted to that verified subdomain, and save its value privately as `RESEND_API_KEY`. Use `RESEND_FROM_EMAIL=enquiries@notifications.example.com` as an example only; configure a sender at the subdomain you verified. Replace the example `ADMIN_EMAIL=team@example.com` with your real team mailbox before expecting to receive alerts. After an enquiry is stored, the team receives its details with the submitter as `replyTo`, and the customer receives a branded confirmation with the team mailbox as `replyTo`. A successful admin sign-in also sends a branded team security alert containing the account identifier and UTC timestamp; credentials are never emailed. Login alerts are limited to one per 15 minutes by default (`ADMIN_LOGIN_NOTIFICATION_COOLDOWN_SECONDS` can be set from 1 to 86,400). Both branded messages embed the existing Gauvis Tech logo as an inline image and include text-only versions; the detailed team enquiry email stays unchanged. `RESEND_TO_EMAIL` is supported only as a temporary migration fallback when `ADMIN_EMAIL` is absent. See [Resend key permissions](https://resend.com/docs/api-reference/api-keys/create-api-key) and [domain restrictions in the API keys dashboard](https://resend.com/docs/dashboard/api-keys/introduction).
-
-## 4. Keep the existing API connected
-
-The frontend continues to call the existing API origin `https://guavis.onrender.com`; this project no longer includes a Render Blueprint or provisions another API service. Keep the API's runtime configuration and secrets on that existing service. Its `FRONTEND_ORIGIN` must include `https://gauvistech.com`, and `GET /api/health` must return JSON `{"status":"ok"}`.
-
-To sign in on the current Cloudflare preview, add its exact origin to the existing API service's `FRONTEND_ORIGIN`, then redeploy/restart that API service:
-
-```text
-https://gauvistech.com,https://dell-website-recreation.service-heyywebb.workers.dev
+```powershell
+npx wrangler secret put MONGODB_URI
+npx wrangler secret put RESEND_API_KEY
+npx wrangler secret put JWT_SECRET_KEY
+npx wrangler secret put ADMIN_PASSWORD_HASH
+npx wrangler secret put RATE_LIMIT_KEY_SECRET
+npx wrangler secret put ADMIN_USERNAME
 ```
 
-Origins are comma-separated, exact HTTPS origins with no path or trailing slash. Keep the canonical website origin in the list, and remove the temporary `workers.dev` origin when preview testing ends. Do not use wildcard origins. The browser's `VITE_API_BASE_URL` remains the API origin, `https://guavis.onrender.com`.
+The non-secret Worker defaults are declared in `wrangler.jsonc` and are the source of truth for GitHub/Wrangler deployments. Change them there and redeploy; do not rely on dashboard-only overrides that a later Wrangler deployment may replace:
 
-| Existing API runtime variable | Value or source |
+| Name | Production value |
 | --- | --- |
-| `NODE_ENV` | `production` |
-| `ENABLE_ENQUIRIES` | `true`; hold at `false` until legal approval |
-| `SERVE_FRONTEND` | `false`; keeps the API-only service from serving a cached `dist` folder |
-| `TRUST_PROXY` | `1` trusted proxy hop |
-| `FRONTEND_ORIGIN` | `https://gauvistech.com`; add the exact Cloudflare preview origin temporarily when testing on `workers.dev` |
-| `MONGODB_URI` | Private Atlas connection URI |
+| `ENABLE_ENQUIRIES` | `false` by default; change to `true` only after legal approval |
 | `MONGODB_DB_NAME` | `gauvistech` |
 | `MONGODB_COLLECTION` | `enquiries` |
-| `RESEND_API_KEY` | Private sending-only, domain-restricted key |
-| `RESEND_FROM_EMAIL` | Sender at the verified subdomain |
-| `ADMIN_EMAIL` | Team recipient mailbox for enquiry and successful-login alerts; replace `team@example.com` placeholder |
-| `ADMIN_LOGIN_NOTIFICATION_COOLDOWN_SECONDS` | `900` by default; minimum interval between successful-login alerts per running API instance |
-| `ADMIN_USERNAME` | Locally generated/chosen username |
-| `ADMIN_PASSWORD_HASH` | Generated `scrypt$...` hash; paste whole value without shell expansion |
-| `JWT_SECRET_KEY` | Secret generated for the API host; keep stable across normal deploys |
+| `RESEND_FROM_EMAIL` | Address on Resend-verified sending domain |
+| `ADMIN_EMAIL` | Gauvis recipient inbox |
+| `ADMIN_LOGIN_NOTIFICATION_COOLDOWN_SECONDS` | `900` unless a different 1–86,400-second cooldown is required |
 
-`FRONTEND_ORIGIN` accepts no wildcard, credentials, non-root path, query, fragment, or HTTP origin in production; invalid/missing values stop startup. `VITE_*` values are unnecessary on the API host. Complete the Atlas outbound allowlist from step 2, then open `https://guavis.onrender.com/api/health`. Confirm the response has JSON content and is exactly `{"status":"ok"}`. The API host root (`/`) may return `404`; Cloudflare serves the website. A health response proves HTTP responsiveness, **not** storage or email delivery.
+`RATE_LIMIT_KEY_SECRET` must be a new random secret, separate from the JWT secret. The Worker HMACs client addresses before placing short-lived limits in its Durable Object; it never stores raw visitor IPs as limiter keys.
 
-Review startup logs for missing storage, notification, or admin configuration. Email failure logs contain only `Enquiry notification failed after storage.` and a category. Do not enable request-body, credential, cookie, or provider-error logging. Missing notification configuration permits storage but requires the dashboard as the recovery path.
+Set `VITE_ENABLE_ENQUIRIES` as a **Cloudflare build environment variable** to `true` only after legal approval; it is embedded in the public frontend bundle. It is independent of the runtime `ENABLE_ENQUIRIES` Worker variable, so both must be enabled for submissions. Keep `VITE_API_BASE_URL` unset so the app uses same-origin `/api` requests.
 
-## 5. Build and deploy the frontend to Cloudflare
+## Build and deploy
 
-The production API origin is preconfigured in `.env.production`. Cloudflare's build environment can set `VITE_API_BASE_URL` to override it. It must be an absolute HTTPS origin with no credentials, path, query, or fragment. Both values below are public build inputs; changing them requires rebuilding:
-
-| Frontend build variable | Production value |
-| --- | --- |
-| `VITE_API_BASE_URL` | `https://guavis.onrender.com` |
-| `VITE_ENABLE_ENQUIRIES` | `true` after legal approval |
-
-Configure the Cloudflare Worker build with `npm ci` followed by `npm run build`, and deploy the generated `dist/` directory using `wrangler.jsonc`. Set `VITE_API_BASE_URL=https://guavis.onrender.com` and `VITE_ENABLE_ENQUIRIES=true` in Cloudflare's production build variables after legal approval. Bind the custom domain `gauvistech.com` to the Worker. The Vite build fails closed if the API URL is missing or invalid.
-
-Only `VITE_*` values are public and embedded into the JavaScript bundle. Never configure `RESEND_API_KEY`, MongoDB credentials, `ADMIN_PASSWORD_HASH`, or `JWT_SECRET_KEY` in Cloudflare's frontend build environment.
-
-## 6. Verify locally and after launch
-
-The full local gate uses a representative HTTPS API URL and disabled form for the existing baseline browser checks. In PowerShell:
+The exact commands are:
 
 ```powershell
-$env:VITE_API_BASE_URL = 'https://guavis.onrender.com'
-$env:VITE_ENABLE_ENQUIRIES = 'false'
-npm test
-npm run typecheck
-npm run lint
+npm ci
 npm run build
-npm run doctor
+npx wrangler deploy
 ```
 
-Install Python Playwright with `python -m pip install playwright` and use Microsoft Edge (default), or `python -m playwright install chromium` with `$env:BROWSER_CHANNEL='chromium'`. In a separate terminal start `npm run preview`, then run:
+Or use `npm run deploy:cloudflare`. GitHub/Cloudflare build settings are **Build command** `npm ci && npm run build` and **Deploy command** `npx wrangler deploy`; repository root is this project root. Do not set `VITE_API_BASE_URL` in the Cloudflare build environment: an omitted value deliberately makes frontend requests same-origin, for example `https://gauvistech.com/api/admin/login`.
 
-```powershell
-python tests/site.browser.py
-python tests/dashboard.browser.py
-```
+For GitHub deployments, connect this repository in **Workers & Pages > Create application > Import a repository**, use the repository root as the working directory, `npm ci && npm run build` as the build command, and `npx wrangler deploy` as the deploy command. Add the public build variable `VITE_ENABLE_ENQUIRIES` there. The checked-in `wrangler.jsonc` sets the Worker entry point, Node.js compatibility, Worker Static Assets from `dist/`, SPA fallback, `/api/*` Worker-first routing, durable-object migration, non-secret runtime defaults, and required secret names. Run `npm run typecheck` after changing Wrangler configuration; it regenerates local Worker runtime types.
 
-`BASE_URL` overrides the baseline preview origin (`http://127.0.0.1:4173`). The harness preserves the disabled-form/responsive journeys and starts isolated loopback Vite/API servers with enabled enquiries, an in-memory repository, and a recording notifier. It exercises allowed contact POST/preflight and rejected origins without MongoDB or Resend. `SPLIT_API_BASE_URL=http://127.0.0.1:<unused-port>` optionally selects the fixture's local API port; it never targets a deployed API. The local split uses HTTP and does not prove production HTTPS cookies or third-party-cookie browser policy. Rebuild/package with `VITE_ENABLE_ENQUIRIES=true` before uploading the production release.
+## MongoDB Atlas and Resend
 
-After deployment, complete all launch checks:
+Use the existing Atlas cluster and put only its application connection string in `MONGODB_URI`. The existing repository validates/updates the collection schema and indexes, so the database user needs `readWrite` plus the least additional database-scoped permissions needed for collection validation/index updates. Cloudflare documents that Worker TCP egress does not use the published Cloudflare edge IP ranges; this project does not configure a fixed egress IP. Before cutover, verify Atlas connectivity using a network policy that your security team approves. Do not add `0.0.0.0/0` or another broad allowlist as an automatic workaround. If Atlas cannot safely allow Worker egress, use a supported private connectivity path (for example Workers VPC with an approved tunnel/network design) or keep the existing API service until that path is provisioned. MongoDB has not been tested against the live Atlas cluster from this workspace.
 
-1. Directly open and refresh `/contact`, `/services/hardware-support`, `/admin/login`, and `/admin/enquiries`. Confirm SPA routing, loaded assets, HTTPS redirects, and no unexpected browser errors. Check that HTML revalidates and real fingerprinted `/assets` responses cache immutably.
-2. Submit one clearly identified test enquiry. In browser Network tools confirm POST targets the configured API `/api/enquiries`, carries the exact website `Origin`, returns `201 { accepted: true }`, and includes the precise CORS origin, credentials permission, and `Vary: Origin`. Verify one matching MongoDB record, one team notification, and one customer receipt. Reply to the team notification and check that the reply targets the submitter.
-3. Sign in at `/admin/login`, confirm `/admin/enquiries` lists the record, refresh, and sign out. Verify one successful-login alert arrived at the team mailbox; an incorrect-password attempt must not generate one. Subsequent session/list requests must be unauthenticated. Inspect the API-host cookie: `HttpOnly; Secure; SameSite=None; Path=/api/admin`, 15-minute lifetime. All frontend admin calls include credentials. If browser privacy policy blocks cross-site cookies, test a same-site custom API domain and update/rebuild the configured origins; cookie attributes cannot override browser policy.
-4. Test preflight and direct state-changing rejection (replace the example host):
+The existing `scrypt` password verification runs on the Worker during login and may exceed the Workers Free plan's 10 ms CPU budget. Measure it on the target plan; use a paid plan if necessary, and do not weaken password hashing to fit a plan limit.
 
-   ```sh
-   curl -i -X OPTIONS https://guavis.onrender.com/api/enquiries -H 'Origin: https://unapproved.example' -H 'Access-Control-Request-Method: POST' -H 'Access-Control-Request-Headers: content-type'
-   curl -i -X POST https://guavis.onrender.com/api/enquiries -H 'Origin: https://unapproved.example' -H 'Content-Type: application/json' --data '{}'
-   ```
+In Resend, verify the sender domain first, then set `RESEND_FROM_EMAIL` to a sender on that domain. Store a sending-only, domain-restricted API key as `RESEND_API_KEY`. A saved enquiry attempts a team notification and customer receipt; a notification failure does not discard its MongoDB record. Successful admin login alerts go only to `ADMIN_EMAIL` and use the durable-object cooldown. Passwords, tokens, cookie values, and provider error details are never emailed or logged.
 
-   Both return 403 without `Access-Control-Allow-Origin`; an absent-Origin production POST must also return 403. There must be no insert/email. Non-browser callers can forge Origin headers; existing rate limits still apply.
-5. Confirm a storage outage produces generic 503 without email. Test notification-failure recovery in staging: storage stays accepted, a sanitized warning appears, and the record is in the dashboard. The team notification and customer receipt are attempted independently, so one may arrive even if the other fails. A login-alert failure must not reject an otherwise valid sign-in. There is no automatic retry/resend queue; do not resubmit an accepted enquiry to recover an email. Check Resend delivery events/spam separately from API acceptance.
+## Domain cutover without disrupting email
 
-## 7. Rollback and rotation
+In Cloudflare Workers & Pages, attach `gauvistech.com` as a **Custom Domain** to this Worker after the zone is active in Cloudflare. Do not replace or delete existing MX, SPF, DKIM, or DMARC records. Adding the Worker domain changes the web `A`/`AAAA` or proxied hostname routing only; preserve all mail records exactly as they are. Confirm HTTPS and open `/`, `/contact`, `/services/hardware-support`, `/admin/login`, and `/admin/enquiries` after DNS propagates.
 
-For frontend regression, restore the prior Cloudflare deployment and retain assets needed by open tabs. For API regression, redeploy the last reviewed API version and verify environment settings, health, enquiry flow, and admin session. Roll back API/frontend as a compatible pair if their contract changed. Never restore compromised credentials or delete stored enquiries. To pause collection, set `ENABLE_ENQUIRIES=false` on the API host, redeploy it, and rebuild/redeploy with `VITE_ENABLE_ENQUIRIES=false` so visitors see the phone/WhatsApp fallback.
+## Production smoke test and rollback
 
-Rotate using replacement-first procedures unless compromise requires immediate revocation:
+1. Confirm `GET /api/health` returns `{"status":"ok"}` on the same public hostname.
+2. Submit one labelled test enquiry. Confirm one Atlas record, a team email, and customer receipt.
+3. Sign in at `/admin/login`, confirm the dashboard can list the test record, refresh, then log out. Confirm one login alert; failed sign-ins must not alert.
+4. Verify browser requests use `/api/...`, have no Render hostname, need no CORS response headers, and the session cookie is `HttpOnly; Secure; SameSite=Strict; Path=/api/admin`.
+5. Send more than five test login attempts or enquiry attempts from one address within 15 minutes and confirm `429`; use a non-production test environment for this check.
 
-- **Resend:** create a new sending-only key restricted to the verified domain, update `RESEND_API_KEY` on Render, redeploy, verify notification, then revoke the old key. A sender-domain change also requires DNS verification and `RESEND_FROM_EMAIL` update.
-- **MongoDB:** create a replacement database user with the same scoped permissions, update Render's `MONGODB_URI`, redeploy, verify insert/admin listing, then revoke the old user. Update private local setup credentials too.
-- **Admin:** run `npm run admin:credentials` on a trusted local copy, save the new password, and privately transfer username/hash to Render. The command also changes the local JWT and resets both local enquiry flags to `false`; restore desired flags before rebuilding. Changing the password hash does **not** revoke existing sessions: also rotate Render's JWT when revocation is required.
-- **JWT:** generate a fresh 32-byte base64url secret (the credential generator supplies one), privately update `JWT_SECRET_KEY` on Render, and redeploy. Existing sessions must sign in again; verify login/list/logout. Keep the production JWT stable on routine deploys.
-
-Backend secret changes require a Render restart/deploy, not a frontend upload. A changed API hostname or frontend flag requires a rebuild/upload; a changed website hostname also requires updating Render's exact `FRONTEND_ORIGIN` allowlist. Record the release commit, test results, and rotation time without secret values.
+If a Cloudflare regression occurs, restore the previous Cloudflare Worker deployment or point the frontend back to the retained Render API by setting a validated HTTPS `VITE_API_BASE_URL` and rebuilding. Keep Render running throughout this period. Only after all checks pass in production, a rollback period has elapsed, MongoDB/Resend work from the Worker, and the owner gives explicit approval should you disable the Render service and then remove `render.yaml`.

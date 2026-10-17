@@ -6,5 +6,8 @@ dist/
 .react-doctor-report.json
 .env
 .env.*
+.dev.vars
+worker-configuration.d.ts
+.wrangler/
 !.env.example
 !.env.production
