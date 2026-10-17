@@ -35,7 +35,7 @@
   "migrations": [
     {
       "tag": "v1",
-      "new_classes": ["MongoEnquiryDurableObject", "SecurityDurableObject"]
+      "new_sqlite_classes": ["MongoEnquiryDurableObject", "SecurityDurableObject"]
     }
   ],
   "assets": {
