@@ -58,7 +58,7 @@ describe('API URL resolution', () => {
     expect(apiUrl('/api/admin/login')).toBe('https://gauvis-api.onrender.com/api/admin/login')
   })
 
-  it('wakes the configured backend without sending credentials or blocking on failure', async () => {
+  it('wakes the configured backend with CORS and without sending credentials', async () => {
     vi.stubEnv('VITE_API_BASE_URL', 'https://guavis.onrender.com')
     const fetchMock = vi.fn().mockRejectedValue(new Error('Service starting'))
     vi.stubGlobal('fetch', fetchMock)
@@ -66,7 +66,7 @@ describe('API URL resolution', () => {
     await expect(wakeBackend()).resolves.toBeUndefined()
     expect(fetchMock).toHaveBeenCalledWith('https://guavis.onrender.com/api/health', {
       credentials: 'omit',
-      mode: 'no-cors',
+      mode: 'cors',
     })
     vi.unstubAllGlobals()
   })

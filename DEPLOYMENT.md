@@ -28,13 +28,21 @@ Create an application-specific key with **Sending access**, restricted to that v
 
 The frontend continues to call the existing API origin `https://guavis.onrender.com`; this project no longer includes a Render Blueprint or provisions another API service. Keep the API's runtime configuration and secrets on that existing service. Its `FRONTEND_ORIGIN` must include `https://gauvistech.com`, and `GET /api/health` must return JSON `{"status":"ok"}`.
 
+To sign in on the current Cloudflare preview, add its exact origin to the existing API service's `FRONTEND_ORIGIN`, then redeploy/restart that API service:
+
+```text
+https://gauvistech.com,https://dell-website-recreation.service-heyywebb.workers.dev
+```
+
+Origins are comma-separated, exact HTTPS origins with no path or trailing slash. Keep the canonical website origin in the list, and remove the temporary `workers.dev` origin when preview testing ends. Do not use wildcard origins. The browser's `VITE_API_BASE_URL` remains the API origin, `https://guavis.onrender.com`.
+
 | Existing API runtime variable | Value or source |
 | --- | --- |
 | `NODE_ENV` | `production` |
 | `ENABLE_ENQUIRIES` | `true`; hold at `false` until legal approval |
 | `SERVE_FRONTEND` | `false`; keeps the API-only service from serving a cached `dist` folder |
 | `TRUST_PROXY` | `1` trusted proxy hop |
-| `FRONTEND_ORIGIN` | `https://gauvistech.com`; add `https://www.gauvistech.com` only if the live website actually uses it |
+| `FRONTEND_ORIGIN` | `https://gauvistech.com`; add the exact Cloudflare preview origin temporarily when testing on `workers.dev` |
 | `MONGODB_URI` | Private Atlas connection URI |
 | `MONGODB_DB_NAME` | `gauvistech` |
 | `MONGODB_COLLECTION` | `enquiries` |
