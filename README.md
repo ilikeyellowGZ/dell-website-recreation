@@ -15,10 +15,10 @@ Notifications are optional locally: without `RESEND_API_KEY`, `RESEND_FROM_EMAIL
 
 ## Production and verification
 
-Follow [DEPLOYMENT.md](DEPLOYMENT.md) for the complete Render API, MongoDB Atlas, Resend, and DirectAdmin procedure, environment matrix, quality gate, browser tests, rollback, and credential rotation.
+Follow [DEPLOYMENT.md](DEPLOYMENT.md) for the existing API, MongoDB Atlas, Resend, and Cloudflare deployment procedure, environment matrix, quality gate, browser tests, rollback, and credential rotation.
 
-Production builds require an HTTPS `VITE_API_BASE_URL`. `npm run package:directadmin` builds and creates `release/directadmin`; upload its contents, including `.htaccess`, to the domain's `public_html`.
+Production builds use the HTTPS API origin in `.env.production`; Cloudflare builds may override it with `VITE_API_BASE_URL`. The Wrangler configuration serves `dist/` as a single-page application on `gauvistech.com`.
 
-The production API origin is `https://guavis.onrender.com`. Set `VITE_API_BASE_URL` to that exact origin when packaging. Each production website load sends a background request to `/api/health` to wake Render; browsing does not wait for it. After signing in at `/admin/login`, `/admin/enquiries` shows a searchable, sortable dashboard with service/location grouping and full record details. The dashboard covers the latest 100 enquiries returned by the API, not an all-time total.
+The existing production API origin is `https://guavis.onrender.com`. Each production website load sends a background request to `/api/health`; browsing does not wait for it. After signing in at `/admin/login`, `/admin/enquiries` shows a searchable, sortable dashboard with service/location grouping and full record details. The dashboard covers the latest 100 enquiries returned by the API, not an all-time total.
 
 The original design prototypes remain in `project/` as reference material.
