@@ -1,0 +1,20 @@
+Subject: New Hardware Support enquiry from Thandi Ndlovu
+From: Gauvis Tech <enquiries@notifications.example.com>
+To: team@example.com
+Reply-To: thandi@example.com
+
+Contact name: Thandi Ndlovu
+
+Business name: Ndlovu Trading
+
+Email: thandi@example.com
+
+Phone: +27 84 123 4567
+
+Requested service: Hardware Support
+
+Location: Cape Town
+
+Message: We need help replacing three office computers and setting them up for our team.
+
+Submitted at (UTC): 2026-10-17T08:00:00.000Z

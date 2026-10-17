@@ -1,0 +1,17 @@
+Subject: We received your Gauvis Tech enquiry
+From: Gauvis Tech <enquiries@notifications.example.com>
+To: thandi@example.com
+Reply-To: team@example.com
+
+ENQUIRY RECEIVED
+Your request is with our team.
+
+Hello Thandi Ndlovu,
+
+Thank you for contacting Gauvis Tech. We received your request for Hardware Support. Our team will review it and respond using the details you supplied.
+
+Requested service: Hardware Support
+
+If you did not send this request, you can ignore this email.
+
+Gauvis Tech

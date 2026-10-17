@@ -1,0 +1,6 @@
+- generic [active] [ref=f1e1]:
+  - img "Gauvis Tech" [ref=f1e2]
+  - text: SECURITY NOTICE A sign-in to your dashboard.
+  - paragraph [ref=f1e3]: The Gauvis Tech admin dashboard was signed into successfully.
+  - paragraph [ref=f1e4]: If this was you, no action is needed. If you do not recognise this sign-in, change your admin password immediately and review access to your account.
+  - text: SIGN-IN TIME (UTC)2026-10-17T08:15:00.000Z Gauvis Tech

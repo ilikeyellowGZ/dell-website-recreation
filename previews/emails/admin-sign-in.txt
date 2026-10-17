@@ -1,0 +1,16 @@
+Subject: Gauvis Tech admin sign-in
+From: Gauvis Tech <enquiries@notifications.example.com>
+To: team@example.com
+Reply-To: team@example.com
+
+SECURITY NOTICE
+A sign-in to your dashboard.
+
+The Gauvis Tech admin dashboard was signed into successfully.
+
+Account: admin
+Sign-in time (UTC): 2026-10-17T08:15:00.000Z
+
+If this was you, no action is needed. If you do not recognise this sign-in, change your admin password immediately and review access to your account.
+
+Gauvis Tech

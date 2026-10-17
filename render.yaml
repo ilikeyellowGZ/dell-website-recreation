@@ -28,8 +28,10 @@ services:
         sync: false
       - key: RESEND_FROM_EMAIL
         sync: false
-      - key: RESEND_TO_EMAIL
+      - key: ADMIN_EMAIL
         sync: false
+      - key: ADMIN_LOGIN_NOTIFICATION_COOLDOWN_SECONDS
+        value: "900"
       - key: ADMIN_USERNAME
         sync: false
       - key: ADMIN_PASSWORD_HASH

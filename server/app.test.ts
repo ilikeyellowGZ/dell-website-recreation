@@ -155,6 +155,72 @@ describe('split-origin API security', () => {
     expect(logout.headers.get('set-cookie')).toBe('gauvis_admin_session=; Path=/api/admin; HttpOnly; SameSite=None; Max-Age=0; Secure')
   })
 
+  it('alerts the team only after a successful admin sign-in and keeps login working if email fails', async () => {
+    const alerts: { at: Date; username: string }[] = []
+    const logged = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const baseUrl = await start(null, undefined, {
+      admin: {
+        isProduction: false,
+        jwtSecret: generateJwtSecret(),
+        passwordHash: await hashPassword('correct horse battery staple'),
+        username: 'admin',
+      },
+      adminLoginNotifier: {
+        async notifyAdminLogin(alert) {
+          alerts.push(alert)
+          throw new Error('re_secret customer@example.com')
+        },
+      },
+    })
+
+    const signIn = (password: string) => fetch(`${baseUrl}/api/admin/login`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', origin: baseUrl },
+      body: JSON.stringify({ username: 'admin', password }),
+    })
+
+    expect((await signIn('wrong password')).status).toBe(401)
+    expect(alerts).toHaveLength(0)
+    const accepted = await signIn('correct horse battery staple')
+    expect(accepted.status).toBe(200)
+    expect(accepted.headers.get('set-cookie')).toContain('gauvis_admin_session=')
+    expect(alerts).toHaveLength(1)
+    expect(alerts[0]).toMatchObject({ username: 'admin' })
+    expect(alerts[0].at).toBeInstanceOf(Date)
+    expect(JSON.stringify(logged.mock.calls)).not.toContain('re_secret')
+    expect(JSON.stringify(logged.mock.calls)).not.toContain('customer@example.com')
+  })
+
+  it('suppresses repeated successful-login alerts during the configured cooldown without blocking sign-in', async () => {
+    const alerts: { at: Date; username: string }[] = []
+    let now = new Date('2026-10-17T08:00:00.000Z')
+    const baseUrl = await start(null, undefined, {
+      admin: {
+        isProduction: false,
+        jwtSecret: generateJwtSecret(),
+        passwordHash: await hashPassword('correct horse battery staple'),
+        username: 'admin',
+      },
+      adminLoginNotificationCooldownMs: 60_000,
+      adminLoginNotifier: { async notifyAdminLogin(alert) { alerts.push(alert) } },
+      clock: () => now,
+    })
+    const signIn = () => fetch(`${baseUrl}/api/admin/login`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', origin: baseUrl },
+      body: JSON.stringify({ username: 'admin', password: 'correct horse battery staple' }),
+    })
+
+    expect((await signIn()).status).toBe(200)
+    expect((await signIn()).status).toBe(200)
+    expect(alerts).toEqual([{ at: now, username: 'admin' }])
+
+    now = new Date('2026-10-17T08:01:00.001Z')
+    expect((await signIn()).status).toBe(200)
+    expect(alerts).toHaveLength(2)
+    expect(alerts[1]).toEqual({ at: now, username: 'admin' })
+  })
+
   it('rejects login and logout from absent, foreign, and API-host origins without setting cookies', async () => {
     const baseUrl = await startSplitApp(null, true)
     for (const path of ['/api/admin/login', '/api/admin/logout']) {
@@ -284,6 +350,21 @@ describe('POST /api/enquiries', () => {
         consent: expect.any(String),
       },
     })
+    expect(stored).toHaveLength(0)
+  })
+
+  it('rejects unexpected fields before they reach the repository', async () => {
+    const stored: Enquiry[] = []
+    const baseUrl = await start({ async insert(enquiry) { stored.push(enquiry) } })
+
+    const response = await fetch(`${baseUrl}/api/enquiries`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ ...validPayload, unexpected: 'not accepted' }),
+    })
+
+    expect(response.status).toBe(422)
+    expect(await response.json()).toMatchObject({ accepted: false, code: 'VALIDATION_ERROR' })
     expect(stored).toHaveLength(0)
   })
 

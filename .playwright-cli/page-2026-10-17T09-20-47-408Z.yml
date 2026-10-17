@@ -1,0 +1,7 @@
+- generic [active] [ref=e1]:
+  - img "Gauvis Tech" [ref=e2]
+  - text: ENQUIRY RECEIVED Your request is with our team.
+  - paragraph [ref=e3]: Hello Thandi Ndlovu,
+  - paragraph [ref=e4]: Thank you for contacting Gauvis Tech. We received your request for Hardware Support. Our team will review it and respond using the details you supplied.
+  - paragraph [ref=e5]: If you did not send this request, you can ignore this email.
+  - text: REQUESTED SERVICEHardware Support Gauvis Tech

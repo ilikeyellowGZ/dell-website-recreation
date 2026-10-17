@@ -22,7 +22,7 @@ After creating Render's service in step 4, copy **every outbound CIDR** under it
 
 In Resend, add a dedicated sending subdomain such as `notifications.example.com`. Copy the exact DNS record types, names, priorities, and values Resend supplies into the **authoritative DNS provider**. DirectAdmin's DNS panel applies only if the domain is delegated there. Watch for panels that append the zone name automatically. Preserve existing mailbox MX/SPF records; publish sending records at Resend's requested names and do not enable inbound receiving for this workflow. Wait for propagation and Resend's verified status before sending. See [Resend domain verification](https://resend.com/docs/dashboard/domains/introduction).
 
-Create an application-specific key with **Sending access**, restricted to that verified subdomain, and save its value privately as `RESEND_API_KEY`. Use `RESEND_FROM_EMAIL=enquiries@notifications.example.com` and the real team mailbox for `RESEND_TO_EMAIL`. The submitter becomes `replyTo`, never the sender; no customer confirmation is sent. See [Resend key permissions](https://resend.com/docs/api-reference/api-keys/create-api-key) and [domain restrictions in the API keys dashboard](https://resend.com/docs/dashboard/api-keys/introduction).
+Create an application-specific key with **Sending access**, restricted to that verified subdomain, and save its value privately as `RESEND_API_KEY`. Use `RESEND_FROM_EMAIL=enquiries@notifications.example.com` as an example only; configure a sender at the subdomain you verified. Replace the example `ADMIN_EMAIL=team@example.com` with your real team mailbox before expecting to receive alerts. After an enquiry is stored, the team receives its details with the submitter as `replyTo`, and the customer receives a branded confirmation with the team mailbox as `replyTo`. A successful admin sign-in also sends a branded team security alert containing the account identifier and UTC timestamp; credentials are never emailed. Login alerts are limited to one per 15 minutes by default (`ADMIN_LOGIN_NOTIFICATION_COOLDOWN_SECONDS` can be set from 1 to 86,400). Both branded messages embed the existing Gauvis Tech logo as an inline image and include text-only versions; the detailed team enquiry email stays unchanged. `RESEND_TO_EMAIL` is supported only as a temporary migration fallback when `ADMIN_EMAIL` is absent. See [Resend key permissions](https://resend.com/docs/api-reference/api-keys/create-api-key) and [domain restrictions in the API keys dashboard](https://resend.com/docs/dashboard/api-keys/introduction).
 
 ## 4. Deploy the API with the Render Blueprint
 
@@ -44,7 +44,8 @@ Enter **every** `sync: false` value below at creation. The Blueprint sets `FRONT
 | `MONGODB_COLLECTION` | `enquiries` |
 | `RESEND_API_KEY` | Private sending-only, domain-restricted key |
 | `RESEND_FROM_EMAIL` | Sender at the verified subdomain |
-| `RESEND_TO_EMAIL` | Team recipient mailbox |
+| `ADMIN_EMAIL` | Team recipient mailbox for enquiry and successful-login alerts; replace `team@example.com` placeholder |
+| `ADMIN_LOGIN_NOTIFICATION_COOLDOWN_SECONDS` | `900` by default; minimum interval between successful-login alerts per running API instance |
 | `ADMIN_USERNAME` | Locally generated/chosen username |
 | `ADMIN_PASSWORD_HASH` | Generated `scrypt$...` hash; paste whole value without shell expansion |
 | `JWT_SECRET_KEY` | Blueprint-generated secret; keep stable across normal deploys |
@@ -108,8 +109,8 @@ python tests/dashboard.browser.py
 After upload, complete all launch checks:
 
 1. Directly open and refresh `/contact`, `/services/hardware-support`, `/admin/login`, and `/admin/enquiries`. Confirm SPA routing, loaded assets, HTTPS redirects, and no unexpected browser errors. Check that HTML revalidates and real fingerprinted `/assets` responses cache immutably.
-2. Submit one clearly identified test enquiry. In browser Network tools confirm POST targets Render `/api/enquiries`, carries the exact website `Origin`, returns `201 { accepted: true }`, and includes the precise CORS origin, credentials permission, and `Vary: Origin`. Verify one matching MongoDB record and a single team notification. Reply and check the reply targets the submitter.
-3. Sign in at `/admin/login`, confirm `/admin/enquiries` lists the record, refresh, and sign out. Subsequent session/list requests must be unauthenticated. Inspect the API-host cookie: `HttpOnly; Secure; SameSite=None; Path=/api/admin`, 15-minute lifetime. All frontend admin calls include credentials. If browser privacy policy blocks cross-site cookies, test a same-site custom API domain and update/rebuild the configured origins; cookie attributes cannot override browser policy.
+2. Submit one clearly identified test enquiry. In browser Network tools confirm POST targets Render `/api/enquiries`, carries the exact website `Origin`, returns `201 { accepted: true }`, and includes the precise CORS origin, credentials permission, and `Vary: Origin`. Verify one matching MongoDB record, one team notification, and one customer receipt. Reply to the team notification and check that the reply targets the submitter.
+3. Sign in at `/admin/login`, confirm `/admin/enquiries` lists the record, refresh, and sign out. Verify one successful-login alert arrived at the team mailbox; an incorrect-password attempt must not generate one. Subsequent session/list requests must be unauthenticated. Inspect the API-host cookie: `HttpOnly; Secure; SameSite=None; Path=/api/admin`, 15-minute lifetime. All frontend admin calls include credentials. If browser privacy policy blocks cross-site cookies, test a same-site custom API domain and update/rebuild the configured origins; cookie attributes cannot override browser policy.
 4. Test preflight and direct state-changing rejection (replace the example host):
 
    ```sh
@@ -118,7 +119,7 @@ After upload, complete all launch checks:
    ```
 
    Both return 403 without `Access-Control-Allow-Origin`; an absent-Origin production POST must also return 403. There must be no insert/email. Non-browser callers can forge Origin headers; existing rate limits still apply.
-5. Confirm a storage outage produces generic 503 without email. Test notification-failure recovery in staging: storage stays accepted, a sanitized warning appears, and the record is in the dashboard. There is no automatic retry/resend queue; do not resubmit an accepted enquiry to recover an email. Check Resend delivery events/spam separately from API acceptance.
+5. Confirm a storage outage produces generic 503 without email. Test notification-failure recovery in staging: storage stays accepted, a sanitized warning appears, and the record is in the dashboard. The team notification and customer receipt are attempted independently, so one may arrive even if the other fails. A login-alert failure must not reject an otherwise valid sign-in. There is no automatic retry/resend queue; do not resubmit an accepted enquiry to recover an email. Check Resend delivery events/spam separately from API acceptance.
 
 ## 7. Rollback and rotation
 

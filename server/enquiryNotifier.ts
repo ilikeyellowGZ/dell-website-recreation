@@ -1,7 +1,9 @@
 import { Resend } from 'resend'
 import type { Enquiry } from './enquiryRepository'
+import { renderAdminLoginAlert, renderCustomerReceipt, type BrandedEmailContent } from './emailTemplates'
 
 export type EnquiryNotifier = { notify(enquiry: Enquiry): Promise<void> }
+export type AdminLoginNotifier = { notifyAdminLogin(alert: { at: Date; username: string }): Promise<void> }
 
 export type NotificationEmail = {
   from: string
@@ -10,9 +12,14 @@ export type NotificationEmail = {
   subject: string
   text: string
   html: string
+  attachments?: BrandedEmailContent['attachments']
 }
 
 type EmailTransport = { send(input: NotificationEmail): Promise<{ error?: unknown }> }
+
+function isSafeRecipientAddress(value: string): boolean {
+  return !/[\r\n]/.test(value) && /^[^\s@<>"',;]+@[^\s@<>"',;]+\.[^\s@<>"',;]+$/.test(value)
+}
 
 function escapeHtml(value: string): string {
   const entities: Record<string, string> = {
@@ -28,11 +35,11 @@ function escapeHtml(value: string): string {
 export function createConfiguredResendNotifier(
   environment: NodeJS.ProcessEnv = process.env,
   createTransport: (apiKey: string) => EmailTransport = (apiKey) => new Resend(apiKey).emails,
-): EnquiryNotifier | null {
+): (EnquiryNotifier & AdminLoginNotifier) | null {
   const apiKey = environment.RESEND_API_KEY?.trim()
   const from = environment.RESEND_FROM_EMAIL?.trim()
-  const to = environment.RESEND_TO_EMAIL?.trim()
-  if (!apiKey || !from || !to) return null
+  const to = environment.ADMIN_EMAIL?.trim() || environment.RESEND_TO_EMAIL?.trim()
+  if (!apiKey || !from || !to || /[\r\n]/.test(from) || !isSafeRecipientAddress(to)) return null
 
   const transport = createTransport(apiKey)
   return {
@@ -47,8 +54,7 @@ export function createConfiguredResendNotifier(
         ['Message', enquiry.message],
         ['Submitted at (UTC)', enquiry.createdAt.toISOString()],
       ]
-      try {
-        const result = await transport.send({
+      const teamEmail: NotificationEmail = {
           from,
           to,
           replyTo: enquiry.email,
@@ -57,11 +63,34 @@ export function createConfiguredResendNotifier(
           html: `<h1>New website enquiry</h1><dl>${fields.map(([label, value]) =>
             `<dt>${label}</dt><dd style="white-space:pre-wrap">${escapeHtml(value)}</dd>`,
           ).join('')}</dl>`,
+      }
+      const customerEmail: NotificationEmail = {
+        from,
+        to: enquiry.email,
+        replyTo: to,
+        ...renderCustomerReceipt(enquiry),
+      }
+      const send = async (email: NotificationEmail) => {
+        const result = await transport.send(email)
+        if (result.error) throw new Error('Provider rejected the notification.')
+      }
+      const outcomes = await Promise.allSettled([send(teamEmail), send(customerEmail)])
+      if (outcomes.some((outcome) => outcome.status === 'rejected')) {
+        // Provider errors can contain credentials and enquiry content; do not retain a cause.
+        throw new Error('Enquiry notification could not be delivered.')
+      }
+    },
+    async notifyAdminLogin(alert) {
+      try {
+        const result = await transport.send({
+          from,
+          to,
+          replyTo: to,
+          ...renderAdminLoginAlert(alert),
         })
         if (result.error) throw new Error('Provider rejected the notification.')
       } catch {
-        // Provider errors can contain credentials and enquiry content; do not retain a cause.
-        throw new Error('Enquiry notification could not be delivered.')
+        throw new Error('Admin sign-in notification could not be delivered.')
       }
     },
   }

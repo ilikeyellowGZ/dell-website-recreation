@@ -1,7 +1,7 @@
 // @vitest-environment node
 
 import { describe, expect, it } from 'vitest'
-import { getRuntimeConfig, parseFrontendOrigins, parseTrustProxy } from './config'
+import { getRuntimeConfig, parseAdminLoginNotificationCooldownSeconds, parseFrontendOrigins, parseTrustProxy } from './config'
 
 describe('parseFrontendOrigins', () => {
   it('normalizes exact HTTPS origins and removes duplicates', () => {
@@ -53,6 +53,18 @@ describe('parseTrustProxy', () => {
   })
 })
 
+describe('parseAdminLoginNotificationCooldownSeconds', () => {
+  it('uses a 15-minute default and accepts safe configured values', () => {
+    expect(parseAdminLoginNotificationCooldownSeconds()).toBe(900)
+    expect(parseAdminLoginNotificationCooldownSeconds(' 60 ')).toBe(60)
+    expect(parseAdminLoginNotificationCooldownSeconds('86400')).toBe(86_400)
+  })
+
+  it.each(['0', '-1', '1.5', 'true', '86401'])('rejects unsafe cooldown values', (value) => {
+    expect(() => parseAdminLoginNotificationCooldownSeconds(value)).toThrow(/ADMIN_LOGIN_NOTIFICATION_COOLDOWN_SECONDS/)
+  })
+})
+
 describe('getRuntimeConfig', () => {
   it('keeps production API-only even when a frontend build exists', () => {
     expect(getRuntimeConfig({ NODE_ENV: 'production', FRONTEND_ORIGIN: 'https://gauvis.co.za' }).serveFrontend).toBe(false)
@@ -78,6 +90,11 @@ describe('getRuntimeConfig', () => {
     expect(() => getRuntimeConfig({ NODE_ENV: 'production' })).toThrow(/FRONTEND_ORIGIN/)
     expect([...getRuntimeConfig({ NODE_ENV: 'production', FRONTEND_ORIGIN: 'https://gauvis.co.za' }).frontendOrigins])
       .toEqual(['https://gauvis.co.za'])
+  })
+
+  it('exposes the configured login-alert cooldown in milliseconds', () => {
+    expect(getRuntimeConfig({ NODE_ENV: 'development', ADMIN_LOGIN_NOTIFICATION_COOLDOWN_SECONDS: '60' }))
+      .toMatchObject({ adminLoginNotificationCooldownMs: 60_000 })
   })
 
   it('allows enquiries by default outside production', () => {

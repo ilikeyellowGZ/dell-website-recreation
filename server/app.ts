@@ -12,18 +12,21 @@ import {
   verifyAdminToken,
   verifyPassword,
 } from './adminAuth'
-import type { EnquiryNotifier } from './enquiryNotifier'
+import type { AdminLoginNotifier, EnquiryNotifier } from './enquiryNotifier'
 import type { Enquiry, EnquiryRepository } from './enquiryRepository'
 import { enquiryInputSchema, getFieldErrors } from './enquirySchema'
 
 type CreateAppOptions = {
   admin?: AdminAccessConfig | null
+  adminLoginNotificationCooldownMs?: number
+  adminLoginNotifier?: AdminLoginNotifier | null
   allowedOrigins?: ReadonlySet<string>
   enquiriesEnabled?: boolean
   enquiryNotifier?: EnquiryNotifier | null
   enquiryRepository: EnquiryRepository | null
   staticDirectory?: string
   trustProxy?: false | number
+  clock?: () => Date
 }
 
 export type AdminAccessConfig = {
@@ -46,14 +49,18 @@ const unavailableResponse = {
 
 export function createApp({
   admin = null,
+  adminLoginNotificationCooldownMs = 15 * 60 * 1_000,
+  adminLoginNotifier = null,
   allowedOrigins = new Set(),
   enquiriesEnabled = true,
   enquiryNotifier = null,
   enquiryRepository,
   staticDirectory,
   trustProxy = false,
+  clock = () => new Date(),
 }: CreateAppOptions) {
   const app = express()
+  let lastAdminLoginNotificationAt = Number.NEGATIVE_INFINITY
 
   app.disable('x-powered-by')
   if (trustProxy !== false) app.set('trust proxy', trustProxy)
@@ -180,6 +187,15 @@ export function createApp({
     }
 
     const token = await createAdminToken(admin.username, admin.jwtSecret)
+    const signedInAt = clock()
+    if (adminLoginNotifier && signedInAt.getTime() - lastAdminLoginNotificationAt >= adminLoginNotificationCooldownMs) {
+      lastAdminLoginNotificationAt = signedInAt.getTime()
+      try {
+        await adminLoginNotifier.notifyAdminLogin({ at: signedInAt, username: admin.username })
+      } catch {
+        console.error('Admin sign-in notification failed.', { category: 'notification_error' })
+      }
+    }
     response.setHeader('Set-Cookie', getSessionCookie(token, admin.isProduction))
     response.json({ authenticated: true })
   })
