@@ -1,6 +1,7 @@
 export type TrustProxySetting = false | number
 
 export type RuntimeConfig = {
+  adminLoginNotificationCooldownMs: number
   enquiriesEnabled: boolean
   frontendOrigins: ReadonlySet<string>
   isProduction: boolean
@@ -62,10 +63,24 @@ export function parseTrustProxy(value?: string): TrustProxySetting {
   return hops
 }
 
+export function parseAdminLoginNotificationCooldownSeconds(value?: string): number {
+  const normalized = value?.trim()
+  if (!normalized) return 15 * 60
+  if (!/^\d+$/.test(normalized)) {
+    throw new Error('ADMIN_LOGIN_NOTIFICATION_COOLDOWN_SECONDS must be an integer between 1 and 86400.')
+  }
+  const seconds = Number(normalized)
+  if (!Number.isSafeInteger(seconds) || seconds < 1 || seconds > 86_400) {
+    throw new Error('ADMIN_LOGIN_NOTIFICATION_COOLDOWN_SECONDS must be an integer between 1 and 86400.')
+  }
+  return seconds
+}
+
 export function getRuntimeConfig(environment: NodeJS.ProcessEnv = process.env): RuntimeConfig {
   const isProduction = environment.NODE_ENV === 'production'
 
   return {
+    adminLoginNotificationCooldownMs: parseAdminLoginNotificationCooldownSeconds(environment.ADMIN_LOGIN_NOTIFICATION_COOLDOWN_SECONDS) * 1_000,
     enquiriesEnabled: parseBooleanSetting('ENABLE_ENQUIRIES', environment.ENABLE_ENQUIRIES, !isProduction),
     frontendOrigins: parseFrontendOrigins(environment.FRONTEND_ORIGIN, isProduction),
     isProduction,

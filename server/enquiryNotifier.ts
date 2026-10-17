@@ -3,7 +3,7 @@ import type { Enquiry } from './enquiryRepository'
 import { renderAdminLoginAlert, renderCustomerReceipt, type BrandedEmailContent } from './emailTemplates'
 
 export type EnquiryNotifier = { notify(enquiry: Enquiry): Promise<void> }
-export type AdminLoginNotifier = { notifyAdminLogin(at: Date): Promise<void> }
+export type AdminLoginNotifier = { notifyAdminLogin(alert: { at: Date; username: string }): Promise<void> }
 
 export type NotificationEmail = {
   from: string
@@ -16,6 +16,10 @@ export type NotificationEmail = {
 }
 
 type EmailTransport = { send(input: NotificationEmail): Promise<{ error?: unknown }> }
+
+function isSafeRecipientAddress(value: string): boolean {
+  return !/[\r\n]/.test(value) && /^[^\s@<>"',;]+@[^\s@<>"',;]+\.[^\s@<>"',;]+$/.test(value)
+}
 
 function escapeHtml(value: string): string {
   const entities: Record<string, string> = {
@@ -34,8 +38,8 @@ export function createConfiguredResendNotifier(
 ): (EnquiryNotifier & AdminLoginNotifier) | null {
   const apiKey = environment.RESEND_API_KEY?.trim()
   const from = environment.RESEND_FROM_EMAIL?.trim()
-  const to = environment.RESEND_TO_EMAIL?.trim()
-  if (!apiKey || !from || !to) return null
+  const to = environment.ADMIN_EMAIL?.trim() || environment.RESEND_TO_EMAIL?.trim()
+  if (!apiKey || !from || !to || /[\r\n]/.test(from) || !isSafeRecipientAddress(to)) return null
 
   const transport = createTransport(apiKey)
   return {
@@ -76,13 +80,13 @@ export function createConfiguredResendNotifier(
         throw new Error('Enquiry notification could not be delivered.')
       }
     },
-    async notifyAdminLogin(at) {
+    async notifyAdminLogin(alert) {
       try {
         const result = await transport.send({
           from,
           to,
           replyTo: to,
-          ...renderAdminLoginAlert(at),
+          ...renderAdminLoginAlert(alert),
         })
         if (result.error) throw new Error('Provider rejected the notification.')
       } catch {

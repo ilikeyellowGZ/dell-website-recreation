@@ -37,11 +37,12 @@ describe('branded transactional email templates', () => {
   })
 
   it('renders a purpose-specific admin sign-in alert with UTC time and no credentials', () => {
-    const alert = renderAdminLoginAlert(new Date('2026-10-17T08:00:00.000Z'))
+    const alert = renderAdminLoginAlert({ at: new Date('2026-10-17T08:00:00.000Z'), username: 'admin' })
 
     expect(alert.subject).toBe('Gauvis Tech admin sign-in')
     expect(alert.text).toContain('A sign-in to your dashboard.')
     expect(alert.text).toContain('2026-10-17T08:00:00.000Z')
+    expect(alert.text).toContain('admin')
     expect(alert.text).toContain('If this was you, no action is needed.')
     expect(alert.html).toContain('SECURITY NOTICE')
     expect(alert.html).toContain('A sign-in to your dashboard.')

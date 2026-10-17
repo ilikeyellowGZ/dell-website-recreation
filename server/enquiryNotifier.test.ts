@@ -190,14 +190,27 @@ describe('Resend enquiry notifications', () => {
       async send(input) { sent.push(input); return { error: null } },
     }))
 
-    await notifier!.notifyAdminLogin(new Date('2026-10-17T08:00:00.000Z'))
+    await notifier!.notifyAdminLogin({ at: new Date('2026-10-17T08:00:00.000Z'), username: 'admin' })
 
     expect(sent).toHaveLength(1)
     expect(sent[0].to).toBe('team@example.com')
     expect(sent[0].text).toContain('2026-10-17T08:00:00.000Z')
+    expect(sent[0].text).toContain('admin')
     expect(sent[0].html).toContain('A sign-in to your dashboard.')
     expect(sent[0].attachments?.[0].contentType).toBe('image/png')
     expect(JSON.stringify(sent[0])).not.toMatch(/correct horse|scrypt\$|JWT_SECRET_KEY|re_test_notification_key/)
+  })
+
+  it('uses ADMIN_EMAIL in preference to the legacy recipient variable and rejects unsafe recipients', async () => {
+    const sent: NotificationEmail[] = []
+    const configured = createConfiguredResendNotifier({ ...environment, ADMIN_EMAIL: 'owner@example.com' }, () => ({
+      async send(input) { sent.push(input); return { error: null } },
+    }))
+
+    await configured!.notifyAdminLogin({ at: new Date('2026-10-17T08:00:00.000Z'), username: 'admin' })
+    expect(sent[0].to).toBe('owner@example.com')
+
+    expect(createConfiguredResendNotifier({ ...environment, ADMIN_EMAIL: 'owner@example.com\r\nBcc: attacker@example.com' })).toBeNull()
   })
 
   it('does not expose provider details if the admin sign-in alert fails', async () => {
@@ -205,7 +218,7 @@ describe('Resend enquiry notifications', () => {
       async send() { throw new Error(`${environment.RESEND_API_KEY} secret`) },
     }))
 
-    await expect(notifier!.notifyAdminLogin(new Date('2026-10-17T08:00:00.000Z'))).rejects.toMatchObject({
+    await expect(notifier!.notifyAdminLogin({ at: new Date('2026-10-17T08:00:00.000Z'), username: 'admin' })).rejects.toMatchObject({
       message: 'Admin sign-in notification could not be delivered.',
     })
   })

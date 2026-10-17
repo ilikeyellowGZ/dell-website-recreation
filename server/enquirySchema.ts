@@ -38,7 +38,7 @@ export const enquiryInputSchema = z.object({
   message: z.string().trim().min(1, 'Tell us what you need.').max(4000, 'Keep your message under 4,000 characters.'),
   consent: z.literal(true, { message: 'Please agree to be contacted about your enquiry.' }),
   website: z.string().max(200).optional().default(''),
-})
+}).strict()
 
 export type EnquiryInput = z.infer<typeof enquiryInputSchema>
 

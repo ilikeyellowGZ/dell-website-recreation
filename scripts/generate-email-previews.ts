@@ -22,7 +22,7 @@ const sent: NotificationEmail[] = []
 const notifier = createConfiguredResendNotifier({
   RESEND_API_KEY: 'preview-only',
   RESEND_FROM_EMAIL: 'Gauvis Tech <enquiries@notifications.example.com>',
-  RESEND_TO_EMAIL: 'team@example.com',
+  ADMIN_EMAIL: 'team@example.com',
 }, () => ({
   async send(email) {
     sent.push(email)
@@ -32,7 +32,7 @@ const notifier = createConfiguredResendNotifier({
 
 if (!notifier) throw new Error('Preview notifier could not be created.')
 await notifier.notify(sample)
-await notifier.notifyAdminLogin(new Date('2026-10-17T08:15:00.000Z'))
+await notifier.notifyAdminLogin({ at: new Date('2026-10-17T08:15:00.000Z'), username: 'admin' })
 
 mkdirSync(outputDirectory, { recursive: true })
 const names = ['team-enquiry', 'customer-receipt', 'admin-sign-in'] as const
