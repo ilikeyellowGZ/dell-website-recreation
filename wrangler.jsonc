@@ -8,7 +8,7 @@
   "vars": {
     "ADMIN_EMAIL": "team@example.com",
     "ADMIN_LOGIN_NOTIFICATION_COOLDOWN_SECONDS": "900",
-    "ENABLE_ENQUIRIES": "false",
+    "ENABLE_ENQUIRIES": "true",
     "MONGODB_COLLECTION": "enquiries",
     "MONGODB_DB_NAME": "gauvistech",
     "RESEND_FROM_EMAIL": "enquiries@notifications.example.com"
