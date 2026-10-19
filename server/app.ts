@@ -347,7 +347,7 @@ export function createApp({
         await enquiryNotifier?.notify(enquiry)
       } catch {
         console.error('Enquiry notification failed after storage.', { category: 'notification_error' })
-        response.status(502).json({ accepted: false, code: 'NOTIFICATION_FAILED', message: `Your enquiry was saved with reference ${enquiry.reference}, but confirmation email delivery failed. Please quote this reference if you contact us.` })
+        response.status(201).json({ accepted: true, reference: enquiry.reference })
         return
       }
       response.status(201).json({ accepted: true, reference: enquiry.reference })
