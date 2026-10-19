@@ -89,7 +89,7 @@ export function createApp({
     }),
   )
   app.use('/api/admin', (_request, response, next) => {
-    response.setHeader('Cache-Control', 'no-store')
+    response.setHeader('Cache-Control', 'no-store, no-transform')
     next()
   })
   const requestOriginMatchesHost = (request: express.Request) => {

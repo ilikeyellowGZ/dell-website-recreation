@@ -141,7 +141,7 @@ describe('split-origin API security', () => {
       const response = await fetch(`${baseUrl}${path}`, { headers: { origin: frontendOrigin, cookie } })
       expect(response.status).toBe(200)
       expectCredentialedCors(response)
-      expect(response.headers.get('cache-control')).toBe('no-store')
+      expect(response.headers.get('cache-control')).toBe('no-store, no-transform')
       expect(await response.json()).toEqual(path.endsWith('/session') ? { authenticated: true } : { enquiries: [] })
     }
 
@@ -639,7 +639,7 @@ describe('admin enquiry API', () => {
     const response = await fetch(`${baseUrl}/api/admin/enquiries`)
 
     expect(response.status).toBe(401)
-    expect(response.headers.get('cache-control')).toBe('no-store')
+    expect(response.headers.get('cache-control')).toBe('no-store, no-transform')
     expect(await response.json()).toEqual({ authenticated: false })
   })
 
@@ -657,11 +657,15 @@ describe('admin enquiry API', () => {
     expect(cookie).toContain('HttpOnly')
 
     const response = await fetch(`${baseUrl}/api/admin/enquiries`, {
-      headers: { cookie: cookie!.split(';')[0] },
+      headers: {
+        'accept-encoding': 'br',
+        cookie: cookie!.split(';')[0],
+      },
     })
 
     expect(response.status).toBe(200)
-    expect(response.headers.get('cache-control')).toBe('no-store')
+    expect(response.headers.get('cache-control')).toBe('no-store, no-transform')
+    expect(response.headers.get('content-encoding')).toBeNull()
     expect(await response.json()).toEqual({ enquiries: [{ ...storedEnquiry, createdAt: '2026-10-10T08:00:00.000Z' }] })
     expect(requestedLimits).toEqual([100])
   })
