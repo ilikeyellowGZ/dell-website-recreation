@@ -146,7 +146,15 @@ export function createMongoEnquiryRepository({
     // Collection validation and indexes are deployment-time administration.
     // Runtime API credentials only need data access; requiring collMod here
     // makes every read and write fail for least-privilege application users.
-    collectionPromise ??= client.connect().then(() => client.db(dbName).collection<Enquiry>(collectionName))
+    collectionPromise ??= client
+      .connect()
+      .then(() => client.db(dbName).collection<Enquiry>(collectionName))
+      .catch((error) => {
+        // Do not permanently cache a transient Atlas/network failure. The next
+        // explicit user retry must be able to establish a fresh connection.
+        collectionPromise = undefined
+        throw error
+      })
     return collectionPromise
   }
 

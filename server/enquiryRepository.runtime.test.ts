@@ -48,4 +48,20 @@ describe('MongoDB runtime repository', () => {
     expect(mongo.limit).toHaveBeenCalledWith(100)
     expect(mongo.toArray).toHaveBeenCalledOnce()
   })
+
+  it('allows a new connection attempt after a transient connection failure', async () => {
+    mongo.client.connect
+      .mockRejectedValueOnce(new Error('temporary network failure'))
+      .mockResolvedValue(mongo.client)
+    const repository = createMongoEnquiryRepository({
+      collectionName: 'enquiries',
+      dbName: 'gauvistech',
+      uri: 'mongodb://database.example',
+    })
+
+    await expect(repository.listRecent?.(100)).rejects.toThrow('temporary network failure')
+    await expect(repository.listRecent?.(100)).resolves.toEqual([])
+
+    expect(mongo.client.connect).toHaveBeenCalledTimes(2)
+  })
 })

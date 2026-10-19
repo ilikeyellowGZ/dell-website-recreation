@@ -269,7 +269,12 @@ export function createApp({
       return
     }
     try {
-      response.json({ enquiries: await enquiryRepository.listRecent(100) })
+      const enquiries = (await enquiryRepository.listRecent(100)).map((enquiry) => ({
+        ...enquiry,
+        createdAt: new Date(enquiry.createdAt).toISOString(),
+      }))
+      console.info('Admin enquiry list succeeded.', { category: 'repository_read', count: enquiries.length })
+      response.json({ enquiries })
     } catch (error) {
       console.error('Admin enquiry list failed.', {
         category: 'repository_error',
