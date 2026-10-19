@@ -81,9 +81,8 @@ describe('getRuntimeConfig', () => {
     expect(() => getRuntimeConfig({ NODE_ENV: 'development', SERVE_FRONTEND: 'yes' })).toThrow(/SERVE_FRONTEND/)
   })
 
-  it('keeps production enquiries disabled unless explicitly enabled', () => {
-    expect(getRuntimeConfig({ NODE_ENV: 'production', FRONTEND_ORIGIN: 'https://gauvis.co.za' }).enquiriesEnabled).toBe(false)
-    expect(getRuntimeConfig({ NODE_ENV: 'production', FRONTEND_ORIGIN: 'https://gauvis.co.za', ENABLE_ENQUIRIES: 'true' }).enquiriesEnabled).toBe(true)
+  it('does not expose a switch that can disable enquiries', () => {
+    expect(getRuntimeConfig({ NODE_ENV: 'production', FRONTEND_ORIGIN: 'https://gauvis.co.za' })).not.toHaveProperty('enquiriesEnabled')
   })
 
   it('validates and exposes frontend origins at startup', () => {
@@ -97,8 +96,4 @@ describe('getRuntimeConfig', () => {
       .toMatchObject({ adminLoginNotificationCooldownMs: 60_000 })
   })
 
-  it('allows enquiries by default outside production', () => {
-    expect(getRuntimeConfig({ NODE_ENV: 'development' }).enquiriesEnabled).toBe(true)
-    expect(getRuntimeConfig({ NODE_ENV: 'test' }).enquiriesEnabled).toBe(true)
-  })
 })

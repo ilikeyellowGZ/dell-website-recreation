@@ -330,35 +330,6 @@ describe('Production static assets', () => {
 })
 
 describe('POST /api/enquiries', () => {
-  it('rejects collection when production enquiries are disabled', async () => {
-    const stored: Enquiry[] = []
-    const server = createApp({
-      enquiriesEnabled: false,
-      enquiryRepository: {
-        async insert(enquiry) {
-          stored.push(enquiry)
-        },
-      },
-    }).listen(0)
-    servers.push(server)
-    await new Promise<void>((resolve) => server.once('listening', resolve))
-    const address = server.address()
-    if (!address || typeof address === 'string') throw new Error('Expected a TCP server address')
-
-    const response = await fetch(`http://127.0.0.1:${address.port}/api/enquiries`, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify(validPayload),
-    })
-
-    expect(response.status).toBe(503)
-    expect(await response.json()).toMatchObject({
-      accepted: false,
-      code: 'ENQUIRIES_DISABLED',
-    })
-    expect(stored).toHaveLength(0)
-  })
-
   it('validates, normalizes, and stores an accepted website enquiry', async () => {
     const stored: Enquiry[] = []
     const baseUrl = await start({
@@ -583,7 +554,6 @@ describe('stored enquiry notifications', () => {
   it.each([
     { name: 'validation rejection', payload: { ...validPayload, email: 'invalid' }, status: 422 },
     { name: 'honeypot', payload: { ...validPayload, website: 'spam' }, status: 201 },
-    { name: 'disabled enquiries', enabled: false, status: 503 },
     { name: 'missing repository', missingRepository: true, status: 503 },
     { name: 'failed storage', storageFailure: true, status: 503 },
     { name: 'rejected origin', originRestricted: true, status: 403 },
@@ -597,7 +567,6 @@ describe('stored enquiry notifications', () => {
         stored.push(enquiry)
       },
     }, undefined, {
-      enquiriesEnabled: scenario.enabled ?? true,
       allowedOrigins: new Set(scenario.originRestricted ? ['https://gauvis.example'] : []),
       enquiryNotifier: { async notify(enquiry) { notifications.push(enquiry) } },
     })

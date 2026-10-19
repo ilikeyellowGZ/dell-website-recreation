@@ -97,12 +97,12 @@ def test_split_origin_enquiry(browser) -> None:
     environment = {
         key: value for key, value in os.environ.items()
         if not key.startswith(("MONGODB_", "RESEND_", "ADMIN_", "VITE_"))
-        and key not in {"JWT_SECRET_KEY", "NODE_ENV", "FRONTEND_ORIGIN", "ENABLE_ENQUIRIES"}
+        and key not in {"JWT_SECRET_KEY", "NODE_ENV", "FRONTEND_ORIGIN"}
     }
     environment.update({
         "NODE_ENV": "development", "FIXTURE_PORT": str(api.port),
         "FIXTURE_FRONTEND_ORIGIN": frontend_origin,
-        "VITE_API_BASE_URL": api_base, "VITE_ENABLE_ENQUIRIES": "true",
+        "VITE_API_BASE_URL": api_base,
         "VITE_DISABLE_REACT_DEVTOOLS": "1",
     })
     # The actual API middleware is used. Only persistence and notification are fakes.
@@ -112,7 +112,6 @@ def test_split_origin_enquiry(browser) -> None:
         const records = [], notifications = [], requests = [];
         const app = createApp({
             allowedOrigins: new Set([process.env.FIXTURE_FRONTEND_ORIGIN]),
-            enquiriesEnabled: true,
             enquiryRepository: { insert: async enquiry => { records.push(enquiry); } },
             enquiryNotifier: { notify: async enquiry => { notifications.push(enquiry); } },
         });
