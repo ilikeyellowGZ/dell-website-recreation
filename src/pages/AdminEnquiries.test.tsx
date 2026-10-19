@@ -1,6 +1,6 @@
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { AdminEnquiries } from './AdminEnquiries'
 
 const enquiries = [
@@ -16,7 +16,16 @@ const enquiries = [
   },
 ]
 
-afterEach(() => vi.unstubAllGlobals())
+const scrollIntoView = vi.fn()
+
+beforeEach(() => {
+  HTMLElement.prototype.scrollIntoView = scrollIntoView
+})
+
+afterEach(() => {
+  vi.unstubAllGlobals()
+  scrollIntoView.mockClear()
+})
 
 async function showDashboard() {
   vi.stubGlobal('fetch', vi.fn(async (url: string) => {
@@ -41,6 +50,8 @@ describe('admin dashboard', () => {
     expect(screen.queryByRole('row', { name: /thandi ndlovu/i })).not.toBeInTheDocument()
     expect(screen.getByRole('row', { name: /ayo moyo/i })).toBeInTheDocument()
     fireEvent.click(within(screen.getByRole('row', { name: /ayo moyo/i })).getByRole('button', { name: /view/i }))
+    await waitFor(() => expect(scrollIntoView).toHaveBeenCalledWith({ behavior: 'auto', block: 'start' }))
+    expect(screen.getByRole('region', { name: 'Ayo Moyo' })).toHaveFocus()
     expect(screen.getByText('Our team needs Microsoft 365 migration.')).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'moyo@example.com' })).toHaveAttribute('href', 'mailto:moyo@example.com')
   })

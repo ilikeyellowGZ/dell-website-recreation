@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getEnquiries, getSession, logout, recordAdminActivity, type AdminEnquiry } from '../features/admin/adminApi'
 import '../styles/admin.css'
@@ -11,7 +11,7 @@ const dateFormatter = new Intl.DateTimeFormat('en-ZA', { dateStyle: 'medium', ti
 function EnquiryTable({ enquiries, label, onView }: {
   enquiries: AdminEnquiry[]
   label: string
-  onView: (enquiry: AdminEnquiry) => void
+  onView: (enquiry: AdminEnquiry, trigger: HTMLButtonElement) => void
 }) {
   return <div className="admin-table-scroll"><table className="admin-table" aria-label={label}>
     <thead><tr>
@@ -23,7 +23,7 @@ function EnquiryTable({ enquiries, label, onView }: {
       <td><strong>{enquiry.fullName}</strong><span>{enquiry.businessName || enquiry.email}</span></td>
       <td>{enquiry.service}</td><td>{enquiry.location || 'Not supplied'}</td>
       <td><span className="admin-status">New</span></td>
-      <td><button className="admin-text-button" type="button" onClick={() => onView(enquiry)} aria-label={`View enquiry from ${enquiry.fullName}`}>View</button></td>
+      <td><button className="admin-text-button" type="button" onClick={(event) => onView(enquiry, event.currentTarget)} aria-label={`View enquiry from ${enquiry.fullName}`}>View</button></td>
     </tr>)}</tbody>
   </table></div>
 }
@@ -39,6 +39,17 @@ export function AdminEnquiries() {
   const [selected, setSelected] = useState<AdminEnquiry | null>(null)
   const [reload, setReload] = useState(0)
   const [snapshotTime, setSnapshotTime] = useState(0)
+  const detailRef = useRef<HTMLElement>(null)
+  const lastViewTriggerRef = useRef<HTMLButtonElement>(null)
+
+  useEffect(() => {
+    if (!selected || !detailRef.current) return
+    detailRef.current.focus({ preventScroll: true })
+    detailRef.current.scrollIntoView({
+      behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+      block: 'start',
+    })
+  }, [selected])
 
   useEffect(() => {
     let active = true
@@ -118,6 +129,16 @@ export function AdminEnquiries() {
     try { await logout() } finally { navigate('/admin/login', { replace: true }) }
   }
 
+  const handleView = (enquiry: AdminEnquiry, trigger: HTMLButtonElement) => {
+    lastViewTriggerRef.current = trigger
+    setSelected(enquiry)
+  }
+
+  const handleCloseDetails = () => {
+    setSelected(null)
+    requestAnimationFrame(() => lastViewTriggerRef.current?.focus())
+  }
+
   return <main className="admin-page" id="main-content">
     <section className="admin-enquiries" aria-labelledby="admin-enquiries-title"><div className="site-shell">
       <header className="admin-enquiries__header">
@@ -148,10 +169,10 @@ export function AdminEnquiries() {
           </div>
           {enquiries.length === 0 ? <p className="admin-empty">No enquiries have been received yet.</p> : null}
           {enquiries.length > 0 && visibleEnquiries.length === 0 ? <div className="admin-empty">No enquiries match those filters. <button className="admin-text-button" type="button" onClick={() => { setSearch(''); setServiceFilter('all') }}>Clear filters</button></div> : null}
-          {visibleEnquiries.length > 0 ? <div className="admin-groups">{groups.map(([name, records]) => <div className="admin-group" key={name}>{groupBy !== 'none' ? <h3>{name} <span>{records.length}</span></h3> : null}<EnquiryTable enquiries={records} label={`${name} enquiries`} onView={setSelected} /></div>)}</div> : null}
+          {visibleEnquiries.length > 0 ? <div className="admin-groups">{groups.map(([name, records]) => <div className="admin-group" key={name}>{groupBy !== 'none' ? <h3>{name} <span>{records.length}</span></h3> : null}<EnquiryTable enquiries={records} label={`${name} enquiries`} onView={handleView} /></div>)}</div> : null}
         </section>
-        {selected ? <section className="admin-panel admin-detail" aria-labelledby="admin-detail-title">
-          <div className="admin-section-heading"><div><p className="section-kicker">Enquiry details</p><h2 id="admin-detail-title">{selected.fullName}</h2></div><button className="admin-secondary-button" type="button" onClick={() => setSelected(null)}>Close details</button></div>
+        {selected ? <section className="admin-panel admin-detail" aria-labelledby="admin-detail-title" ref={detailRef} tabIndex={-1}>
+          <div className="admin-section-heading"><div><p className="section-kicker">Enquiry details</p><h2 id="admin-detail-title">{selected.fullName}</h2></div><button className="admin-secondary-button" type="button" onClick={handleCloseDetails}>Close details</button></div>
           <dl className="admin-detail-grid">
             <div><dt>Received</dt><dd><time dateTime={selected.createdAt}>{dateFormatter.format(new Date(selected.createdAt))}</time></dd></div>
             <div><dt>Business</dt><dd>{selected.businessName || 'Not supplied'}</dd></div>
