@@ -6,13 +6,8 @@ import type { WorkerEnv } from './types'
 export type WorkerRuntime = {
   admin: AdminAccessConfig | null
   adminLoginNotificationCooldownMs: number
-  enquiriesEnabled: boolean
   enquiryNotifier: WorkerEnquiryNotifier | null
   enquiryRepository: EnquiryRepository | null
-}
-
-function enabled(value: string | undefined): boolean {
-  return value?.trim().toLowerCase() === 'true'
 }
 
 function cooldownMs(value: string | undefined): number {
@@ -39,7 +34,6 @@ export function createWorkerRuntime(env: WorkerEnv): WorkerRuntime {
       ? { isProduction: true, cookieSameSite: 'Strict', jwtSecret, passwordHash, username }
       : null,
     adminLoginNotificationCooldownMs: cooldownMs(env.ADMIN_LOGIN_NOTIFICATION_COOLDOWN_SECONDS),
-    enquiriesEnabled: enabled(env.ENABLE_ENQUIRIES),
     enquiryNotifier: createWorkerResendNotifier(env),
     enquiryRepository: repository,
   }

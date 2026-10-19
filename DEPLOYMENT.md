@@ -4,8 +4,8 @@ Gauvis now deploys as one Cloudflare Worker: Static Assets serve the Vite React 
 
 ## Required external verification before production cutover
 
-1. In Resend, verify that `guavistech.com` is an authenticated sending domain and that `notification@guavistech.com` is permitted as a sender.
-2. Confirm with the business owner that the company inbox is intentionally `info@gauvistech.com` (note the different domain spelling from the sender) before setting `COMPANY_NOTIFICATION_EMAIL`.
+1. In Resend, verify that `gauvistech.com` is an authenticated sending domain and that `notification@gauvistech.com` is permitted as a sender.
+2. Confirm the company inbox is `info@gauvistech.com` before setting `COMPANY_NOTIFICATION_EMAIL`.
 3. Send a real staging enquiry and confirm both the company notification and customer confirmation in their destination inboxes; local mocked tests do not prove delivery.
 4. In Google Search Console, add and verify the `https://gauvistech.com/` property, submit `https://gauvistech.com/sitemap.xml`, inspect the home, services, and contact URLs, then request indexing. Submission does not guarantee indexing.
 
@@ -29,7 +29,6 @@ The non-secret Worker defaults are declared in `wrangler.jsonc` and are the sour
 
 | Name | Production value |
 | --- | --- |
-| `ENABLE_ENQUIRIES` | `false` by default; change to `true` only after legal approval |
 | `MONGODB_DB_NAME` | `gauvistech` |
 | `MONGODB_COLLECTION` | `enquiries` |
 | `RESEND_FROM_EMAIL` | Address on Resend-verified sending domain |
@@ -38,7 +37,7 @@ The non-secret Worker defaults are declared in `wrangler.jsonc` and are the sour
 
 `RATE_LIMIT_KEY_SECRET` must be a new random secret, separate from the JWT secret. The Worker HMACs client addresses before placing short-lived limits in its Durable Object; it never stores raw visitor IPs as limiter keys.
 
-Set `VITE_ENABLE_ENQUIRIES` as a **Cloudflare build environment variable** to `true` only after legal approval; it is embedded in the public frontend bundle. It is independent of the runtime `ENABLE_ENQUIRIES` Worker variable, so both must be enabled for submissions. Keep `VITE_API_BASE_URL` unset so the app uses same-origin `/api` requests.
+The contact form and its submission API are always available. Keep `VITE_API_BASE_URL` unset so the app uses same-origin `/api` requests.
 
 ## Build and deploy
 
@@ -52,7 +51,7 @@ npx wrangler deploy
 
 Or use `npm run deploy:cloudflare`. GitHub/Cloudflare build settings are **Build command** `npm ci && npm run build` and **Deploy command** `npx wrangler deploy`; repository root is this project root. Do not set `VITE_API_BASE_URL` in the Cloudflare build environment: an omitted value deliberately makes frontend requests same-origin, for example `https://gauvistech.com/api/admin/login`.
 
-For GitHub deployments, connect this repository in **Workers & Pages > Create application > Import a repository**, use the repository root as the working directory, `npm ci && npm run build` as the build command, and `npx wrangler deploy` as the deploy command. Add the public build variable `VITE_ENABLE_ENQUIRIES` there. The checked-in `wrangler.jsonc` sets the Worker entry point, Node.js compatibility, Worker Static Assets from `dist/`, SPA fallback, `/api/*` Worker-first routing, durable-object migration, non-secret runtime defaults, and required secret names. Run `npm run typecheck` after changing Wrangler configuration; it regenerates local Worker runtime types.
+For GitHub deployments, connect this repository in **Workers & Pages > Create application > Import a repository**, use the repository root as the working directory, `npm ci && npm run build` as the build command, and `npx wrangler deploy` as the deploy command. The checked-in `wrangler.jsonc` sets the Worker entry point, Node.js compatibility, Worker Static Assets from `dist/`, SPA fallback, `/api/*` Worker-first routing, durable-object migration, non-secret runtime defaults, and required secret names. Run `npm run typecheck` after changing Wrangler configuration; it regenerates local Worker runtime types.
 
 ## MongoDB Atlas and Resend
 

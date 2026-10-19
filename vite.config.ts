@@ -9,10 +9,6 @@ export default defineConfig(({ command, mode }) => {
   }
   return {
     plugins: [react()],
-    define:
-      mode === 'test'
-        ? { 'import.meta.env.VITE_ENABLE_ENQUIRIES': JSON.stringify('true') }
-        : undefined,
     build: {
       assetsInlineLimit: 0,
       rolldownOptions: {

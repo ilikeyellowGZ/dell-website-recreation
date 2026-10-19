@@ -26,7 +26,6 @@ type CreateAppOptions = {
   adminLoginNotifier?: AdminLoginNotifier | null
   adminSessionStore?: AdminSessionStore
   allowedOrigins?: ReadonlySet<string>
-  enquiriesEnabled?: boolean
   enquiryNotifier?: EnquiryNotifier | null
   enquiryRepository: EnquiryRepository | null
   staticDirectory?: string
@@ -61,7 +60,6 @@ export function createApp({
   adminLoginNotifier = null,
   adminSessionStore = createMemoryAdminSessionStore(),
   allowedOrigins = new Set(),
-  enquiriesEnabled = true,
   enquiryNotifier = null,
   enquiryRepository,
   staticDirectory,
@@ -294,15 +292,6 @@ export function createApp({
   })
 
   app.post('/api/enquiries', enquiryLimiter, async (request, response) => {
-    if (!enquiriesEnabled) {
-      response.status(503).json({
-        accepted: false,
-        code: 'ENQUIRIES_DISABLED',
-        message: 'Online enquiries are not available yet. Please contact us by phone or WhatsApp.',
-      })
-      return
-    }
-
     const honeypot = request.body && typeof request.body === 'object' ? request.body.website : undefined
     if (typeof honeypot === 'string' && honeypot.trim()) {
       response.status(201).json({ accepted: true })

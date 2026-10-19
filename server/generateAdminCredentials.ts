@@ -29,8 +29,6 @@ const jwtSecret = generateJwtSecret()
 envContents = setEnvValue(envContents, 'ADMIN_USERNAME', username)
 envContents = setEnvValue(envContents, 'ADMIN_PASSWORD_HASH', passwordHash)
 envContents = setEnvValue(envContents, 'JWT_SECRET_KEY', jwtSecret)
-envContents = setEnvValue(envContents, 'ENABLE_ENQUIRIES', 'false')
-envContents = setEnvValue(envContents, 'VITE_ENABLE_ENQUIRIES', 'false')
 
 await writeFile(envPath, envContents, { encoding: 'utf8', mode: 0o600 })
 

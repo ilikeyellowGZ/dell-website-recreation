@@ -2,7 +2,6 @@ export type TrustProxySetting = false | number
 
 export type RuntimeConfig = {
   adminLoginNotificationCooldownMs: number
-  enquiriesEnabled: boolean
   frontendOrigins: ReadonlySet<string>
   isProduction: boolean
   serveFrontend: boolean
@@ -81,7 +80,6 @@ export function getRuntimeConfig(environment: NodeJS.ProcessEnv = process.env): 
 
   return {
     adminLoginNotificationCooldownMs: parseAdminLoginNotificationCooldownSeconds(environment.ADMIN_LOGIN_NOTIFICATION_COOLDOWN_SECONDS) * 1_000,
-    enquiriesEnabled: parseBooleanSetting('ENABLE_ENQUIRIES', environment.ENABLE_ENQUIRIES, !isProduction),
     frontendOrigins: parseFrontendOrigins(environment.FRONTEND_ORIGIN, isProduction),
     isProduction,
     serveFrontend: parseBooleanSetting('SERVE_FRONTEND', environment.SERVE_FRONTEND, !isProduction),

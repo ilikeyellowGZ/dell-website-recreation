@@ -30,7 +30,6 @@ const app = createApp({
   adminLoginNotificationCooldownMs: runtimeConfig.adminLoginNotificationCooldownMs,
   adminLoginNotifier: enquiryNotifier,
   allowedOrigins: runtimeConfig.frontendOrigins,
-  enquiriesEnabled: runtimeConfig.enquiriesEnabled,
   enquiryNotifier,
   enquiryRepository,
   staticDirectory:
@@ -45,9 +44,6 @@ const server = app.listen(port, () => {
   }
   if (!enquiryNotifier) {
     console.warn('Email notifications are unavailable until RESEND_API_KEY, RESEND_FROM_EMAIL, and COMPANY_NOTIFICATION_EMAIL are configured.')
-  }
-  if (!runtimeConfig.enquiriesEnabled) {
-    console.warn('Public enquiry collection is disabled. Set ENABLE_ENQUIRIES=true only after legal content is approved.')
   }
   if (!admin) console.warn('Admin access is unavailable until ADMIN_USERNAME, ADMIN_PASSWORD_HASH, and JWT_SECRET_KEY are configured.')
 })

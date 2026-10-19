@@ -70,7 +70,6 @@ function getServer(env: WorkerEnv): Server {
       touch: (sessionId, now) => securityState.touchAdminSession(sessionId, now),
       revoke: (sessionId) => securityState.revokeAdminSession(sessionId),
     },
-    enquiriesEnabled: runtime.enquiriesEnabled,
     enquiryNotifier: runtime.enquiryNotifier,
     enquiryRepository: runtime.enquiryRepository,
     sameOriginOnly: true,

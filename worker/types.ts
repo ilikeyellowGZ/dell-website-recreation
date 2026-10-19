@@ -7,7 +7,6 @@ export type WorkerEnv = {
   ADMIN_LOGIN_NOTIFICATION_COOLDOWN_SECONDS?: string
   ADMIN_PASSWORD_HASH?: string
   ADMIN_USERNAME?: string
-  ENABLE_ENQUIRIES?: string
   JWT_SECRET_KEY?: string
   MONGODB_COLLECTION?: string
   MONGODB_DB_NAME?: string

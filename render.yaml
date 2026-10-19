@@ -10,8 +10,6 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
-      - key: ENABLE_ENQUIRIES
-        value: "true"
       - key: SERVE_FRONTEND
         value: "false"
       - key: TRUST_PROXY
