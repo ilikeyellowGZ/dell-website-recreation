@@ -44,12 +44,13 @@ export function generateJwtSecret(): string {
   return randomBytes(32).toString('base64url')
 }
 
-export async function createAdminToken(subject: string, secret: string): Promise<string> {
+export async function createAdminToken(subject: string, secret: string, sessionId = randomBytes(24).toString('base64url')): Promise<string> {
   return new SignJWT({ role: 'admin' })
     .setProtectedHeader({ alg: 'HS256', typ: 'JWT' })
     .setSubject(subject)
     .setIssuer(issuer)
     .setAudience(audience)
+    .setJti(sessionId)
     .setIssuedAt()
     .setExpirationTime(`${sessionLifetimeSeconds}s`)
     .sign(getSecretKey(secret))
@@ -61,8 +62,39 @@ export async function verifyAdminToken(token: string, secret: string): Promise<J
     audience,
     issuer,
   })
-  if (payload.role !== 'admin' || !payload.sub) throw new Error('Invalid admin session.')
+  if (payload.role !== 'admin' || !payload.sub || !payload.jti) throw new Error('Invalid admin session.')
   return payload
+}
+
+export const adminIdleTimeoutMs = sessionLifetimeSeconds * 1_000
+
+export type AdminSessionStore = {
+  create(sessionId: string, now: number): Promise<void>
+  isActive(sessionId: string, now: number): Promise<boolean>
+  touch(sessionId: string, now: number): Promise<boolean>
+  revoke(sessionId: string): Promise<void>
+}
+
+export function createMemoryAdminSessionStore(idleTimeoutMs = adminIdleTimeoutMs): AdminSessionStore {
+  const sessions = new Map<string, number>()
+  const active = (sessionId: string, now: number) => {
+    const lastActivityAt = sessions.get(sessionId)
+    if (lastActivityAt === undefined || now - lastActivityAt >= idleTimeoutMs) {
+      sessions.delete(sessionId)
+      return false
+    }
+    return true
+  }
+  return {
+    async create(sessionId, now) { sessions.set(sessionId, now) },
+    async isActive(sessionId, now) { return active(sessionId, now) },
+    async touch(sessionId, now) {
+      if (!active(sessionId, now)) return false
+      sessions.set(sessionId, now)
+      return true
+    },
+    async revoke(sessionId) { sessions.delete(sessionId) },
+  }
 }
 
 export type CookieSameSite = 'None' | 'Strict'

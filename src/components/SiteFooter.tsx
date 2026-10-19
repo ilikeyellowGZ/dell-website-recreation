@@ -1,4 +1,4 @@
-import { MapPin, Phone } from '@phosphor-icons/react'
+import { EnvelopeSimple, MapPin, Phone } from '@phosphor-icons/react'
 import { Link, useLocation } from 'react-router-dom'
 import { assets } from '../assets'
 
@@ -87,12 +87,24 @@ export function SiteFooter() {
                 <span>Pontsho: 064 367 0274</span>
               </a>
             </li>
+            <li>
+              <a className="contact-item" href="mailto:info@gauvistech.com">
+                <EnvelopeSimple aria-hidden="true" size={18} weight="fill" />
+                <span>info@gauvistech.com</span>
+              </a>
+            </li>
           </ul>
         </div>
       </div>
       <div className="footer-bottom">
         <div className="site-shell footer-bottom__inner">
           <span>© 2026 Gauvis Technology Holdings. All rights reserved.</span>
+          <span>
+            Website made by{' '}
+            <a className="footer-credit" href="https://heyywebb.com" target="_blank" rel="noreferrer">
+              heyywebb
+            </a>
+          </span>
           <span>CIPC Registration Number: 2026/703930/07</span>
         </div>
       </div>

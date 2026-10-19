@@ -21,10 +21,15 @@ async function renderRoute(route: string) {
 }
 
 describe('Shared footer', () => {
-  it('shows the confirmed CIPC registration number', async () => {
+  it('shows the company details and creator credit', async () => {
     await renderRoute('/')
 
     expect(screen.getByText('CIPC Registration Number: 2026/703930/07')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'heyywebb' })).toHaveAttribute('href', 'https://heyywebb.com')
+    expect(screen.getByRole('link', { name: 'info@gauvistech.com' })).toHaveAttribute(
+      'href',
+      'mailto:info@gauvistech.com',
+    )
   })
 })
 
@@ -42,7 +47,10 @@ describe('About route', () => {
     const primaryNavigation = screen.getByRole('navigation', { name: 'Primary' })
     expect(within(primaryNavigation).getByRole('link', { name: 'About' })).toHaveAttribute('aria-current', 'page')
     expect(within(primaryNavigation).getByRole('link', { name: 'Home' })).toHaveAttribute('href', '/')
-    expect(document.querySelector('a[href^="mailto:"]')).not.toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'info@gauvistech.com' })).toHaveAttribute(
+      'href',
+      'mailto:info@gauvistech.com',
+    )
   })
 
   it('opens the mobile drawer, traps focus, and restores focus when it closes', async () => {
@@ -357,7 +365,12 @@ describe('Contact route', () => {
       'href',
       'https://wa.me/27840356925',
     )
-    expect(document.querySelector('a[href^="mailto:"]')).not.toBeInTheDocument()
+    const contactDetails = screen.getByRole('heading', { name: /get in touch/i }).closest('.contact-details')
+    expect(contactDetails).not.toBeNull()
+    expect(within(contactDetails as HTMLElement).getByRole('link', { name: 'info@gauvistech.com' })).toHaveAttribute(
+      'href',
+      'mailto:info@gauvistech.com',
+    )
   })
 
   it('shows connected validation errors, focuses the first invalid field, and preserves invalid values', async () => {

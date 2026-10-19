@@ -43,6 +43,7 @@ describe('MongoDB enquiry storage configuration', () => {
       'message',
       'consent',
       'createdAt',
+      'reference',
       'source',
       'status',
     ])
@@ -50,12 +51,14 @@ describe('MongoDB enquiry storage configuration', () => {
       email: { bsonType: 'string' },
       consent: { bsonType: 'bool' },
       createdAt: { bsonType: 'date' },
+      reference: { bsonType: 'string' },
       source: { enum: ['website'] },
       status: { enum: ['new'] },
     })
     expect(definition.indexes).toEqual([
       { key: { createdAt: -1 }, name: 'createdAt_desc' },
       { key: { status: 1, createdAt: -1 }, name: 'status_createdAt_desc' },
+      { key: { reference: 1 }, name: 'reference_unique', sparse: true, unique: true },
     ])
   })
 })

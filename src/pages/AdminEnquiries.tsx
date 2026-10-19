@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { getEnquiries, getSession, logout, type AdminEnquiry } from '../features/admin/adminApi'
+import { getEnquiries, getSession, logout, recordAdminActivity, type AdminEnquiry } from '../features/admin/adminApi'
 import '../styles/admin.css'
 
 type SortOrder = 'newest' | 'oldest' | 'name-asc' | 'name-desc'
@@ -18,7 +18,7 @@ function EnquiryTable({ enquiries, label, onView }: {
       <th scope="col">Received</th><th scope="col">Contact</th><th scope="col">Service</th>
       <th scope="col">Location</th><th scope="col">Status</th><th scope="col"><span className="visually-hidden">Details</span></th>
     </tr></thead>
-    <tbody>{enquiries.map((enquiry, index) => <tr key={`${enquiry.createdAt}-${enquiry.email}-${index}`}>
+    <tbody>{enquiries.map((enquiry) => <tr key={enquiry.reference || `${enquiry.createdAt}-${enquiry.email}`}>
       <td><time dateTime={enquiry.createdAt}>{dateFormatter.format(new Date(enquiry.createdAt))}</time></td>
       <td><strong>{enquiry.fullName}</strong><span>{enquiry.businessName || enquiry.email}</span></td>
       <td>{enquiry.service}</td><td>{enquiry.location || 'Not supplied'}</td>
@@ -57,6 +57,28 @@ export function AdminEnquiries() {
     void load()
     return () => { active = false }
   }, [navigate, reload])
+
+  useEffect(() => {
+    let lastSentAt = 0
+    let timer: ReturnType<typeof setTimeout> | undefined
+    const meaningfulActivity = () => {
+      const now = Date.now()
+      if (now - lastSentAt < 60_000) return
+      lastSentAt = now
+      clearTimeout(timer)
+      timer = setTimeout(() => {
+        void recordAdminActivity().then((active) => {
+          if (!active) navigate('/admin/login', { replace: true })
+        })
+      }, 500)
+    }
+    const events: (keyof WindowEventMap)[] = ['click', 'keydown', 'pointerdown']
+    events.forEach((event) => window.addEventListener(event, meaningfulActivity, { passive: true }))
+    return () => {
+      clearTimeout(timer)
+      events.forEach((event) => window.removeEventListener(event, meaningfulActivity))
+    }
+  }, [navigate])
 
   const services = useMemo(() => [...new Set(enquiries.map((item) => item.service))].sort(), [enquiries])
   const locations = useMemo(() => new Set(enquiries.map((item) => item.location.trim()).filter(Boolean)).size, [enquiries])

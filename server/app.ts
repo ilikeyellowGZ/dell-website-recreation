@@ -3,14 +3,18 @@ import express, { type ErrorRequestHandler } from 'express'
 import rateLimit from 'express-rate-limit'
 import helmet from 'helmet'
 import { join } from 'node:path'
+import { randomBytes } from 'node:crypto'
 import { z } from 'zod'
 import {
+  adminIdleTimeoutMs,
   clearSessionCookie,
   createAdminToken,
+  createMemoryAdminSessionStore,
   getSessionCookie,
   readSessionCookie,
   verifyAdminToken,
   verifyPassword,
+  type AdminSessionStore,
 } from './adminAuth'
 import type { AdminLoginNotifier, EnquiryNotifier } from './enquiryNotifier'
 import type { Enquiry, EnquiryRepository } from './enquiryRepository'
@@ -20,6 +24,7 @@ type CreateAppOptions = {
   admin?: AdminAccessConfig | null
   adminLoginNotificationCooldownMs?: number
   adminLoginNotifier?: AdminLoginNotifier | null
+  adminSessionStore?: AdminSessionStore
   allowedOrigins?: ReadonlySet<string>
   enquiriesEnabled?: boolean
   enquiryNotifier?: EnquiryNotifier | null
@@ -54,6 +59,7 @@ export function createApp({
   admin = null,
   adminLoginNotificationCooldownMs = 15 * 60 * 1_000,
   adminLoginNotifier = null,
+  adminSessionStore = createMemoryAdminSessionStore(),
   allowedOrigins = new Set(),
   enquiriesEnabled = true,
   enquiryNotifier = null,
@@ -66,6 +72,7 @@ export function createApp({
 }: CreateAppOptions) {
   const app = express()
   let lastAdminLoginNotificationAt = Number.NEGATIVE_INFINITY
+  const failedLogins = new Map<string, { count: number; lastAlertAt: number; windowStartedAt: number }>()
 
   app.disable('x-powered-by')
   if (trustProxy !== false) app.set('trust proxy', trustProxy)
@@ -181,7 +188,9 @@ export function createApp({
     }
 
     try {
-      response.locals.adminSession = await verifyAdminToken(token, admin.jwtSecret)
+      const session = await verifyAdminToken(token, admin.jwtSecret)
+      if (!session.jti || !(await adminSessionStore.isActive(session.jti, clock().getTime()))) throw new Error('Expired admin session.')
+      response.locals.adminSession = session
       next()
     } catch {
       response.status(401).setHeader('Set-Cookie', clearSessionCookie(admin.isProduction, admin.cookieSameSite)).json({ authenticated: false })
@@ -206,16 +215,33 @@ export function createApp({
 
     const passwordMatches = await verifyPassword(parsed.data.password, admin.passwordHash)
     if (!passwordMatches || parsed.data.username !== admin.username) {
+      const now = clock()
+      const key = request.ip || 'unknown'
+      const previous = failedLogins.get(key)
+      const state = !previous || now.getTime() - previous.windowStartedAt >= 15 * 60 * 1_000
+        ? { count: 1, lastAlertAt: Number.NEGATIVE_INFINITY, windowStartedAt: now.getTime() }
+        : { ...previous, count: previous.count + 1 }
+      failedLogins.set(key, state)
+      if (state.count >= 3 && now.getTime() - state.lastAlertAt >= 15 * 60 * 1_000 && adminLoginNotifier?.notifyAdminLoginFailure) {
+        state.lastAlertAt = now.getTime()
+        void adminLoginNotifier.notifyAdminLoginFailure({ at: now, username: parsed.data.username, attempts: state.count, ipAddress: request.ip, userAgent: request.get('user-agent')?.slice(0, 500) }).catch(() => {
+          console.error('Admin failed-login notification failed.', { category: 'notification_error' })
+        })
+      }
       response.status(401).json({ authenticated: false, message: 'Sign-in failed.' })
       return
     }
 
-    const token = await createAdminToken(admin.username, admin.jwtSecret)
+    failedLogins.delete(request.ip || 'unknown')
+
     const signedInAt = clock()
+    const sessionId = crypto.randomUUID()
+    await adminSessionStore.create(sessionId, signedInAt.getTime())
+    const token = await createAdminToken(admin.username, admin.jwtSecret, sessionId)
     if (adminLoginNotifier && signedInAt.getTime() - lastAdminLoginNotificationAt >= adminLoginNotificationCooldownMs) {
       lastAdminLoginNotificationAt = signedInAt.getTime()
       try {
-        await adminLoginNotifier.notifyAdminLogin({ at: signedInAt, username: admin.username })
+        await adminLoginNotifier.notifyAdminLogin({ at: signedInAt, username: admin.username, ipAddress: request.ip, userAgent: request.get('user-agent')?.slice(0, 500) })
       } catch {
         console.error('Admin sign-in notification failed.', { category: 'notification_error' })
       }
@@ -226,6 +252,17 @@ export function createApp({
 
   app.get('/api/admin/session', requireAdmin, (_request, response) => {
     response.json({ authenticated: true })
+  })
+
+  app.post('/api/admin/activity', requireAdmin, async (_request, response) => {
+    const sessionId = response.locals.adminSession?.jti
+    if (!sessionId || !(await adminSessionStore.touch(sessionId, clock().getTime()))) {
+      response.status(401).setHeader('Set-Cookie', clearSessionCookie(Boolean(admin?.isProduction), admin?.cookieSameSite)).json({ authenticated: false })
+      return
+    }
+    const token = await createAdminToken(admin!.username, admin!.jwtSecret, sessionId)
+    response.setHeader('Set-Cookie', getSessionCookie(token, admin!.isProduction, admin!.cookieSameSite))
+    response.json({ authenticated: true, idleTimeoutMs: adminIdleTimeoutMs })
   })
 
   app.get('/api/admin/enquiries', requireAdmin, async (_request, response) => {
@@ -240,10 +277,17 @@ export function createApp({
     }
   })
 
-  app.post('/api/admin/logout', (request, response) => {
+  app.post('/api/admin/logout', async (request, response) => {
     if (!hasAllowedOrigin(request)) {
       response.status(403).json({ authenticated: false })
       return
+    }
+    const token = readSessionCookie(request.get('cookie'))
+    if (token && admin) {
+      try {
+        const session = await verifyAdminToken(token, admin.jwtSecret)
+        if (session.jti) await adminSessionStore.revoke(session.jti)
+      } catch { /* Clearing an invalid cookie is still a successful logout. */ }
     }
     response.setHeader('Set-Cookie', clearSessionCookie(Boolean(admin?.isProduction), admin?.cookieSameSite))
     response.status(204).end()
@@ -290,6 +334,7 @@ export function createApp({
       fullName,
       location,
       message,
+      reference: `GVT-${clock().toISOString().slice(0, 10).replaceAll('-', '')}-${randomBytes(6).toString('hex').toUpperCase()}`,
       phone,
       service,
       source: 'website',
@@ -302,8 +347,10 @@ export function createApp({
         await enquiryNotifier?.notify(enquiry)
       } catch {
         console.error('Enquiry notification failed after storage.', { category: 'notification_error' })
+        response.status(502).json({ accepted: false, code: 'NOTIFICATION_FAILED', message: `Your enquiry was saved with reference ${enquiry.reference}, but confirmation email delivery failed. Please quote this reference if you contact us.` })
+        return
       }
-      response.status(201).json({ accepted: true })
+      response.status(201).json({ accepted: true, reference: enquiry.reference })
     } catch {
       response.status(503).json(unavailableResponse)
     }
@@ -318,7 +365,7 @@ export function createApp({
         maxAge: '1y',
       }),
     )
-    app.use(express.static(staticDirectory, { index: false }))
+    app.use(express.static(staticDirectory, { extensions: ['html'], index: false }))
     app.use((request, response, next) => {
       if (request.method === 'GET' && request.accepts('html')) {
         response.sendFile(join(staticDirectory, 'index.html'))

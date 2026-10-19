@@ -48,10 +48,13 @@ function getServer(env: WorkerEnv): Server {
   const securityState = env.SECURITY_STATE.get(env.SECURITY_STATE.idFromName('gauvis-security-state'))
   const loginNotifier = runtime.enquiryNotifier
     ? {
-        async notifyAdminLogin(alert: { at: Date; username: string }) {
+        async notifyAdminLogin(alert: { at: Date; username: string; ipAddress?: string; userAgent?: string }) {
           if (await securityState.shouldNotifyAdminLogin(alert.username, runtime.adminLoginNotificationCooldownMs)) {
             await runtime.enquiryNotifier!.notifyAdminLogin(alert)
           }
+        },
+        async notifyAdminLoginFailure(alert: { at: Date; username: string; attempts: number; ipAddress?: string; userAgent?: string }) {
+          await runtime.enquiryNotifier!.notifyAdminLoginFailure?.(alert)
         },
       }
     : null
@@ -61,6 +64,12 @@ function getServer(env: WorkerEnv): Server {
     // The durable object is the cross-isolate login-alert cooldown authority.
     adminLoginNotificationCooldownMs: 0,
     adminLoginNotifier: loginNotifier,
+    adminSessionStore: {
+      create: (sessionId, now) => securityState.createAdminSession(sessionId, now),
+      isActive: (sessionId, now) => securityState.isAdminSessionActive(sessionId, now),
+      touch: (sessionId, now) => securityState.touchAdminSession(sessionId, now),
+      revoke: (sessionId) => securityState.revokeAdminSession(sessionId),
+    },
     enquiriesEnabled: runtime.enquiriesEnabled,
     enquiryNotifier: runtime.enquiryNotifier,
     enquiryRepository: runtime.enquiryRepository,

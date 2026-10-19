@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect } from 'react'
 import { Route, Routes, useLocation, useMatch, type Location } from 'react-router-dom'
 import { SiteFooter } from './components/SiteFooter'
 import { SiteHeader } from './components/SiteHeader'
+import { Seo } from './components/Seo'
 import { getServiceBySlug } from './services/serviceCatalogue'
 
 const Home = lazy(() => import('./pages/Home').then((module) => ({ default: module.Home })))
@@ -27,6 +28,15 @@ const routeTitles: Record<string, string> = {
   '/admin/enquiries': 'Enquiries Dashboard | Gauvis Technology Holdings',
 }
 
+const routeDescriptions: Record<string, string> = {
+  '/': 'Gauvis Technology Holdings provides practical hardware, software, networking and IT support solutions for businesses across South Africa.',
+  '/about': 'Learn about Gauvis Technology Holdings, a practical technology partner helping South African businesses use dependable IT solutions.',
+  '/services': 'Explore GuavisTech hardware, software, networking, Microsoft 365, CCTV, printer, desktop support and website development services.',
+  '/solutions': 'See how GuavisTech combines technology services into practical solutions shaped around South African business needs.',
+  '/faq': 'Find answers about GuavisTech IT services, support, project enquiries and service delivery across South Africa.',
+  '/contact': 'Contact GuavisTech to discuss an IT support, networking, software, CCTV, printer, hardware or website development requirement.',
+}
+
 const activePageByPath = {
   '/': 'home',
   '/about': 'about',
@@ -41,12 +51,9 @@ function RouteEffects() {
   const serviceSlug = useMatch('/services/:serviceSlug')?.params.serviceSlug
   const service = getServiceBySlug(serviceSlug)
 
-  useEffect(() => {
-    document.title = service?.metaTitle
-      ?? (serviceSlug ? 'Service Not Found | Gauvis Technology Holdings' : routeTitles[pathname] ?? routeTitles['/'])
-  }, [pathname, service, serviceSlug])
-
-  return null
+  const title = service?.metaTitle ?? (serviceSlug ? 'Service Not Found | Gauvis Technology Holdings' : routeTitles[pathname] ?? routeTitles['/'])
+  const description = service?.summary ?? (serviceSlug ? 'The requested GuavisTech service page could not be found.' : routeDescriptions[pathname] ?? routeDescriptions['/'])
+  return <Seo description={description} noindex={pathname.startsWith('/admin/') || Boolean(serviceSlug && !service)} path={pathname} serviceName={service?.title} title={title} />
 }
 
 function ReadyRouteEffects({ location }: { location: Location }) {

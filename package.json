@@ -8,7 +8,7 @@
     "dev:client": "vite",
     "dev:server": "tsx watch server/index.ts",
     "dev:worker": "npm run build && wrangler dev --local --port 8787",
-    "build": "npm run images:generate && tsc -b && vite build",
+    "build": "npm run images:generate && tsc -b && vite build && node scripts/generate-seo-pages.mjs",
     "package:directadmin": "npm run build && node scripts/package-directadmin.mjs",
     "db:setup": "tsx server/setupDatabase.ts",
     "preview": "tsx server/index.ts --port 4173",

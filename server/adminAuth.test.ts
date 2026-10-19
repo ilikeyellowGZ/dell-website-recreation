@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vitest'
 import {
   clearSessionCookie,
   createAdminToken,
+  createMemoryAdminSessionStore,
   generateAdminPassword,
   generateJwtSecret,
   getSessionCookie,
@@ -50,6 +51,21 @@ describe('admin JWT session', () => {
   it('keeps local HTTP sessions strict and clears the same cookie scope', () => {
     expect(getSessionCookie('local-token', false)).toBe('gauvis_admin_session=local-token; Path=/api/admin; HttpOnly; SameSite=Strict; Max-Age=900')
     expect(clearSessionCookie(false)).toBe('gauvis_admin_session=; Path=/api/admin; HttpOnly; SameSite=Strict; Max-Age=0')
+  })
+})
+
+describe('server-enforced admin idle sessions', () => {
+  it('expires after 15 idle minutes, refreshes only when touched, and supports revocation', async () => {
+    const sessions = createMemoryAdminSessionStore(15 * 60 * 1_000)
+    await sessions.create('session-one', 1_000)
+    expect(await sessions.isActive('session-one', 15 * 60 * 1_000)).toBe(true)
+    expect(await sessions.touch('session-one', 15 * 60 * 1_000)).toBe(true)
+    expect(await sessions.isActive('session-one', 30 * 60 * 1_000 - 1)).toBe(true)
+    expect(await sessions.isActive('session-one', 30 * 60 * 1_000)).toBe(false)
+
+    await sessions.create('session-two', 1_000)
+    await sessions.revoke('session-two')
+    expect(await sessions.isActive('session-two', 1_001)).toBe(false)
   })
 })
 

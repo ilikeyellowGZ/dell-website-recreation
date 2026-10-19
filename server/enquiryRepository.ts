@@ -6,6 +6,7 @@ const DEFAULT_COLLECTION_NAME = 'enquiries'
 
 export type Enquiry = Omit<EnquiryInput, 'website'> & {
   createdAt: Date
+  reference?: string
   source: 'website'
   status: 'new'
 }
@@ -58,6 +59,7 @@ export function getEnquiryCollectionDefinition({
           'message',
           'consent',
           'createdAt',
+          'reference',
           'source',
           'status',
         ],
@@ -83,6 +85,7 @@ export function getEnquiryCollectionDefinition({
           message: { bsonType: 'string', minLength: 1, maxLength: 4000 },
           consent: { bsonType: 'bool', enum: [true] },
           createdAt: { bsonType: 'date' },
+          reference: { bsonType: 'string', minLength: 16, maxLength: 40 },
           source: { enum: ['website'] },
           status: { enum: ['new'] },
         },
@@ -91,6 +94,7 @@ export function getEnquiryCollectionDefinition({
     indexes: [
       { key: { createdAt: -1 }, name: 'createdAt_desc' },
       { key: { status: 1, createdAt: -1 }, name: 'status_createdAt_desc' },
+      { key: { reference: 1 }, name: 'reference_unique', sparse: true, unique: true },
     ],
   }
 }

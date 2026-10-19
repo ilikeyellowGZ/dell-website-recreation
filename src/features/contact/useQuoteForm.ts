@@ -4,6 +4,7 @@ import { readEnquiryPayload, validateEnquiryPayload, type EnquiryPayload, type F
 
 type ApiResponse = {
   accepted?: boolean
+  reference?: string
   fieldErrors?: Partial<Record<FieldName, string>>
   message?: string
 }
@@ -14,7 +15,7 @@ export type SubmissionStatus = {
 }
 
 type SubmissionResult =
-  | { kind: 'success' }
+  | { kind: 'success'; reference?: string }
   | { kind: 'validation'; errors: FormErrors }
   | { kind: 'error'; message: string }
 
@@ -49,7 +50,7 @@ async function submitEnquiry(payload: EnquiryPayload): Promise<SubmissionResult>
 
     if (response.status === 422) return { kind: 'validation', errors: readApiErrors(body.fieldErrors) }
     if (!response.ok || !body.accepted) return { kind: 'error', message: body.message || genericError }
-    return { kind: 'success' }
+    return { kind: 'success', reference: body.reference }
   } catch {
     return { kind: 'error', message: genericError }
   }
@@ -106,7 +107,7 @@ export function useQuoteForm() {
     setErrors({})
     setStatus({
       kind: 'success',
-      message: 'Thank you. Your enquiry has been received. Our team will contact you using the details provided.',
+      message: `Thank you. Your enquiry has been received${result.reference ? ` (reference ${result.reference})` : ''}. Our team will contact you using the details provided.`,
     })
   }
 

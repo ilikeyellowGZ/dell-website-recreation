@@ -7,6 +7,7 @@ export type AdminEnquiry = {
   fullName: string
   location: string
   message: string
+  reference?: string
   phone: string
   service: string
   status: 'new'
@@ -36,6 +37,11 @@ export async function login(input: LoginInput): Promise<LoginResult> {
 
 export async function getSession(): Promise<boolean> {
   const response = await fetch(apiUrl('/api/admin/session'), { credentials: 'include' })
+  return response.ok
+}
+
+export async function recordAdminActivity(): Promise<boolean> {
+  const response = await fetch(apiUrl('/api/admin/activity'), { credentials: 'include', method: 'POST' })
   return response.ok
 }
 

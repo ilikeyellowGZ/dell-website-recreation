@@ -105,7 +105,7 @@ The exact About photographs are present only inside the approved composite mocku
 - `SiteHeader`: utility bar, brand, desktop nav, accessible mobile disclosure, active route state.
 - `Mobile navigation drawer`: full-height navy side panel below 1024px, dimmed backdrop, internal close control, numbered navigation rows, and the existing quote CTA. It traps keyboard focus while open and returns focus to the header toggle when dismissed.
 - `RouteTransition`: shared Motion wrapper around route content; it coordinates page exit and entrance while the persistent header and footer remain stable.
-- `SiteFooter`: reusable brand, quick links, services, and confirmed phone contacts.
+- `SiteFooter`: reusable brand, quick links, services, confirmed phone contacts, and a compact creator credit in the footer-bottom strip.
 - `ButtonLink`: primary, outline, and light variants with hover, active, focus-visible, and reduced-motion behavior.
 - `SectionEyebrow`: compact orange section label, used only where the reference includes one.
 - `Icon`: one Phosphor icon family with consistent weight.
@@ -139,7 +139,9 @@ The exact About photographs are present only inside the approved composite mocku
 - Solutions is marked with `aria-current="page"` on `/solutions`.
 - Do not invent services, claims, certifications, statistics, testimonials, employees, projects, addresses, hours, or email addresses.
 - Confirmed phone destinations are Thabang at 084 035 6925 and Pontsho at 064 367 0274.
+- Confirmed footer email is `info@gauvistech.com` and uses a `mailto:` link.
 - Confirmed company registration is CIPC Registration Number 2026/703930/07 and appears in the shared footer.
+- The footer creator credit links to `https://heyywebb.com`.
 - Quote CTAs use `/contact#request-quote`.
 - Contact submissions use the same-origin `/api/enquiries` endpoint; success requires server acceptance. WhatsApp uses only the user-confirmed Thabang destination.
 
