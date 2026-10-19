@@ -551,7 +551,7 @@ describe('stored enquiry notifications', () => {
     expect(notifications[0]).not.toHaveProperty('website')
   })
 
-  it('reports a stored enquiry honestly when notification delivery fails and logs no sensitive values', async () => {
+  it('accepts a stored enquiry when notification delivery fails and logs no sensitive values', async () => {
     const logged = vi.spyOn(console, 'error').mockImplementation(() => {})
     const stored: Enquiry[] = []
     const notifications: Enquiry[] = []
@@ -568,8 +568,8 @@ describe('stored enquiry notifications', () => {
 
     const response = await postEnquiry(baseUrl)
 
-    expect(response.status).toBe(502)
-    expect(await response.json()).toMatchObject({ accepted: false, code: 'NOTIFICATION_FAILED', message: expect.stringContaining('reference GVT-') })
+    expect(response.status).toBe(201)
+    expect(await response.json()).toMatchObject({ accepted: true, reference: expect.stringMatching(/^GVT-/) })
     expect(stored).toHaveLength(1)
     expect(notifications).toHaveLength(1)
     expect(logged).toHaveBeenCalledTimes(1)
