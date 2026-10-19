@@ -270,7 +270,11 @@ export function createApp({
     }
     try {
       response.json({ enquiries: await enquiryRepository.listRecent(100) })
-    } catch {
+    } catch (error) {
+      console.error('Admin enquiry list failed.', {
+        category: 'repository_error',
+        errorName: error instanceof Error ? error.name : 'UnknownError',
+      })
       response.status(503).json({ message: 'Enquiry records are temporarily unavailable.' })
     }
   })

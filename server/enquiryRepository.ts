@@ -134,7 +134,6 @@ export function createMongoEnquiryRepository({
   minPoolSize,
   uri,
 }: MongoRepositoryOptions): EnquiryRepository {
-  const definition = getEnquiryCollectionDefinition({ collectionName, dbName })
   const client = new MongoClient(uri, {
     maxPoolSize,
     ...(minPoolSize === undefined ? {} : { minPoolSize }),
@@ -144,7 +143,10 @@ export function createMongoEnquiryRepository({
   let collectionPromise: Promise<Collection<Enquiry>> | undefined
 
   const getCollection = () => {
-    collectionPromise ??= client.connect().then(() => ensureEnquiryCollection(client.db(dbName), definition))
+    // Collection validation and indexes are deployment-time administration.
+    // Runtime API credentials only need data access; requiring collMod here
+    // makes every read and write fail for least-privilege application users.
+    collectionPromise ??= client.connect().then(() => client.db(dbName).collection<Enquiry>(collectionName))
     return collectionPromise
   }
 
