@@ -33,7 +33,10 @@ export function ContactDetails() {
           <span className="contact-card__icon" aria-hidden="true">
             <MapPin size={28} weight="fill" />
           </span>
-          <strong>Serving South Africa</strong>
+          <span>
+            <strong>Serving South Africa</strong>
+            <a href="mailto:info@gauvistech.com">info@gauvistech.com</a>
+          </span>
         </div>
       </div>
 

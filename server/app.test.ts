@@ -213,12 +213,13 @@ describe('split-origin API security', () => {
 
     expect((await signIn()).status).toBe(200)
     expect((await signIn()).status).toBe(200)
-    expect(alerts).toEqual([{ at: now, username: 'admin' }])
+    expect(alerts).toHaveLength(1)
+    expect(alerts[0]).toMatchObject({ at: now, username: 'admin' })
 
     now = new Date('2026-10-17T08:01:00.001Z')
     expect((await signIn()).status).toBe(200)
     expect(alerts).toHaveLength(2)
-    expect(alerts[1]).toEqual({ at: now, username: 'admin' })
+    expect(alerts[1]).toMatchObject({ at: now, username: 'admin' })
   })
 
   it('rejects login and logout from absent, foreign, and API-host origins without setting cookies', async () => {
@@ -373,7 +374,7 @@ describe('POST /api/enquiries', () => {
     })
 
     expect(response.status).toBe(201)
-    expect(await response.json()).toEqual({ accepted: true })
+    expect(await response.json()).toMatchObject({ accepted: true, reference: expect.stringMatching(/^GVT-\d{8}-[A-F0-9]{12}$/) })
     expect(stored).toHaveLength(1)
     expect(stored[0]).toMatchObject({
       fullName: 'Thandi Ndlovu',
@@ -386,6 +387,7 @@ describe('POST /api/enquiries', () => {
       consent: true,
       source: 'website',
       status: 'new',
+      reference: expect.stringMatching(/^GVT-\d{8}-[A-F0-9]{12}$/),
     })
     expect(stored[0].createdAt).toBeInstanceOf(Date)
   })
@@ -538,7 +540,7 @@ describe('stored enquiry notifications', () => {
     const response = await postEnquiry(baseUrl)
 
     expect(response.status).toBe(201)
-    expect(await response.json()).toEqual({ accepted: true })
+    expect(await response.json()).toMatchObject({ accepted: true, reference: expect.any(String) })
     expect(events).toEqual(['stored', 'emailed'])
     expect(stored).toHaveLength(1)
     expect(notifications).toHaveLength(1)
@@ -549,7 +551,7 @@ describe('stored enquiry notifications', () => {
     expect(notifications[0]).not.toHaveProperty('website')
   })
 
-  it('still accepts one stored enquiry after notification rejection and logs no sensitive values', async () => {
+  it('reports a stored enquiry honestly when notification delivery fails and logs no sensitive values', async () => {
     const logged = vi.spyOn(console, 'error').mockImplementation(() => {})
     const stored: Enquiry[] = []
     const notifications: Enquiry[] = []
@@ -566,8 +568,8 @@ describe('stored enquiry notifications', () => {
 
     const response = await postEnquiry(baseUrl)
 
-    expect(response.status).toBe(201)
-    expect(await response.json()).toEqual({ accepted: true })
+    expect(response.status).toBe(502)
+    expect(await response.json()).toMatchObject({ accepted: false, code: 'NOTIFICATION_FAILED', message: expect.stringContaining('reference GVT-') })
     expect(stored).toHaveLength(1)
     expect(notifications).toHaveLength(1)
     expect(logged).toHaveBeenCalledTimes(1)

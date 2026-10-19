@@ -627,6 +627,16 @@ main h1[tabindex='-1']:focus {
   font-size: 0.6875rem;
 }
 
+.footer-credit {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+.footer-credit:hover {
+  color: var(--orange-500);
+}
+
 .legal-links {
   display: flex;
   gap: 0.875rem;

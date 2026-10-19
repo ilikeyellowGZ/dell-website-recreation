@@ -3,6 +3,7 @@ import type { SecurityDurableObject } from './security-durable-object'
 
 export type WorkerEnv = {
   ADMIN_EMAIL?: string
+  COMPANY_NOTIFICATION_EMAIL?: string
   ADMIN_LOGIN_NOTIFICATION_COOLDOWN_SECONDS?: string
   ADMIN_PASSWORD_HASH?: string
   ADMIN_USERNAME?: string

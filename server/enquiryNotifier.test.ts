@@ -11,6 +11,7 @@ const environment = {
 }
 
 const enquiry: Enquiry = {
+  reference: 'GVT-20261016-ABCDEF123456',
   fullName: 'Thandi Ndlovu',
   businessName: 'Ndlovu Trading',
   email: 'thandi@example.com',
@@ -55,9 +56,9 @@ describe('Resend enquiry notifications', () => {
       reply_to: 'team@example.com',
     })
     expect(customerBody.text).toContain('Hardware Support')
-    expect(customerBody.text).not.toContain(enquiry.message)
-    expect(teamBody).not.toHaveProperty('attachments')
-    expect(customerBody.html).toContain('Your request is with our team.')
+    expect(customerBody.text).toContain(enquiry.message)
+    expect(teamBody.html).toContain('NEW WEBSITE ENQUIRY')
+    expect(customerBody.html).toContain('received your enquiry')
     expect(customerBody.html).toContain('cid:gauvis-tech-logo')
     expect(customerBody.attachments[0]).toMatchObject({
       filename: 'gauvis-email-logo.png',
@@ -113,8 +114,7 @@ describe('Resend enquiry notifications', () => {
       to: 'team@example.com',
       replyTo: 'thandi@example.com',
     })
-    expect(sent[0].subject).toContain('Hardware Support')
-    expect(sent[0].subject).toContain('Thandi Ndlovu')
+    expect(sent[0].subject).toContain('New Website Enquiry')
     for (const value of [
       'Thandi Ndlovu', 'Ndlovu Trading', 'thandi@example.com', '+27 84 123 4567',
       'Hardware Support', 'Cape Town', 'Please help replace three computers.',
@@ -129,10 +129,10 @@ describe('Resend enquiry notifications', () => {
       to: 'thandi@example.com',
       replyTo: 'team@example.com',
     })
-    expect(sent[1].text).toContain('Thandi Ndlovu')
-    expect(sent[1].text).not.toContain(enquiry.message)
-    expect(sent[0].attachments).toBeUndefined()
-    expect(sent[1].html).toContain('Your request is with our team.')
+    expect(sent[1].text).toContain('Hello Thandi')
+    expect(sent[1].text).toContain(enquiry.message)
+    expect(sent[0].attachments?.[0].contentId).toBe('gauvis-tech-logo')
+    expect(sent[1].html).toContain('received your enquiry')
     expect(sent[1].attachments?.[0].contentId).toBe('gauvis-tech-logo')
   })
 
@@ -155,11 +155,11 @@ describe('Resend enquiry notifications', () => {
     expect(sent[0].html).toContain('&lt;town&gt; &#39;quote&#39; &amp; suburb')
     expect(sent[0].html).toContain('&lt;img src=x onerror=&quot;alert(1)&quot;&gt;')
     expect(sent[0].html).toContain('It&#39;s &lt;urgent&gt; &amp; &quot;important&quot;.')
-    expect(sent[0].html).not.toMatch(/<script|<img|<town>|<urgent>/)
+    expect(sent[0].html).not.toMatch(/<script|<town>|<urgent>|<img src=x/)
     expect(sent[0].text).toContain('<script>alert("name")</script>')
     expect(sent[1].html).toContain('&lt;script&gt;alert(&quot;name&quot;)&lt;/script&gt;')
     expect(sent[1].html).not.toContain('<script>')
-    expect(sent[1].html).not.toContain(enquiry.message)
+    expect(sent[1].html).toContain('&lt;img src=x onerror=&quot;alert(1)&quot;&gt;')
   })
 
   it('keeps the subject on one line when a contact name contains line breaks', async () => {

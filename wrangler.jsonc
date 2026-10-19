@@ -6,12 +6,12 @@
   "main": "./worker/index.ts",
   "upload_source_maps": true,
   "vars": {
-    "ADMIN_EMAIL": "team@example.com",
+    "COMPANY_NOTIFICATION_EMAIL": "info@gauvistech.com",
     "ADMIN_LOGIN_NOTIFICATION_COOLDOWN_SECONDS": "900",
-    "ENABLE_ENQUIRIES": "false",
+    "ENABLE_ENQUIRIES": "true",
     "MONGODB_COLLECTION": "enquiries",
     "MONGODB_DB_NAME": "gauvistech",
-    "RESEND_FROM_EMAIL": "enquiries@notifications.example.com"
+    "RESEND_FROM_EMAIL": "notification@guavistech.com"
   },
   "secrets": {
     "required": [

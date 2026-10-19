@@ -2,6 +2,13 @@
 
 Gauvis now deploys as one Cloudflare Worker: Static Assets serve the Vite React application and the Worker handles the existing `/api/*` Express routes on the same origin. MongoDB Atlas and Resend remain external services. The old `render.yaml` is retained only as a rollback reference; do not shut down the live Render service until the Cloudflare checks below pass and the owner explicitly approves it.
 
+## Required external verification before production cutover
+
+1. In Resend, verify that `guavistech.com` is an authenticated sending domain and that `notification@guavistech.com` is permitted as a sender.
+2. Confirm with the business owner that the company inbox is intentionally `info@gauvistech.com` (note the different domain spelling from the sender) before setting `COMPANY_NOTIFICATION_EMAIL`.
+3. Send a real staging enquiry and confirm both the company notification and customer confirmation in their destination inboxes; local mocked tests do not prove delivery.
+4. In Google Search Console, add and verify the `https://gauvistech.com/` property, submit `https://gauvistech.com/sitemap.xml`, inspect the home, services, and contact URLs, then request indexing. Submission does not guarantee indexing.
+
 ## Before deployment
 
 1. Use Node 24 LTS and run `npm ci`.

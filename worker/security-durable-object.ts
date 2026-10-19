@@ -8,6 +8,30 @@ type SlidingWindow = { timestamps: number[] }
  * Worker isolates. Keys are HMAC digests, never raw visitor IP addresses.
  */
 export class SecurityDurableObject extends DurableObject<WorkerEnv> {
+  private static readonly idleTimeoutMs = 15 * 60 * 1_000
+
+  async createAdminSession(sessionId: string, now: number): Promise<void> {
+    await this.ctx.storage.put(`session:${sessionId}`, now)
+  }
+
+  async isAdminSessionActive(sessionId: string, now: number): Promise<boolean> {
+    const lastActivityAt = await this.ctx.storage.get<number>(`session:${sessionId}`)
+    if (lastActivityAt === undefined || now - lastActivityAt >= SecurityDurableObject.idleTimeoutMs) {
+      await this.ctx.storage.delete(`session:${sessionId}`)
+      return false
+    }
+    return true
+  }
+
+  async touchAdminSession(sessionId: string, now: number): Promise<boolean> {
+    if (!(await this.isAdminSessionActive(sessionId, now))) return false
+    await this.createAdminSession(sessionId, now)
+    return true
+  }
+
+  async revokeAdminSession(sessionId: string): Promise<void> {
+    await this.ctx.storage.delete(`session:${sessionId}`)
+  }
   async consume(key: string, limit: number, windowMs: number, now = Date.now()): Promise<boolean> {
     return this.ctx.blockConcurrencyWhile(async () => {
       const stored = await this.ctx.storage.get<SlidingWindow>(`rate:${key}`)

@@ -30,7 +30,7 @@ with sync_playwright() as playwright:
         assert toggle.is_visible()
 
         toggle.click()
-        page.wait_for_timeout(240)
+        page.wait_for_timeout(140)
         reveal_opacities = navigation.locator("[data-mobile-nav-reveal]").evaluate_all(
             "elements => elements.map(element => Number.parseFloat(getComputedStyle(element).opacity).toFixed(2))"
         )

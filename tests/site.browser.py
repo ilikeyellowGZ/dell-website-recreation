@@ -151,13 +151,15 @@ def test_split_origin_enquiry(browser) -> None:
             with page.expect_response(lambda response: response.url == endpoint and response.request.method == "POST") as pending:
                 page.get_by_role("button", name="Send Enquiry", exact=True).click()
             response = pending.value
-            assert response.status == 201 and response.json() == {"accepted": True}
+            response_body = response.json()
+            assert response.status == 201 and response_body["accepted"] is True
+            assert re.fullmatch(r"GVT-\d{8}-[A-F0-9]{12}", response_body["reference"])
             assert response.request.all_headers()["origin"] == frontend_origin
             headers = response.all_headers()
             assert headers["access-control-allow-origin"] == frontend_origin
             assert headers["access-control-allow-credentials"] == "true"
             assert "origin" in headers["vary"].lower()
-            expect(page.get_by_role("status")).to_contain_text("Your enquiry has been received.")
+            expect(page.get_by_role("status")).to_contain_text("Your enquiry has been received")
             state = context.request.get(f"{api_base}/__test/state").json()
             assert len(state["records"]) == len(state["notifications"]) == 1
             assert state["records"][0]["email"] == "split-test@example.com"
@@ -549,15 +551,13 @@ with sync_playwright() as playwright:
         assert primary.locator('a[href="/"]').get_attribute("href") == "/"
         assert page.locator('a[href="tel:+27840356925"]').count() >= 2
         assert page.locator('a[href="tel:+27643670274"]').count() >= 2
-        assert page.locator('a[href^="mailto:"]').count() == 0
+        assert page.locator('a[href="mailto:info@gauvistech.com"]').count() >= 1
         assert page.get_by_role("link", name="Chat on WhatsApp").get_attribute("href") == "https://wa.me/27840356925"
 
         send_button = page.get_by_role("button", name="Send Enquiry")
-        assert send_button.is_disabled()
-        assert page.get_by_text("Online enquiries are not open yet.").is_visible()
-        assert page.locator("#request-quote fieldset").get_attribute("disabled") is not None
-        assert page.locator("#enquiry-unavailable a[href='tel:+27840356925']").is_visible()
-        assert page.locator("#enquiry-unavailable a[href='https://wa.me/27840356925']").is_visible()
+        assert send_button.is_enabled()
+        assert page.locator("#enquiry-unavailable").count() == 0
+        assert page.locator("#request-quote fieldset").get_attribute("disabled") is None
 
         page.goto(f"{BASE_URL}/contact#request-quote", wait_until="networkidle")
         assert page.url == f"{BASE_URL}/contact#request-quote"

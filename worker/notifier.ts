@@ -6,7 +6,8 @@ import type { WorkerEnv } from './types'
 
 export type WorkerEnquiryNotifier = {
   notify(enquiry: Enquiry): Promise<void>
-  notifyAdminLogin(alert: { at: Date; username: string }): Promise<void>
+  notifyAdminLogin(alert: { at: Date; username: string; ipAddress?: string; userAgent?: string }): Promise<void>
+  notifyAdminLoginFailure?(alert: { at: Date; username: string; attempts: number; ipAddress?: string; userAgent?: string }): Promise<void>
 }
 
 type InlineAttachment = { filename: string; content: Buffer; contentId: string; contentType: string }
@@ -33,19 +34,22 @@ function frame(label: string, headline: string, body: string, detail: string): s
 }
 
 function customerReceipt(enquiry: Enquiry): Omit<NotificationEmail, 'from' | 'to' | 'replyTo'> {
-  const name = escapeHtml(enquiry.fullName)
+  const firstName = enquiry.fullName.trim().split(/\s+/)[0] || enquiry.fullName
+  const name = escapeHtml(firstName)
   const service = escapeHtml(enquiry.service)
-  const body = `<p style="margin:0 0 16px;">Hello ${name},</p><p style="margin:0 0 16px;">Thank you for contacting Gauvis Tech. We received your request for ${service}. Our team will review it and respond using the details you supplied.</p><p style="margin:0;">If you did not send this request, you can ignore this email.</p>`
-  const detail = `<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="width:100%;border-collapse:collapse;background:#edf4fa;"><tr><td style="padding:16px 18px;color:#53677f;font-size:12px;line-height:18px;">REQUESTED SERVICE<br><span style="color:#0b2c55;font-size:15px;line-height:24px;font-weight:700;">${service}</span></td></tr></table>`
-  return { subject: 'We received your Gauvis Tech enquiry', text: `ENQUIRY RECEIVED\nYour request is with our team.\n\nHello ${enquiry.fullName},\n\nThank you for contacting Gauvis Tech. We received your request for ${enquiry.service}. Our team will review it and respond using the details you supplied.\n\nRequested service: ${enquiry.service}\n\nIf you did not send this request, you can ignore this email.\n\nGauvis Tech`, html: frame('ENQUIRY RECEIVED', 'Your request is with our team.', body, detail), attachments: attachments() }
+  const reference = escapeHtml(enquiry.reference || 'Reference pending')
+  const message = escapeHtml(enquiry.message)
+  const body = `<p style="margin:0 0 16px;">Hello ${name},</p><p style="margin:0 0 16px;">Thank you for contacting GuavisTech. We’ve received your enquiry and our team will review it carefully.</p><p style="margin:0;">We’ll respond using the contact details you supplied.</p>`
+  const detail = `<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="width:100%;border-collapse:collapse;background:#edf4fa;"><tr><td style="padding:16px 18px;color:#53677f;font-size:12px;line-height:18px;">REFERENCE<br><span style="color:#0b2c55;font-size:15px;line-height:24px;font-weight:700;">${reference}</span></td></tr><tr><td style="padding:0 18px 8px;color:#53677f;font-size:12px;line-height:18px;">REQUESTED SERVICE<br><span style="color:#0b2c55;font-size:15px;line-height:24px;font-weight:700;">${service}</span></td></tr><tr><td style="padding:8px 18px 16px;color:#53677f;font-size:12px;line-height:18px;">YOUR MESSAGE<br><span style="color:#0b2c55;font-size:14px;line-height:22px;white-space:pre-wrap;">${message}</span></td></tr></table>`
+  return { subject: "We've Received Your Enquiry — GuavisTech", text: `ENQUIRY RECEIVED\n\nHello ${firstName},\n\nThank you for contacting GuavisTech.\n\nReference: ${enquiry.reference || 'Reference pending'}\nRequested service: ${enquiry.service}\nYour message: ${enquiry.message}\n\nGuavisTech`, html: frame('ENQUIRY RECEIVED', 'We’ve received your enquiry.', body, detail), attachments: attachments() }
 }
 
-function loginAlert(alert: { at: Date; username: string }): Omit<NotificationEmail, 'from' | 'to' | 'replyTo'> {
+function loginAlert(alert: { at: Date; username: string; ipAddress?: string; userAgent?: string }): Omit<NotificationEmail, 'from' | 'to' | 'replyTo'> {
   const time = alert.at.toISOString()
   const account = escapeHtml(alert.username)
   const body = '<p style="margin:0 0 16px;">The Gauvis Tech admin dashboard was signed into successfully.</p><p style="margin:0;">If this was you, no action is needed. If you do not recognise this sign-in, change your admin password immediately and review access to your account.</p>'
-  const detail = `<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="width:100%;border-collapse:collapse;background:#edf4fa;"><tr><td style="padding:16px 18px;color:#53677f;font-size:12px;line-height:18px;">ACCOUNT<br><span style="color:#0b2c55;font-size:15px;line-height:24px;font-weight:700;">${account}</span></td></tr><tr><td style="padding:0 18px 16px;color:#53677f;font-size:12px;line-height:18px;">SIGN-IN TIME (UTC)<br><span style="color:#0b2c55;font-size:15px;line-height:24px;font-weight:700;">${time}</span></td></tr></table>`
-  return { subject: 'Gauvis Tech admin sign-in', text: `SECURITY NOTICE\nA sign-in to your dashboard.\n\nThe Gauvis Tech admin dashboard was signed into successfully.\n\nAccount: ${alert.username}\nSign-in time (UTC): ${time}\n\nIf this was you, no action is needed. If you do not recognise this sign-in, change your admin password immediately and review access to your account.\n\nGauvis Tech`, html: frame('SECURITY NOTICE', 'A sign-in to your dashboard.', body, detail), attachments: attachments() }
+  const detail = `<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="width:100%;border-collapse:collapse;background:#edf4fa;"><tr><td style="padding:16px 18px;color:#53677f;font-size:12px;line-height:18px;">ACCOUNT<br><span style="color:#0b2c55;font-size:15px;line-height:24px;font-weight:700;">${account}</span></td></tr><tr><td style="padding:0 18px 8px;color:#53677f;font-size:12px;line-height:18px;">STATUS<br><span style="color:#0b2c55;font-size:15px;line-height:24px;font-weight:700;">Successful</span></td></tr><tr><td style="padding:8px 18px;color:#53677f;font-size:12px;line-height:18px;">IP ADDRESS<br><span style="color:#0b2c55;font-size:14px;">${escapeHtml(alert.ipAddress || 'Unavailable')}</span></td></tr><tr><td style="padding:8px 18px;color:#53677f;font-size:12px;line-height:18px;">BROWSER / DEVICE<br><span style="color:#0b2c55;font-size:14px;">${escapeHtml(alert.userAgent || 'Unavailable')}</span></td></tr><tr><td style="padding:8px 18px 16px;color:#53677f;font-size:12px;line-height:18px;">SIGN-IN TIME (UTC)<br><span style="color:#0b2c55;font-size:15px;line-height:24px;font-weight:700;">${time}</span></td></tr></table>`
+  return { subject: 'Admin Login Alert — GuavisTech', text: `SECURITY NOTICE\n\nAccount: ${alert.username}\nStatus: Successful\nIP address: ${alert.ipAddress || 'Unavailable'}\nBrowser/device: ${alert.userAgent || 'Unavailable'}\nSign-in time (UTC): ${time}\n\nGuavisTech`, html: frame('SECURITY NOTICE', 'A sign-in to your dashboard.', body, detail), attachments: attachments() }
 }
 
 export function createWorkerResendNotifier(
@@ -54,7 +58,7 @@ export function createWorkerResendNotifier(
 ): WorkerEnquiryNotifier | null {
   const apiKey = environment.RESEND_API_KEY?.trim()
   const from = environment.RESEND_FROM_EMAIL?.trim()
-  const to = environment.ADMIN_EMAIL?.trim()
+  const to = environment.COMPANY_NOTIFICATION_EMAIL?.trim() || environment.ADMIN_EMAIL?.trim()
   if (!apiKey || !from || !to || /[\r\n]/.test(from) || !safeRecipient(to)) return null
   const transport = createTransport(apiKey)
   const send = async (email: NotificationEmail) => {
@@ -64,14 +68,22 @@ export function createWorkerResendNotifier(
 
   return {
     async notify(enquiry) {
-      const fields = [['Contact name', enquiry.fullName], ['Business name', enquiry.businessName], ['Email', enquiry.email], ['Phone', enquiry.phone], ['Requested service', enquiry.service], ['Location', enquiry.location], ['Message', enquiry.message], ['Submitted at (UTC)', enquiry.createdAt.toISOString()]]
-      const team: NotificationEmail = { from, to, replyTo: enquiry.email, subject: `New ${enquiry.service} enquiry from ${enquiry.fullName}`.replace(/[\r\n]+/g, ' '), text: fields.map(([label, value]) => `${label}: ${value}`).join('\n\n'), html: `<h1>New website enquiry</h1><dl>${fields.map(([label, value]) => `<dt>${label}</dt><dd style="white-space:pre-wrap">${escapeHtml(value)}</dd>`).join('')}</dl>` }
+      const fields = [['Reference', enquiry.reference || 'Reference pending'], ['Customer', enquiry.fullName], ['Email', enquiry.email], ['Phone', enquiry.phone || 'Not supplied'], ['Service', enquiry.service], ['Business', enquiry.businessName || 'Not supplied'], ['Location', enquiry.location || 'Not supplied'], ['Submitted (UTC)', enquiry.createdAt.toISOString()], ['Message', enquiry.message]]
+      const rows = fields.map(([label, value]) => `<tr><td style="padding:8px 12px;color:#53677f;font-size:12px;">${escapeHtml(label)}</td><td style="padding:8px 12px;color:#0b2c55;font-size:14px;white-space:pre-wrap;">${escapeHtml(value)}</td></tr>`).join('')
+      const team: NotificationEmail = { from, to, replyTo: enquiry.email, subject: 'New Website Enquiry — GuavisTech', text: fields.map(([label, value]) => `${label}: ${value}`).join('\n\n'), html: frame('NEW WEBSITE ENQUIRY', `Enquiry ${enquiry.reference || 'received'}`, '<p style="margin:0;">A new customer enquiry has been stored by the GuavisTech website.</p>', `<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="width:100%;border-collapse:collapse;background:#edf4fa;">${rows}</table>`), attachments: attachments() }
       const customer: NotificationEmail = { from, to: enquiry.email, replyTo: to, ...customerReceipt(enquiry) }
       const outcomes = await Promise.allSettled([send(team), send(customer)])
       if (outcomes.some((outcome) => outcome.status === 'rejected')) throw new Error('Enquiry notification could not be delivered.')
     },
     async notifyAdminLogin(alert) {
       try { await send({ from, to, replyTo: to, ...loginAlert(alert) }) } catch { throw new Error('Admin sign-in notification could not be delivered.') }
+    },
+    async notifyAdminLoginFailure(alert) {
+      const fields = [['Account entered', alert.username], ['Failed attempts', String(alert.attempts)], ['IP address', alert.ipAddress || 'Unavailable'], ['Browser / device', alert.userAgent || 'Unavailable'], ['Time (UTC)', alert.at.toISOString()]]
+      const rows = fields.map(([label, value]) => `<tr><td style="padding:8px 12px;color:#53677f;font-size:12px;">${escapeHtml(label)}</td><td style="padding:8px 12px;color:#0b2c55;font-size:14px;">${escapeHtml(value)}</td></tr>`).join('')
+      try {
+        await send({ from, to, replyTo: to, subject: 'Suspicious Admin Login Attempts — GuavisTech', text: `SECURITY WARNING\n\n${fields.map(([label, value]) => `${label}: ${value}`).join('\n')}\n\nNo password, token, or cookie is included.`, html: frame('SECURITY WARNING', 'Repeated admin sign-in failures detected.', '<p style="margin:0;">Review this activity. No password, session token or authentication cookie is included.</p>', `<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="width:100%;border-collapse:collapse;background:#fff3ed;">${rows}</table>`), attachments: attachments() })
+      } catch { throw new Error('Admin failed-login notification could not be delivered.') }
     },
   }
 }

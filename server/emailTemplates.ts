@@ -55,28 +55,64 @@ function renderFrame(label: string, headline: string, body: string, detail: stri
 </body></html>`
 }
 
-export function renderCustomerReceipt(enquiry: Pick<Enquiry, 'fullName' | 'service'>): BrandedEmailContent {
-  const name = escapeHtml(enquiry.fullName)
-  const service = escapeHtml(enquiry.service)
-  const body = `<p style="margin:0 0 16px;">Hello ${name},</p><p style="margin:0 0 16px;">Thank you for contacting Gauvis Tech. We received your request for ${service}. Our team will review it and respond using the details you supplied.</p><p style="margin:0;">If you did not send this request, you can ignore this email.</p>`
-  const detail = `<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="width:100%;border-collapse:collapse;background:#edf4fa;"><tr><td style="padding:16px 18px;color:#53677f;font-size:12px;line-height:18px;">REQUESTED SERVICE<br><span style="color:#0b2c55;font-size:15px;line-height:24px;font-weight:700;">${service}</span></td></tr></table>`
+function enquiryReference(enquiry: Pick<Enquiry, 'reference'>): string {
+  return enquiry.reference || 'Reference pending'
+}
+
+export function renderTeamEnquiry(enquiry: Enquiry): BrandedEmailContent {
+  const fields = [
+    ['Reference', enquiryReference(enquiry)], ['Customer', enquiry.fullName], ['Email', enquiry.email],
+    ['Phone', enquiry.phone || 'Not supplied'], ['Service', enquiry.service], ['Business', enquiry.businessName || 'Not supplied'],
+    ['Location', enquiry.location || 'Not supplied'], ['Submitted (UTC)', enquiry.createdAt.toISOString()], ['Message', enquiry.message],
+  ]
+  const rows = fields.map(([label, value]) => `<tr><td style="padding:8px 12px;color:#53677f;font-size:12px;vertical-align:top;">${escapeHtml(label)}</td><td style="padding:8px 12px;color:#0b2c55;font-size:14px;white-space:pre-wrap;">${escapeHtml(value)}</td></tr>`).join('')
   return {
-    subject: 'We received your Gauvis Tech enquiry',
-    text: `ENQUIRY RECEIVED\nYour request is with our team.\n\nHello ${enquiry.fullName},\n\nThank you for contacting Gauvis Tech. We received your request for ${enquiry.service}. Our team will review it and respond using the details you supplied.\n\nRequested service: ${enquiry.service}\n\nIf you did not send this request, you can ignore this email.\n\nGauvis Tech`,
-    html: renderFrame('ENQUIRY RECEIVED', 'Your request is with our team.', body, detail),
+    subject: 'New Website Enquiry — GuavisTech',
+    text: fields.map(([label, value]) => `${label}: ${value}`).join('\n\n'),
+    html: renderFrame('NEW WEBSITE ENQUIRY', `Enquiry ${enquiryReference(enquiry)}`, '<p style="margin:0;">A new customer enquiry has been stored by the GuavisTech website.</p>', `<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="width:100%;border-collapse:collapse;background:#edf4fa;">${rows}</table>`),
     attachments: attachment(),
   }
 }
 
-export function renderAdminLoginAlert({ at, username }: { at: Date; username: string }): BrandedEmailContent {
+export function renderCustomerReceipt(enquiry: Pick<Enquiry, 'fullName' | 'service'> & Partial<Pick<Enquiry, 'message' | 'reference'>>): BrandedEmailContent {
+  const firstNameValue = enquiry.fullName.trim().split(/\s+/)[0] || enquiry.fullName
+  const name = escapeHtml(firstNameValue)
+  const service = escapeHtml(enquiry.service)
+  const reference = escapeHtml(enquiryReference(enquiry))
+  const messageValue = enquiry.message || 'Not supplied'
+  const message = escapeHtml(messageValue)
+  const body = `<p style="margin:0 0 16px;">Hello ${name},</p><p style="margin:0 0 16px;">Thank you for contacting GuavisTech. We’ve received your enquiry and our team will review it carefully.</p><p style="margin:0;">We’ll respond using the contact details you supplied. If you did not send this request, you can ignore this email.</p>`
+  const detail = `<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="width:100%;border-collapse:collapse;background:#edf4fa;"><tr><td style="padding:16px 18px;color:#53677f;font-size:12px;line-height:18px;">REFERENCE<br><span style="color:#0b2c55;font-size:15px;line-height:24px;font-weight:700;">${reference}</span></td></tr><tr><td style="padding:0 18px 8px;color:#53677f;font-size:12px;line-height:18px;">REQUESTED SERVICE<br><span style="color:#0b2c55;font-size:15px;line-height:24px;font-weight:700;">${service}</span></td></tr><tr><td style="padding:8px 18px 16px;color:#53677f;font-size:12px;line-height:18px;">YOUR MESSAGE<br><span style="color:#0b2c55;font-size:14px;line-height:22px;white-space:pre-wrap;">${message}</span></td></tr></table>`
+  return {
+    subject: "We've Received Your Enquiry — GuavisTech",
+    text: `ENQUIRY RECEIVED\nWe’ve received your enquiry.\n\nHello ${firstNameValue},\n\nThank you for contacting GuavisTech. Our team will review your enquiry and respond using the contact details you supplied.\n\nReference: ${enquiryReference(enquiry)}\nRequested service: ${enquiry.service}\nYour message: ${enquiry.message}\n\nGauvisTech`,
+    html: renderFrame('ENQUIRY RECEIVED', 'We’ve received your enquiry.', body, detail),
+    attachments: attachment(),
+  }
+}
+
+export function renderAdminLoginAlert({ at, username, ipAddress, userAgent }: { at: Date; username: string; ipAddress?: string; userAgent?: string }): BrandedEmailContent {
   const time = at.toISOString()
   const account = escapeHtml(username)
   const body = '<p style="margin:0 0 16px;">The Gauvis Tech admin dashboard was signed into successfully.</p><p style="margin:0;">If this was you, no action is needed. If you do not recognise this sign-in, change your admin password immediately and review access to your account.</p>'
-  const detail = `<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="width:100%;border-collapse:collapse;background:#edf4fa;"><tr><td style="padding:16px 18px;color:#53677f;font-size:12px;line-height:18px;">ACCOUNT<br><span style="color:#0b2c55;font-size:15px;line-height:24px;font-weight:700;">${account}</span></td></tr><tr><td style="padding:0 18px 16px;color:#53677f;font-size:12px;line-height:18px;">SIGN-IN TIME (UTC)<br><span style="color:#0b2c55;font-size:15px;line-height:24px;font-weight:700;">${time}</span></td></tr></table>`
+  const safeIp = escapeHtml(ipAddress || 'Unavailable')
+  const safeAgent = escapeHtml(userAgent || 'Unavailable')
+  const detail = `<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="width:100%;border-collapse:collapse;background:#edf4fa;"><tr><td style="padding:16px 18px;color:#53677f;font-size:12px;line-height:18px;">ACCOUNT<br><span style="color:#0b2c55;font-size:15px;line-height:24px;font-weight:700;">${account}</span></td></tr><tr><td style="padding:0 18px 8px;color:#53677f;font-size:12px;line-height:18px;">LOGIN STATUS<br><span style="color:#0b2c55;font-size:15px;line-height:24px;font-weight:700;">Successful</span></td></tr><tr><td style="padding:8px 18px;color:#53677f;font-size:12px;line-height:18px;">IP ADDRESS<br><span style="color:#0b2c55;font-size:15px;line-height:24px;font-weight:700;">${safeIp}</span></td></tr><tr><td style="padding:8px 18px;color:#53677f;font-size:12px;line-height:18px;">BROWSER / DEVICE<br><span style="color:#0b2c55;font-size:14px;line-height:22px;font-weight:700;">${safeAgent}</span></td></tr><tr><td style="padding:8px 18px 16px;color:#53677f;font-size:12px;line-height:18px;">SIGN-IN TIME (UTC)<br><span style="color:#0b2c55;font-size:15px;line-height:24px;font-weight:700;">${time}</span></td></tr></table>`
   return {
-    subject: 'Gauvis Tech admin sign-in',
+    subject: 'Admin Login Alert — GuavisTech',
     text: `SECURITY NOTICE\nA sign-in to your dashboard.\n\nThe Gauvis Tech admin dashboard was signed into successfully.\n\nAccount: ${username}\nSign-in time (UTC): ${time}\n\nIf this was you, no action is needed. If you do not recognise this sign-in, change your admin password immediately and review access to your account.\n\nGauvis Tech`,
     html: renderFrame('SECURITY NOTICE', 'A sign-in to your dashboard.', body, detail),
+    attachments: attachment(),
+  }
+}
+
+export function renderAdminFailedLoginAlert({ at, username, attempts, ipAddress, userAgent }: { at: Date; username: string; attempts: number; ipAddress?: string; userAgent?: string }): BrandedEmailContent {
+  const time = at.toISOString()
+  const detail = `<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="width:100%;border-collapse:collapse;background:#fff3ed;"><tr><td style="padding:16px 18px;color:#53677f;font-size:12px;">ACCOUNT ENTERED<br><span style="color:#0b2c55;font-size:15px;font-weight:700;">${escapeHtml(username)}</span></td></tr><tr><td style="padding:8px 18px;color:#53677f;font-size:12px;">FAILED ATTEMPTS<br><span style="color:#0b2c55;font-size:15px;font-weight:700;">${attempts}</span></td></tr><tr><td style="padding:8px 18px;color:#53677f;font-size:12px;">IP ADDRESS<br><span style="color:#0b2c55;font-size:14px;">${escapeHtml(ipAddress || 'Unavailable')}</span></td></tr><tr><td style="padding:8px 18px;color:#53677f;font-size:12px;">BROWSER / DEVICE<br><span style="color:#0b2c55;font-size:14px;">${escapeHtml(userAgent || 'Unavailable')}</span></td></tr><tr><td style="padding:8px 18px 16px;color:#53677f;font-size:12px;">TIME (UTC)<br><span style="color:#0b2c55;font-size:14px;">${time}</span></td></tr></table>`
+  return {
+    subject: 'Suspicious Admin Login Attempts — GuavisTech',
+    text: `SECURITY WARNING\n\n${attempts} failed admin login attempts were detected.\nAccount entered: ${username}\nIP address: ${ipAddress || 'Unavailable'}\nBrowser/device: ${userAgent || 'Unavailable'}\nTime (UTC): ${time}\n\nNo password, token, or cookie is included in this alert.`,
+    html: renderFrame('SECURITY WARNING', 'Repeated admin sign-in failures detected.', '<p style="margin:0;">Review this activity. No password, session token or authentication cookie is included.</p>', detail),
     attachments: attachment(),
   }
 }
