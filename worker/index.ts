@@ -1,6 +1,7 @@
 import { createServer, type Server } from 'node:http'
 import { handleAsNodeRequest } from 'cloudflare:node'
 import { createApp } from '../server/app'
+import { createWorkerAdminSessionStore, getSecurityState } from './admin-session-store'
 import { createWorkerRuntime } from './config'
 import { MongoEnquiryDurableObject } from './mongo-durable-object'
 import { SecurityDurableObject } from './security-durable-object'
@@ -45,11 +46,13 @@ async function isAllowedByGlobalLimit(request: Request, env: WorkerEnv, pathname
 function getServer(env: WorkerEnv): Server {
   if (server) return server
   const runtime = createWorkerRuntime(env)
-  const securityState = env.SECURITY_STATE.get(env.SECURITY_STATE.idFromName('gauvis-security-state'))
+  // Durable Object stubs are request-scoped I/O objects. The Express server is
+  // intentionally cached across Worker requests, so never capture a stub here.
+  // Resolve a fresh stub when each request actually needs security state.
   const loginNotifier = runtime.enquiryNotifier
     ? {
         async notifyAdminLogin(alert: { at: Date; username: string; ipAddress?: string; userAgent?: string }) {
-          if (await securityState.shouldNotifyAdminLogin(alert.username, runtime.adminLoginNotificationCooldownMs)) {
+          if (await getSecurityState(env).shouldNotifyAdminLogin(alert.username, runtime.adminLoginNotificationCooldownMs)) {
             await runtime.enquiryNotifier!.notifyAdminLogin(alert)
           }
         },
@@ -64,12 +67,7 @@ function getServer(env: WorkerEnv): Server {
     // The durable object is the cross-isolate login-alert cooldown authority.
     adminLoginNotificationCooldownMs: 0,
     adminLoginNotifier: loginNotifier,
-    adminSessionStore: {
-      create: (sessionId, now) => securityState.createAdminSession(sessionId, now),
-      isActive: (sessionId, now) => securityState.isAdminSessionActive(sessionId, now),
-      touch: (sessionId, now) => securityState.touchAdminSession(sessionId, now),
-      revoke: (sessionId) => securityState.revokeAdminSession(sessionId),
-    },
+    adminSessionStore: createWorkerAdminSessionStore(env),
     enquiryNotifier: runtime.enquiryNotifier,
     enquiryRepository: runtime.enquiryRepository,
     sameOriginOnly: true,
